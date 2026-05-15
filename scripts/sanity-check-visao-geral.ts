@@ -162,7 +162,18 @@ async function fetchAllSheets(): Promise<{
 }
 
 // ---------------------------------------------------------------------------
-// Baselines da Análise Geral — Funil PERP, 01-14/05/2026
+// Baselines AO VIVO da aba "Análise Geral" da própria planilha.
+//
+// Em vez de hardcodar (que envelhece — ex: 14/05 era parcial ontem, fechou
+// hoje), lemos a aba "Análise Geral" que já calcula tudo por fórmula
+// conforme o filtro configurado nela. O sanity compara o que NOSSO calc
+// produz vs o que a PLANILHA produz, no mesmo range e funil que a planilha
+// está configurada. Sempre atual, nunca envelhece.
+//
+// Layout da aba (confirmado por inspeção):
+//   Linha 3:  B=data início  C=data final  D=funil  E=visualizar por
+//   Linha 6:  cabeçalhos (B=Data, E=Valor usado, F=Leads, H=MQL, M=Agendamentos)
+//   Linha 7+: uma linha por dia
 // ---------------------------------------------------------------------------
 
 type Baseline = {
@@ -173,30 +184,69 @@ type Baseline = {
   agendamentos: number;
 };
 
-const BASELINES: Baseline[] = [
-  { dia: "2026-05-01", investimento: 555.05, leads: 5, mql: 5, agendamentos: 0 },
-  { dia: "2026-05-02", investimento: 568.70, leads: 6, mql: 6, agendamentos: 0 },
-  { dia: "2026-05-03", investimento: 877.28, leads: 7, mql: 6, agendamentos: 0 },
-  { dia: "2026-05-04", investimento: 1003.80, leads: 11, mql: 10, agendamentos: 0 },
-  { dia: "2026-05-05", investimento: 887.47, leads: 8, mql: 7, agendamentos: 0 },
-  { dia: "2026-05-06", investimento: 1206.32, leads: 8, mql: 8, agendamentos: 2 },
-  { dia: "2026-05-07", investimento: 1212.52, leads: 10, mql: 8, agendamentos: 5 },
-  { dia: "2026-05-08", investimento: 1074.24, leads: 11, mql: 7, agendamentos: 4 },
-  { dia: "2026-05-09", investimento: 1084.41, leads: 8, mql: 6, agendamentos: 0 },
-  { dia: "2026-05-10", investimento: 1290.99, leads: 9, mql: 7, agendamentos: 0 },
-  { dia: "2026-05-11", investimento: 1054.23, leads: 10, mql: 6, agendamentos: 1 },
-  { dia: "2026-05-12", investimento: 1276.79, leads: 3, mql: 2, agendamentos: 1 },
-  { dia: "2026-05-13", investimento: 1145.28, leads: 9, mql: 4, agendamentos: 1 },
-  { dia: "2026-05-14", investimento: 889.52, leads: 9, mql: 8, agendamentos: 0 },
-];
+/** "R$ 1.234,56" | "1.234,56" | "555,05" → number */
+function parseBRLNumber(s: unknown): number {
+  if (typeof s === "number") return s;
+  if (s == null) return 0;
+  const cleaned = String(s)
+    .replace(/R\$\s?/g, "")
+    .replace(/\./g, "")
+    .replace(",", ".")
+    .trim();
+  const n = parseFloat(cleaned);
+  return Number.isFinite(n) ? n : 0;
+}
 
-const BASELINES_TOTAL = {
-  // Total do mês inteiro (01-31) declarado pela Análise Geral
-  investimento_mes: 14126.60,
-  leads_mes: 114,
-  mql_mes: 90,
-  agendamentos_mes: 14,
-};
+/** "01/05/2026" → "2026-05-01" */
+function brDateToIso(s: unknown): string | null {
+  const m = String(s ?? "").match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (!m) return null;
+  const [, d, mo, y] = m;
+  return `${y}-${mo.padStart(2, "0")}-${d.padStart(2, "0")}`;
+}
+
+async function fetchBaselinesAoVivo(
+  client: ReturnType<typeof google.sheets>,
+  spreadsheetId: string
+): Promise<{
+  baselines: Baseline[];
+  filtro: { inicio: string | null; fim: string | null; funil: string };
+}> {
+  // Filtro configurado na aba (linha 3): B=início C=fim D=funil
+  const filtroResp = await client.spreadsheets.values.get({
+    spreadsheetId,
+    range: "'Análise Geral'!B3:E3",
+    valueRenderOption: "FORMATTED_VALUE",
+  });
+  const fRow = filtroResp.data.values?.[0] ?? [];
+  const filtro = {
+    inicio: brDateToIso(fRow[0]),
+    fim: brDateToIso(fRow[1]),
+    funil: String(fRow[2] ?? "PERP"),
+  };
+
+  // Linhas diárias (7+). B=Data E=Valor usado F=Leads H=MQL M=Agendamentos
+  const dataResp = await client.spreadsheets.values.get({
+    spreadsheetId,
+    range: "'Análise Geral'!B7:M60",
+    valueRenderOption: "FORMATTED_VALUE",
+  });
+  const rows = dataResp.data.values ?? [];
+  const baselines: Baseline[] = [];
+  for (const row of rows) {
+    // row[0]=B(Data) row[3]=E(Valor usado) row[4]=F(Leads) row[6]=H(MQL) row[11]=M(Agend)
+    const dia = brDateToIso(row[0]);
+    if (!dia) continue; // linha sem data = fim dos dados
+    baselines.push({
+      dia,
+      investimento: parseBRLNumber(row[3]),
+      leads: parseBRLNumber(row[4]),
+      mql: parseBRLNumber(row[6]),
+      agendamentos: parseBRLNumber(row[11]),
+    });
+  }
+  return { baselines, filtro };
+}
 
 // ---------------------------------------------------------------------------
 // Comparação & formatação
@@ -274,25 +324,40 @@ function worstStatus(rows: CompareRow[]): RowStatus {
 // ---------------------------------------------------------------------------
 
 async function main(): Promise<void> {
-  console.log("# Sanity check — calcVisaoGeral vs Análise Geral");
-  console.log("Range: 2026-05-01 → 2026-05-14 | Funil: todos (≡ PERP)\n");
+  console.log("# Sanity check — calcVisaoGeral vs Análise Geral (AO VIVO)\n");
 
-  console.log("[1/3] Fetching sheets…");
+  console.log("[1/4] Fetching sheets (dados crus)…");
   const data = await fetchAllSheets();
   console.log(
     `  fb_todos=${data.fb_todos.length} leads=${data.leads.length} sdr=${data.sdr.length} vendas=${data.vendas.length}`
   );
 
-  console.log("[2/3] Rodando calcVisaoGeral…");
-  const from = new Date("2026-05-01T03:00:00.000Z");
-  const to = new Date("2026-05-14T03:00:00.000Z");
+  console.log("[2/4] Lendo baselines AO VIVO da aba Análise Geral…");
+  const { client, spreadsheetId } = buildSheetsClient();
+  const { baselines: BASELINES, filtro } = await fetchBaselinesAoVivo(
+    client,
+    spreadsheetId
+  );
+  if (BASELINES.length === 0) {
+    console.error("  Nenhuma linha de baseline lida da Análise Geral. Abortando.");
+    process.exit(1);
+  }
+  const primeiroDia = BASELINES[0].dia;
+  const ultimoDia = BASELINES[BASELINES.length - 1].dia;
+  console.log(
+    `  Filtro da planilha: funil=${filtro.funil} | ${BASELINES.length} dias (${primeiroDia} → ${ultimoDia})`
+  );
+
+  console.log("[3/4] Rodando calcVisaoGeral no MESMO range da planilha…");
+  const from = new Date(`${primeiroDia}T00:00:00-03:00`);
+  const to = new Date(`${ultimoDia}T00:00:00-03:00`);
   const result = calcVisaoGeral(data, { from, to, funis: ["todos"] });
 
   console.log(
     `  KPIs: investimento=${fmtBRL(result.kpis.investimento)} mql=${result.kpis.mql} agend=${result.kpis.agendamentos} vendas=${result.kpis.vendas}`
   );
 
-  console.log("[3/3] Comparando vs baselines…\n");
+  console.log("[4/4] Comparando vs baselines ao vivo…\n");
 
   // ---- Compara dia a dia (investimento + mql + agendamentos) -------------
   const perDay: Array<{ dia: string; status: RowStatus; rows: CompareRow[] }> = [];
@@ -344,24 +409,14 @@ async function main(): Promise<void> {
   const sumBaseAgend = BASELINES.reduce((s, b) => s + b.agendamentos, 0);
 
   const totalRows: CompareRow[] = [
-    compare("Investimento (01-14)", sumBaseInvest, result.kpis.investimento, true),
-    compare("MQL (01-14)", sumBaseMql, result.kpis.mql),
-    compare("Agendamentos (01-14)", sumBaseAgend, result.kpis.agendamentos),
+    compare(`Investimento (${primeiroDia}→${ultimoDia})`, sumBaseInvest, result.kpis.investimento, true),
+    compare(`MQL (${primeiroDia}→${ultimoDia})`, sumBaseMql, result.kpis.mql),
+    compare(`Agendamentos (${primeiroDia}→${ultimoDia})`, sumBaseAgend, result.kpis.agendamentos),
     compare("Soma diária MQL (sanity)", sumBaseMql, totalCalcMql),
     compare("Soma diária Invest (sanity)", sumBaseInvest, totalCalcInvest, true),
     compare("Soma diária Agend (sanity)", sumBaseAgend, totalCalcAgend),
   ];
-  printTable("Totais do range (01-14/05)", totalRows);
-
-  // ---- Comparativo informativo com totais do mês completo ----------------
-  // Não é um campo do calcVisaoGeral pra esse range, mas reportamos pra contexto.
-  console.log("\n### Referência informativa — totais do mês completo (01-31/05) — Análise Geral");
-  console.log(
-    `  Investimento mês: ${fmtBRL(BASELINES_TOTAL.investimento_mes)} | Leads: ${BASELINES_TOTAL.leads_mes} | MQL: ${BASELINES_TOTAL.mql_mes} | Agendamentos: ${BASELINES_TOTAL.agendamentos_mes}`
-  );
-  console.log(
-    `  (calcVisaoGeral foi rodado APENAS pro range 01-14 — esses totais servem só como sanity contextual.)`
-  );
+  printTable(`Totais do range (${primeiroDia} → ${ultimoDia})`, totalRows);
 
   // ---- Vendas / Reuniões / Faturamento (não estão nos baselines, mas reportamos) -----
   console.log("\n### Campos sem baseline (apenas reporte do calculado)");
