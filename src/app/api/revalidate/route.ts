@@ -1,26 +1,38 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { revalidateTag } from "next/cache";
-import { SHEETS_CACHE_TAG } from "@/lib/sheets/read";
+import { refreshAllSheets } from "@/lib/sheets/read";
+
+export const maxDuration = 120;
 
 /**
- * Manual cache invalidation endpoint.
- *
- * Used for debug / ad-hoc refresh outside the cron cadence. Protected by a
- * shared secret in the `x-revalidate-secret` header.
+ * Refresh manual do cache (Upstash). Busca fresco da Sheets e sobrescreve.
+ * Protegido por REVALIDATE_SECRET no header `x-revalidate-secret`.
+ * Também aceito como alvo do cron externo (GitHub Actions).
  */
 export async function POST(req: NextRequest) {
   const expected = process.env.REVALIDATE_SECRET;
-  const provided = req.headers.get("x-revalidate-secret");
+  const provided =
+    req.headers.get("x-revalidate-secret") ??
+    req.headers.get("authorization")?.replace(/^Bearer\s+/, "");
 
   if (!expected || provided !== expected) {
-    return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: "unauthorized" },
+      { status: 401 }
+    );
   }
 
-  // Next 16 requires a profile (or inline expire config) as the 2nd arg.
-  revalidateTag(SHEETS_CACHE_TAG, "default");
-
-  return NextResponse.json({
-    ok: true,
-    revalidatedAt: new Date().toISOString(),
-  });
+  try {
+    const { refreshed, durationMs } = await refreshAllSheets();
+    return NextResponse.json({
+      ok: true,
+      refreshed,
+      durationMs,
+      at: new Date().toISOString(),
+    });
+  } catch (err) {
+    return NextResponse.json(
+      { ok: false, error: String(err) },
+      { status: 500 }
+    );
+  }
 }

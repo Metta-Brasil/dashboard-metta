@@ -1,28 +1,46 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { revalidateTag } from "next/cache";
-import { SHEETS_CACHE_TAG } from "@/lib/sheets/read";
+import { refreshAllSheets } from "@/lib/sheets/read";
+
+export const maxDuration = 120;
 
 /**
- * Vercel Cron handler — invoked every 10 minutes (see /vercel.json).
+ * Refresh do cache (Upstash). Chamado pelo cron externo horário
+ * (GitHub Actions — .github/workflows/refresh-cache.yml) e compatível
+ * com Vercel Cron (Authorization: Bearer CRON_SECRET).
  *
- * Vercel automatically sends `Authorization: Bearer ${CRON_SECRET}` for
- * production cron jobs. We require the same header here so the endpoint
- * is not freely invocable.
+ * Busca fresco da Sheets e sobrescreve o Upstash → cache sempre quente
+ * e ≤1h de idade. Aceita CRON_SECRET ou REVALIDATE_SECRET.
  */
+function authorized(req: NextRequest): boolean {
+  const cronSecret = process.env.CRON_SECRET;
+  const revalidateSecret = process.env.REVALIDATE_SECRET;
+  const auth = req.headers.get("authorization");
+  const xrs = req.headers.get("x-revalidate-secret");
+  if (cronSecret && auth === `Bearer ${cronSecret}`) return true;
+  if (revalidateSecret && auth === `Bearer ${revalidateSecret}`) return true;
+  if (revalidateSecret && xrs === revalidateSecret) return true;
+  return false;
+}
+
 export async function GET(req: NextRequest) {
-  const expected = process.env.CRON_SECRET;
-  const provided = req.headers.get("authorization");
-
-  if (!expected || provided !== `Bearer ${expected}`) {
-    return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
+  if (!authorized(req)) {
+    return NextResponse.json(
+      { ok: false, error: "unauthorized" },
+      { status: 401 }
+    );
   }
-
-  // Next 16 requires a profile (or inline expire config) as the 2nd arg.
-  // "default" matches the in-cache cacheLife profile we use elsewhere.
-  revalidateTag(SHEETS_CACHE_TAG, "default");
-
-  return NextResponse.json({
-    ok: true,
-    revalidatedAt: new Date().toISOString(),
-  });
+  try {
+    const { refreshed, durationMs } = await refreshAllSheets();
+    return NextResponse.json({
+      ok: true,
+      refreshed,
+      durationMs,
+      at: new Date().toISOString(),
+    });
+  } catch (err) {
+    return NextResponse.json(
+      { ok: false, error: String(err) },
+      { status: 500 }
+    );
+  }
 }
