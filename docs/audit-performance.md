@@ -67,3 +67,29 @@ Ordem proposta (cada passo tem critério objetivo de "pronto"):
 6. **Re-medir vs PRD §6.** Cache hit < 1s, filtro < 500ms, cache miss < 15s.
 
 Tudo isso é `lib/sheets` + `lib/calc` + cache config + cron — **permanente, não refeito na fase de charts**. Orquestração de página (Suspense) mexida só o mínimo.
+
+---
+
+## Resultado da correção (2026-05-15)
+
+| Página | Antes | Depois (cache quente) |
+|---|---|---|
+| / (Visão Geral) | 22-25s | ~2,3s |
+| /trafego | 18s | ~2,1s |
+| /sdr | 3-5s | **~0,75s** ✅ |
+| /closer | 6-8s | ~1,9s |
+| /anuncios | 6-8s | ~2,2s |
+| /origem | 3-6s | **~0,76s** ✅ |
+| /metas | 6-9s | ~2,1s |
+
+Ganho ~10-30×. O problema crítico (usuário reportou "5min", medido 6-25s) está resolvido — todas as páginas estáveis e o cron horário mantém o cache quente (dados ≤1h, nunca volta ao fetch frio).
+
+**O que resolveu:**
+1. `React.cache()` por request — 6 fetches/calcs → 1 (stampede).
+2. Cache manual no Upstash (gzip 13×) — o Vercel **ignora `cacheHandlers` custom** e o Data Cache nativo rejeita >2MB; cache aplicacional contorna isso.
+3. Cron GitHub Actions horário (`0 * * * *`) → `refreshAllSheets()` mantém quente.
+
+**Gargalo restante (5/7 páginas ~2s, meta PRD §6 é <1s):**
+As páginas que usam `fb_todos` (51k linhas) gastam ~1,5s em gunzip + `JSON.parse` (21MB) + `reviveDates` (regex em ~900k campos) por request, mesmo com cache hit. `/sdr` e `/origem` não usam fb_todos pesado → já <1s.
+
+Otimização possível (não feita — decisão pendente): reviver de Date dirigido por schema (converter só os campos Date conhecidos, em vez de testar regex em toda string) deve derrubar as pesadas pra <1s. Baixo risco, não mexe nos cálculos validados.
