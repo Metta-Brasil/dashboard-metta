@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 
+import { AreaLineChart, DonutChart } from "@/components/dashboard/charts";
 import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
 import { MetricTable, type Column } from "@/components/dashboard/metric-table";
 import { Toolbar } from "@/components/dashboard/toolbar";
@@ -10,12 +11,7 @@ import {
   formatInt,
   formatPercent,
 } from "@/lib/calc/shared";
-import type {
-  CloserEvolucao12MesesPoint,
-  CloserReceitaPorFunil,
-  CloserRow,
-  CloserVendaRow,
-} from "@/lib/calc/types";
+import type { CloserRow, CloserVendaRow } from "@/lib/calc/types";
 import { getCloser, getFilters } from "@/lib/page-data";
 
 type PageProps = {
@@ -65,45 +61,20 @@ async function CloserContent({ searchParams }: PageProps) {
     },
   ];
 
-  const receitaColumns: Column<CloserReceitaPorFunil>[] = [
-    {
-      key: "funil",
-      header: "Funil",
-      render: (r) => capitalizeFunil(r.funil),
-    },
-    {
-      key: "receita",
-      header: "Receita",
-      align: "right",
-      render: (r) => formatBRL(r.receita),
-    },
-    {
-      key: "pct",
-      header: "% do total",
-      align: "right",
-      render: (r) => formatPercent(r.pct),
-    },
-  ];
+  const receitaPorFunilData = result.receitaPorFunil.map((r) => ({
+    name: capitalizeFunil(r.funil),
+    value: Math.round(r.receita),
+  }));
+  const receitaTotal = result.receitaPorFunil.reduce(
+    (acc, r) => acc + r.receita,
+    0
+  );
 
-  const evolucaoColumns: Column<CloserEvolucao12MesesPoint>[] = [
-    {
-      key: "mes",
-      header: "Mês",
-      render: (r) => formatMesBR(r.mes),
-    },
-    {
-      key: "receita",
-      header: "Receita",
-      align: "right",
-      render: (r) => formatBRL(r.receita),
-    },
-    {
-      key: "meta",
-      header: "Meta",
-      align: "right",
-      render: (r) => (r.meta !== null ? formatBRL(r.meta) : "—"),
-    },
-  ];
+  const evolucaoData = result.evolucao12Meses.map((r) => ({
+    mes: formatMesBR(r.mes),
+    receita: Math.round(r.receita),
+    meta: r.meta == null ? null : Math.round(r.meta),
+  }));
 
   const vendasColumns: Column<CloserVendaRow>[] = [
     {
@@ -226,18 +197,21 @@ async function CloserContent({ searchParams }: PageProps) {
     >
       <KpiGrid kpis={kpis} />
 
-      <MetricTable
+      <DonutChart
         title="Receita por funil"
         description="Distribuição de faturamento por funil de origem"
-        columns={receitaColumns}
-        rows={result.receitaPorFunil}
+        data={receitaPorFunilData}
+        centerLabel="Receita total"
+        centerValue={formatBRLCompact(receitaTotal)}
       />
 
-      <MetricTable
+      <AreaLineChart
         title="Evolução de receita (12 meses)"
         description="Faturamento mensal vs meta"
-        columns={evolucaoColumns}
-        rows={result.evolucao12Meses}
+        data={evolucaoData}
+        xKey="mes"
+        area={{ key: "receita", label: "Receita" }}
+        lines={[{ key: "meta", label: "Meta", dashed: true }]}
       />
 
       <MetricTable

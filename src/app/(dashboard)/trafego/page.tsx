@@ -1,5 +1,9 @@
 import { Suspense } from "react";
 
+import {
+  ComboBarLineChart,
+  GroupedBarChart,
+} from "@/components/dashboard/charts";
 import { FunnelVertical } from "@/components/dashboard/funnel-vertical";
 import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
 import { MetricTable, type Column } from "@/components/dashboard/metric-table";
@@ -13,9 +17,7 @@ import {
 } from "@/lib/calc/shared";
 import type {
   Funil,
-  TrafegoComboPoint,
   TrafegoFunilResumo,
-  TrafegoMqlCmqlPorFunil,
   TrafegoRankingRow,
 } from "@/lib/calc/types";
 import { getFilters, getTrafego } from "@/lib/page-data";
@@ -138,50 +140,24 @@ async function TrafegoKpis({ searchParams }: PageProps) {
 async function EvolucaoDiaria({ searchParams }: PageProps) {
   const result = await getTrafego(searchParams);
 
-  const columns: Column<TrafegoComboPoint>[] = [
-    {
-      key: "dia",
-      header: "Dia",
-      render: (r) => formatDayBr(r.dia),
-    },
-    {
-      key: "investimento",
-      header: "Investimento",
-      align: "right",
-      render: (r) => formatBRL(r.investimento),
-    },
-    {
-      key: "cliques",
-      header: "Cliques",
-      align: "right",
-      render: (r) => formatInt(r.cliques),
-    },
-    {
-      key: "leads",
-      header: "Leads",
-      align: "right",
-      render: (r) => formatInt(r.leads),
-    },
-    {
-      key: "mql",
-      header: "MQL",
-      align: "right",
-      render: (r) => formatInt(r.mql),
-    },
-    {
-      key: "cmql",
-      header: "CMQL",
-      align: "right",
-      render: (r) => (r.cmql == null ? "—" : formatBRL(r.cmql)),
-    },
-  ];
+  const data = result.serieCombo.map((r) => ({
+    dia: formatDayBr(r.dia),
+    investimento: Math.round(r.investimento),
+    mql: r.mql,
+    cmql: r.cmql == null ? null : Math.round(r.cmql),
+  }));
 
   return (
-    <MetricTable
-      title="Evolução diária: Investimento, MQL e CMQL"
-      description="Combo diário do período selecionado."
-      columns={columns}
-      rows={result.serieCombo}
+    <ComboBarLineChart
+      title="Investimento, MQL e CMQL · diário"
+      description="Barras (Investimento + MQL) + linha (CMQL, eixo direito)"
+      data={data}
+      xKey="dia"
+      bars={[
+        { key: "investimento", label: "Investimento" },
+        { key: "mql", label: "MQL" },
+      ]}
+      lines={[{ key: "cmql", label: "CMQL", axis: "right" }]}
     />
   );
 }
@@ -193,38 +169,22 @@ async function EvolucaoDiaria({ searchParams }: PageProps) {
 async function MqlPorFunil({ searchParams }: PageProps) {
   const result = await getTrafego(searchParams);
 
-  const columns: Column<TrafegoMqlCmqlPorFunil>[] = [
-    {
-      key: "funil",
-      header: "Funil",
-      render: (r) => FUNIL_LABEL[r.funil] ?? r.funil,
-    },
-    {
-      key: "mql",
-      header: "MQL",
-      align: "right",
-      render: (r) => formatInt(r.mql),
-    },
-    {
-      key: "cmql",
-      header: "CMQL",
-      align: "right",
-      render: (r) => (r.cmql == null ? "—" : formatBRL(r.cmql)),
-    },
-    {
-      key: "investimento",
-      header: "Investimento",
-      align: "right",
-      render: (r) => formatBRL(r.investimento),
-    },
-  ];
+  const data = result.mqlCmqlPorFunil.map((r) => ({
+    funil: FUNIL_LABEL[r.funil] ?? r.funil,
+    mql: r.mql,
+    cmql: r.cmql == null ? 0 : Math.round(r.cmql),
+  }));
 
   return (
-    <MetricTable
+    <GroupedBarChart
       title="MQL e CMQL por funil"
-      description="Recorte fixo dos 5 funis (ignora filtro de funil)."
-      columns={columns}
-      rows={result.mqlCmqlPorFunil}
+      description="Recorte fixo dos 5 funis (ignora filtro de funil)"
+      data={data}
+      xKey="funil"
+      bars={[
+        { key: "mql", label: "MQL" },
+        { key: "cmql", label: "CMQL", axis: "right" },
+      ]}
     />
   );
 }

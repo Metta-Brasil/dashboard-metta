@@ -1,5 +1,10 @@
 import { Suspense } from "react";
 
+import {
+  ComboBarLineChart,
+  DonutChart,
+  MultiLineChart,
+} from "@/components/dashboard/charts";
 import { FunnelVertical } from "@/components/dashboard/funnel-vertical";
 import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
 import {
@@ -15,9 +20,6 @@ import {
   formatPercent,
 } from "@/lib/calc/shared";
 import type {
-  CustoPorEtapaPoint,
-  DailyPoint,
-  DistribuicaoPorFunil,
   Funil,
   TabelaDiariaRow,
   TabelaDiariaTotal,
@@ -191,44 +193,28 @@ async function FunilSection({ searchParams }: PageProps) {
 async function EvolucaoDiariaSection({ searchParams }: PageProps) {
   const result = await loadVisaoGeral(searchParams);
 
-  const columns: Column<DailyPoint>[] = [
-    {
-      key: "dia",
-      header: "Dia",
-      render: (r) => fmtDayShort(r.dia),
-    },
-    {
-      key: "mql",
-      header: "MQL",
-      align: "right",
-      render: (r) => formatInt(r.mql),
-    },
-    {
-      key: "reunioes",
-      header: "Reuniões",
-      align: "right",
-      render: (r) => formatInt(r.reunioes),
-    },
-    {
-      key: "vendas",
-      header: "Vendas",
-      align: "right",
-      render: (r) => formatInt(r.vendas),
-    },
-    {
-      key: "convMqlVenda",
-      header: "% Conv. acumulada",
-      align: "right",
-      render: (r) => nullable(r.convMqlVenda, (n) => formatPercent(n)),
-    },
-  ];
+  const data = result.serieDiaria.map((r) => ({
+    dia: fmtDayShort(r.dia),
+    mql: r.mql,
+    reunioes: r.reunioes,
+    vendas: r.vendas,
+    conv: r.convMqlVenda == null ? null : Number((r.convMqlVenda * 100).toFixed(1)),
+  }));
 
   return (
-    <MetricTable<DailyPoint>
-      title="Evolução diária (MQL · Reuniões · Vendas)"
-      description="Volumes diários com conversão acumulada Vendas/MQL"
-      columns={columns}
-      rows={result.serieDiaria}
+    <ComboBarLineChart
+      title="Evolução: MQL · Reuniões Realizadas · Vendas"
+      description="Barras (volumes) + linha de conversão acumulada Vendas/MQL"
+      data={data}
+      xKey="dia"
+      bars={[
+        { key: "mql", label: "MQL" },
+        { key: "reunioes", label: "Reuniões realizadas" },
+        { key: "vendas", label: "Vendas" },
+      ]}
+      lines={[
+        { key: "conv", label: "% Conv. acumulada", axis: "right" },
+      ]}
     />
   );
 }
@@ -236,38 +222,24 @@ async function EvolucaoDiariaSection({ searchParams }: PageProps) {
 async function CustoPorEtapaSection({ searchParams }: PageProps) {
   const result = await loadVisaoGeral(searchParams);
 
-  const columns: Column<CustoPorEtapaPoint>[] = [
-    {
-      key: "dia",
-      header: "Dia",
-      render: (r) => fmtDayShort(r.dia),
-    },
-    {
-      key: "cpl",
-      header: "CPL",
-      align: "right",
-      render: (r) => nullable(r.cpl, formatBRL),
-    },
-    {
-      key: "cmql",
-      header: "CMQL",
-      align: "right",
-      render: (r) => nullable(r.cmql, formatBRL),
-    },
-    {
-      key: "cac",
-      header: "CAC",
-      align: "right",
-      render: (r) => nullable(r.cac, formatBRL),
-    },
-  ];
+  const data = result.custoPorEtapa.map((r) => ({
+    dia: fmtDayShort(r.dia),
+    cpl: r.cpl,
+    cmql: r.cmql,
+    cac: r.cac,
+  }));
 
   return (
-    <MetricTable<CustoPorEtapaPoint>
+    <MultiLineChart
       title="Custo por etapa (CPL · CMQL · CAC) — diário"
-      description="Custos derivados por dia (vazio quando denominador é zero)"
-      columns={columns}
-      rows={result.custoPorEtapa}
+      description="Escala dupla: CPL/CMQL à esquerda, CAC à direita"
+      data={data}
+      xKey="dia"
+      lines={[
+        { key: "cpl", label: "CPL" },
+        { key: "cmql", label: "CMQL" },
+        { key: "cac", label: "CAC", axis: "right" },
+      ]}
     />
   );
 }
@@ -275,50 +247,22 @@ async function CustoPorEtapaSection({ searchParams }: PageProps) {
 async function DistribuicaoSection({ searchParams }: PageProps) {
   const result = await loadVisaoGeral(searchParams);
 
-  const columns: Column<DistribuicaoPorFunil>[] = [
-    {
-      key: "funil",
-      header: "Funil",
-      render: (r) => FUNIL_LABELS[r.funil] ?? r.funil,
-    },
-    {
-      key: "leads",
-      header: "Leads",
-      align: "right",
-      render: (r) => formatInt(r.leads),
-    },
-    {
-      key: "mql",
-      header: "MQL",
-      align: "right",
-      render: (r) => formatInt(r.mql),
-    },
-    {
-      key: "reunioes",
-      header: "Reuniões",
-      align: "right",
-      render: (r) => formatInt(r.reunioes),
-    },
-    {
-      key: "vendas",
-      header: "Vendas",
-      align: "right",
-      render: (r) => formatInt(r.vendas),
-    },
-    {
-      key: "faturamento",
-      header: "Faturamento",
-      align: "right",
-      render: (r) => formatBRL(r.faturamento),
-    },
-  ];
+  const data = result.distribuicaoPorFunil
+    .map((r) => ({
+      name: FUNIL_LABELS[r.funil] ?? r.funil,
+      value: r.mql,
+    }))
+    .filter((d) => d.value > 0);
+
+  const totalMql = data.reduce((s, d) => s + d.value, 0);
 
   return (
-    <MetricTable<DistribuicaoPorFunil>
+    <DonutChart
       title="Distribuição por funil"
-      description="Volume e receita por funil dentro do período"
-      columns={columns}
-      rows={result.distribuicaoPorFunil}
+      description="MQL por funil dentro do período"
+      data={data}
+      centerLabel="MQL total"
+      centerValue={formatInt(totalMql)}
     />
   );
 }

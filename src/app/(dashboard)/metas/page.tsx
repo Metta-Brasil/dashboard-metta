@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 
+import { AreaLineChart } from "@/components/dashboard/charts";
 import { MetricTable, type Column } from "@/components/dashboard/metric-table";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
@@ -13,7 +14,6 @@ import type {
   MetasCardTaxa,
   MetasHistoricoRow,
   MetasPacingNecessario,
-  MetasPacingPoint,
   MetricaMetaReal,
 } from "@/lib/calc/types";
 import { getMetas, getFilters } from "@/lib/page-data";
@@ -83,26 +83,11 @@ async function MetasContent({ searchParams }: PageProps) {
       ? pacingChartFull.slice(pacingChartFull.length - PACING_CHART_LIMIT)
       : pacingChartFull;
 
-  const pacingChartColumns: Column<MetasPacingPoint>[] = [
-    {
-      key: "date",
-      header: "Data",
-      render: (r) => formatDataBR(r.date),
-    },
-    {
-      key: "real",
-      header: "Real acumulado",
-      align: "right",
-      render: (r) => formatBRL(r.realAcumulado),
-    },
-    {
-      key: "meta",
-      header: "Meta acumulada",
-      align: "right",
-      render: (r) =>
-        r.metaAcumulada !== null ? formatBRL(r.metaAcumulada) : "—",
-    },
-  ];
+  const pacingChartData = pacingChartRows.map((r) => ({
+    data: formatDataBR(r.date),
+    real: Math.round(r.realAcumulado),
+    meta: r.metaAcumulada == null ? null : Math.round(r.metaAcumulada),
+  }));
 
   // ---- Pacing necessário --------------------------------------------------
   const pacingNecessarioColumns: Column<MetasPacingNecessario>[] = [
@@ -258,12 +243,14 @@ async function MetasContent({ searchParams }: PageProps) {
         ))}
       </div>
 
-      {/* Pacing chart (tabela) */}
-      <MetricTable
+      {/* Pacing chart */}
+      <AreaLineChart
         title="Pacing — Faturamento acumulado"
         description={pacingDescricao}
-        columns={pacingChartColumns}
-        rows={pacingChartRows}
+        data={pacingChartData}
+        xKey="data"
+        area={{ key: "real", label: "Real acumulado" }}
+        lines={[{ key: "meta", label: "Meta acumulada", dashed: true }]}
       />
 
       {/* Pacing necessário */}
