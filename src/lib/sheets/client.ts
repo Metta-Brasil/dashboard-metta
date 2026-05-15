@@ -1,8 +1,22 @@
 import { google } from "googleapis";
 
+/**
+ * Normaliza PRIVATE_KEY:
+ * - Remove aspas wrapping (algumas UIs/CLIs adicionam ao salvar)
+ * - Converte \n literal em newline real (formato Vercel)
+ */
+function normalizeKey(raw: string | undefined): string {
+  if (!raw) return "";
+  let v = raw.trim();
+  if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
+    v = v.slice(1, -1);
+  }
+  return v.replace(/\\n/g, "\n");
+}
+
 const auth = new google.auth.JWT({
-  email: process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
-  key: process.env.GOOGLE_SHEETS_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+  email: process.env.GOOGLE_SHEETS_CLIENT_EMAIL?.replace(/^["']|["']$/g, ""),
+  key: normalizeKey(process.env.GOOGLE_SHEETS_PRIVATE_KEY),
   scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
 });
 
