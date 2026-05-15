@@ -1,7 +1,4 @@
-import {
-  unstable_cacheLife as cacheLife,
-  unstable_cacheTag as cacheTag,
-} from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 
 import { assertSheetsEnv, sheetsClient, SPREADSHEET_ID } from "./client";
 import { parseSheetData } from "./parse";
