@@ -65,17 +65,13 @@ function ChartCard({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 rounded-xl border border-border bg-card p-5 shadow-xs",
+        "surface-card flex flex-col gap-4 p-5 lg:p-6",
         className
       )}
     >
-      <div className="flex flex-col gap-0.5">
-        <h3 className="text-base font-semibold tracking-tight text-foreground">
-          {title}
-        </h3>
-        {description && (
-          <span className="text-xs text-muted-foreground">{description}</span>
-        )}
+      <div className="flex flex-col gap-1">
+        <h3 className="panel-title">{title}</h3>
+        {description && <span className="panel-desc">{description}</span>}
       </div>
       {children}
     </div>
@@ -314,41 +310,59 @@ export function DonutChart({
 
   return (
     <ChartCard title={title} description={description}>
-      <ChartContainer
-        config={config}
-        className="aspect-auto w-full"
-        style={{ height }}
-      >
-        <PieChart>
-          <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
-          <Pie
-            data={data}
-            dataKey="value"
-            nameKey="name"
-            innerRadius="55%"
-            outerRadius="80%"
-            paddingAngle={2}
-            strokeWidth={2}
-          >
-            {data.map((_, i) => (
-              <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
-            ))}
-          </Pie>
-          <ChartLegend content={<ChartLegendContent nameKey="name" />} />
-        </PieChart>
-      </ChartContainer>
-      {(centerValue || centerLabel) && (
-        <div className="-mt-[calc(50%)] flex flex-col items-center justify-center pointer-events-none">
-          {centerValue && (
-            <span className="text-2xl font-semibold tabular-nums text-foreground">
-              {centerValue}
-            </span>
-          )}
-          {centerLabel && (
-            <span className="text-xs text-muted-foreground">{centerLabel}</span>
-          )}
-        </div>
-      )}
+      {/* Wrapper de altura fixa: o gráfico preenche por absoluto e o
+          valor central fica sobreposto e centrado — sem margem negativa
+          (que estourava o card e invadia a seção de baixo no mobile). */}
+      <div className="relative w-full" style={{ height }}>
+        <ChartContainer
+          config={config}
+          className="absolute inset-0 aspect-auto h-full w-full"
+        >
+          <PieChart>
+            <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
+            <Pie
+              data={data}
+              dataKey="value"
+              nameKey="name"
+              innerRadius="58%"
+              outerRadius="82%"
+              paddingAngle={2}
+              strokeWidth={2}
+            >
+              {data.map((_, i) => (
+                <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
+              ))}
+            </Pie>
+          </PieChart>
+        </ChartContainer>
+        {(centerValue || centerLabel) && (
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+            {centerValue && (
+              <span className="text-2xl font-semibold tabular-nums text-foreground">
+                {centerValue}
+              </span>
+            )}
+            {centerLabel && (
+              <span className="text-xs text-muted-foreground">
+                {centerLabel}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+      {/* Legenda própria em fluxo normal — não disputa espaço com o
+          overlay e quebra linha no mobile sem vazar. */}
+      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+        {data.map((d, i) => (
+          <div key={d.name} className="flex items-center gap-1.5">
+            <span
+              className="size-2.5 shrink-0 rounded-[3px]"
+              style={{ backgroundColor: PALETTE[i % PALETTE.length] }}
+            />
+            <span className="text-xs text-muted-foreground">{d.name}</span>
+          </div>
+        ))}
+      </div>
     </ChartCard>
   );
 }

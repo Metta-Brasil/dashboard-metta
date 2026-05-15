@@ -31,24 +31,13 @@ export function MetricTable<T>({
 }: MetricTableProps<T>) {
   return (
     <div
-      className={cn(
-        "flex flex-col gap-3 rounded-xl border border-border bg-card p-5 shadow-xs",
-        className
-      )}
+      className={cn("surface-card flex flex-col gap-4 p-5 lg:p-6", className)}
     >
       {(title || toolbar) && (
         <div className="flex items-baseline justify-between gap-2">
-          <div className="flex flex-col gap-0.5">
-            {title && (
-              <h3 className="text-base font-semibold tracking-tight text-foreground">
-                {title}
-              </h3>
-            )}
-            {description && (
-              <span className="text-xs text-muted-foreground">
-                {description}
-              </span>
-            )}
+          <div className="flex flex-col gap-1">
+            {title && <h3 className="panel-title">{title}</h3>}
+            {description && <span className="panel-desc">{description}</span>}
           </div>
           {toolbar && (
             <div className="flex items-center gap-2">{toolbar}</div>
@@ -56,15 +45,15 @@ export function MetricTable<T>({
         </div>
       )}
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+      <div className="-mx-2 overflow-x-auto">
+        <table className="w-full border-separate border-spacing-0 text-sm">
           <thead>
-            <tr className="border-b border-border text-xs uppercase tracking-wider text-muted-foreground">
+            <tr className="text-[11px] uppercase tracking-[0.07em] text-muted-foreground">
               {columns.map((c) => (
                 <th
                   key={c.key}
                   className={cn(
-                    "px-3 py-2 font-medium",
+                    "border-b border-border bg-muted/40 px-3 py-2.5 font-medium first:rounded-l-md last:rounded-r-md",
                     c.align === "right" && "text-right",
                     c.align === "center" && "text-center",
                     !c.align && "text-left",
@@ -81,7 +70,7 @@ export function MetricTable<T>({
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-3 py-8 text-center text-sm text-muted-foreground"
+                  className="px-3 py-10 text-center text-sm text-muted-foreground"
                 >
                   {empty}
                 </td>
@@ -90,13 +79,13 @@ export function MetricTable<T>({
               rows.map((r, i) => (
                 <tr
                   key={i}
-                  className="border-b border-border/60 last:border-b-0 hover:bg-muted/40"
+                  className="group transition-colors hover:bg-accent/60"
                 >
                   {columns.map((c) => (
                     <td
                       key={c.key}
                       className={cn(
-                        "px-3 py-2 tabular-nums",
+                        "border-b border-border/50 px-3 py-2.5 tabular-nums text-foreground/90 group-last:border-b-0",
                         c.align === "right" && "text-right",
                         c.align === "center" && "text-center",
                         c.className
@@ -109,12 +98,12 @@ export function MetricTable<T>({
               ))
             )}
             {footer && (
-              <tr className="border-t-2 border-border bg-muted/40 font-semibold">
+              <tr className="bg-muted/50 font-semibold text-foreground">
                 {columns.map((c) => (
                   <td
                     key={c.key}
                     className={cn(
-                      "px-3 py-2 tabular-nums",
+                      "border-t-2 border-border px-3 py-2.5 tabular-nums first:rounded-bl-md last:rounded-br-md",
                       c.align === "right" && "text-right",
                       c.align === "center" && "text-center",
                       c.className

@@ -14,6 +14,18 @@ type KpiGridProps = {
   className?: string;
 };
 
+const DELTA_STYLE: Record<"up" | "down" | "neutral", string> = {
+  up: "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
+  down: "bg-rose-50 text-rose-700 ring-rose-600/20",
+  neutral: "bg-muted text-muted-foreground ring-border",
+};
+
+const DELTA_ARROW: Record<"up" | "down" | "neutral", string> = {
+  up: "↑",
+  down: "↓",
+  neutral: "→",
+};
+
 export function KpiGrid({
   kpis,
   cols = "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5",
@@ -24,34 +36,29 @@ export function KpiGrid({
       {kpis.map((k) => (
         <div
           key={k.label}
-          className="flex flex-col gap-2 rounded-xl border border-border bg-card p-5 shadow-xs"
+          className="surface-card surface-card-interactive flex flex-col gap-3 p-5"
         >
-          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            {k.label}
-          </span>
-          <span className="text-2xl font-semibold tracking-tight tabular-nums text-foreground">
+          <div className="flex items-start justify-between gap-2">
+            <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+              {k.label}
+            </span>
+            {k.delta && (
+              <span
+                className={cn(
+                  "inline-flex shrink-0 items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums ring-1 ring-inset",
+                  DELTA_STYLE[k.delta.direction]
+                )}
+              >
+                <span aria-hidden>{DELTA_ARROW[k.delta.direction]}</span>
+                {k.delta.value}
+              </span>
+            )}
+          </div>
+          <span className="text-[28px] font-semibold leading-none tracking-tight tabular-nums text-foreground">
             {k.value}
           </span>
-          {(k.hint || k.delta) && (
-            <div className="flex items-center gap-2 text-xs">
-              {k.delta && (
-                <span
-                  className={cn(
-                    "font-medium tabular-nums",
-                    k.delta.direction === "up" && "text-emerald-600",
-                    k.delta.direction === "down" && "text-rose-600",
-                    k.delta.direction === "neutral" && "text-muted-foreground"
-                  )}
-                >
-                  {k.delta.direction === "up" && "↑ "}
-                  {k.delta.direction === "down" && "↓ "}
-                  {k.delta.value}
-                </span>
-              )}
-              {k.hint && (
-                <span className="text-muted-foreground">{k.hint}</span>
-              )}
-            </div>
+          {k.hint && (
+            <span className="text-xs text-muted-foreground">{k.hint}</span>
           )}
         </div>
       ))}

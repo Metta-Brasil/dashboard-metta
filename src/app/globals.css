@@ -74,9 +74,10 @@
   --font-geist-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo,
     Consolas, monospace;
 
-  /* Surfaces — tapete off-white (branco gelo) com cards brancos puros
-     que saltam do fundo (tratamento claro estilo shadcn dashboard-01). */
-  --background: #fafcfd;
+  /* Surfaces — tapete cinza-gelo frio com cards brancos puros que
+     saltam por contraste + sombra (tratamento claro dashboard-01).
+     O delta bg↔card precisa ser perceptível (não #fff sobre #fff). */
+  --background: #eef2f5;
   --foreground: #0c161b;
 
   --card: #ffffff;
@@ -100,8 +101,8 @@
 
   --destructive: #dc2626;
 
-  --border: #e6ebee;
-  --input: #e0e6e9;
+  --border: #dde4e9;
+  --input: #d6dee3;
   --ring: #ffbe18;
 
   /* Charts — amarelo Metta como destaque, escala azul acinzentado pro resto */
@@ -180,5 +181,31 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer components {
+  /* Superfície de card única do dashboard — borda + branco puro +
+     sombra suave azul-noite. Lift no hover. Usar em TODO card/painel
+     pra profundidade consistente contra o tapete cinza-gelo. */
+  .surface-card {
+    @apply rounded-xl border border-border bg-card;
+    box-shadow:
+      0 1px 2px -1px rgba(12, 22, 27, 0.06),
+      0 2px 6px -2px rgba(12, 22, 27, 0.05);
+    transition: box-shadow 180ms ease, border-color 180ms ease;
+  }
+  .surface-card-interactive:hover {
+    box-shadow:
+      0 4px 12px -3px rgba(12, 22, 27, 0.12),
+      0 2px 6px -2px rgba(12, 22, 27, 0.07);
+    border-color: color-mix(in srgb, var(--border) 60%, var(--foreground));
+  }
+  /* Título de painel padrão. */
+  .panel-title {
+    @apply text-[15px] font-semibold tracking-tight text-foreground;
+  }
+  .panel-desc {
+    @apply text-xs text-muted-foreground;
   }
 }

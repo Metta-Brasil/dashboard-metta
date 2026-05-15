@@ -379,8 +379,13 @@ async function TabelaDiariaSection({ searchParams }: PageProps) {
 
 function SectionFallback({ label }: { label: string }) {
   return (
-    <div className="flex h-32 items-center justify-center rounded-xl border border-dashed border-border bg-card/50 text-sm text-muted-foreground">
-      {label}
+    <div className="surface-card flex flex-col gap-4 p-5 lg:p-6">
+      <div className="flex flex-col gap-2">
+        <div className="h-4 w-48 animate-pulse rounded bg-muted" />
+        <div className="h-3 w-64 animate-pulse rounded bg-muted/70" />
+      </div>
+      <div className="h-48 w-full animate-pulse rounded-lg bg-muted/60" />
+      <span className="sr-only">{label}</span>
     </div>
   );
 }
