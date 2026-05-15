@@ -42,17 +42,44 @@ const TOP_ROAS_MIN_INVEST = 500;
 /** Limite de cards na galeria (PRD §5.2.5 — 12 cards, paginação v2). */
 const GALERIA_LIMIT = 12;
 
+/** Normalização robusta: lowercase, remove acentos, espaços/hífens → "_",
+ *  colapsa "_" repetidos, trim. Permite casar "Empresário quer..." (adName)
+ *  com "Empresario_quer..." (utm_content) sem falso-positivo de substring. */
 function normalizeForMatch(s: string): string {
-  return s.toLowerCase().replace(/\s+/g, "_").trim();
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[\s\-]+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_|_$/g, "")
+    .trim();
 }
 
-/** Substring match bidirecional após normalização — tolera case/espaços e UTMs truncados. */
+/** Match EXATO normalizado (NÃO substring).
+ *
+ * O substring bidirecional anterior (`a.includes(b) || b.includes(a)`)
+ * causava contaminação massiva: ~437/2490 adNames colidiam entre si por
+ * prefixo, fazendo cada anúncio "roubar" leads/vendas de outros (inclusive
+ * de outros funis). 71,9% dos leads casam por igualdade exata normalizada
+ * — esse é o vínculo real `utm_content == adName`. */
 function utmMatchesAd(utmContent: string, adName: string): boolean {
   if (!utmContent || !adName) return false;
   const u = normalizeForMatch(utmContent);
   const a = normalizeForMatch(adName);
-  if (!u || !a) return false;
-  return u === a || u.includes(a) || a.includes(u);
+  return u !== "" && u === a;
+}
+
+/** O registro pertence ao anúncio NAQUELA campanha (logo, naquele funil):
+ *  utm_campaign do lead/sdr/venda tem que ser uma das campanhas em que o
+ *  adName rodou no recorte filtrado. Impede que o mesmo criativo reusado
+ *  em campanhas/funis diferentes misture métricas. */
+function utmCampaignInSet(
+  utmCampaign: string,
+  campNormSet: Set<string>
+): boolean {
+  if (!utmCampaign) return false;
+  return campNormSet.has(normalizeForMatch(utmCampaign));
 }
 
 /** Lookup em ads_links por adName — match exato (normalizado) ou substring bidirecional.
@@ -162,17 +189,31 @@ export function calcAnuncios(
     const cliques = sumBy(rows, (r) => r.linkClicks);
     const lpViews = sumBy(rows, (r) => r.landingPageViews);
 
-    const leadsDoAd = leadsUnicos.filter((l) =>
-      utmMatchesAd(l.utmContent, adName)
+    // Campanhas em que ESTE anúncio rodou no recorte filtrado. O downstream
+    // (lead/sdr/venda) só conta se utm_content == adName E utm_campaign for
+    // uma dessas campanhas — amarra ao funil correto e evita que o mesmo
+    // criativo reusado em campanhas/funis diferentes misture métricas.
+    const campNormSet = new Set(
+      rows.map((r) => normalizeForMatch(r.campaignName)).filter(Boolean)
+    );
+
+    const leadsDoAd = leadsUnicos.filter(
+      (l) =>
+        utmMatchesAd(l.utmContent, adName) &&
+        utmCampaignInSet(l.utmCampaign, campNormSet)
     );
     const leadsCount = leadsDoAd.length;
     const mql = leadsDoAd.filter((l) => isMql(l.qualificacao)).length;
 
-    const sdrAgendDoAd = sdrByAgendamento.filter((s) =>
-      utmMatchesAd(s.utmContentSnap, adName)
+    const sdrAgendDoAd = sdrByAgendamento.filter(
+      (s) =>
+        utmMatchesAd(s.utmContentSnap, adName) &&
+        utmCampaignInSet(s.utmCampaignSnap, campNormSet)
     );
-    const sdrReunDoAd = sdrByReuniao.filter((s) =>
-      utmMatchesAd(s.utmContentSnap, adName)
+    const sdrReunDoAd = sdrByReuniao.filter(
+      (s) =>
+        utmMatchesAd(s.utmContentSnap, adName) &&
+        utmCampaignInSet(s.utmCampaignSnap, campNormSet)
     );
     const agendamentos = sdrAgendDoAd.length;
     const reunioesAgendadas = sdrReunDoAd.length;
@@ -180,8 +221,10 @@ export function calcAnuncios(
       isReuniaoRealizada(s.status)
     ).length;
 
-    const vendasDoAd = vendasInRange.filter((v) =>
-      utmMatchesAd(v.utmContentSnap, adName)
+    const vendasDoAd = vendasInRange.filter(
+      (v) =>
+        utmMatchesAd(v.utmContentSnap, adName) &&
+        utmCampaignInSet(v.utmCampaignSnap, campNormSet)
     );
     const vendasCount = vendasDoAd.length;
     const faturamento = sumBy(vendasDoAd, (v) => v.valorContrato);
