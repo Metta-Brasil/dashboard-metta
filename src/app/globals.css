@@ -2,6 +2,16 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* SF Pro — única família tipográfica da marca Metta (PRD §4.1).
+   Variable font (subset Latin, eixos de peso 270–870). */
+@font-face {
+  font-family: "SF Pro";
+  src: url("/fonts/SFPro-subset.woff2") format("woff2-variations");
+  font-weight: 270 870;
+  font-style: normal;
+  font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -57,8 +67,16 @@
    ============================================================ */
 
 :root {
-  /* Surfaces */
-  --background: #ffffff;
+  /* Tipografia — SF Pro é a única família da marca (PRD §4.1).
+     Fallback system enquanto o woff2 carrega (font-display: swap). */
+  --font-sans: "SF Pro", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Helvetica Neue", Arial, sans-serif;
+  --font-geist-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo,
+    Consolas, monospace;
+
+  /* Surfaces — tapete off-white (branco gelo) com cards brancos puros
+     que saltam do fundo (tratamento claro estilo shadcn dashboard-01). */
+  --background: #fafcfd;
   --foreground: #0c161b;
 
   --card: #ffffff;
@@ -67,14 +85,14 @@
   --popover: #ffffff;
   --popover-foreground: #0c161b;
 
-  /* Brand */
+  /* Brand — amarelo Metta; fundo amarelo → texto azul noite (PRD §9.2) */
   --primary: #ffbe18;
   --primary-foreground: #0c161b;
 
   --secondary: #ebf3f7;
   --secondary-foreground: #0c161b;
 
-  --muted: #fafcfd;
+  --muted: #eff3f5;
   --muted-foreground: #688594;
 
   --accent: #ebf3f7;
@@ -82,28 +100,28 @@
 
   --destructive: #dc2626;
 
-  --border: #e0e6e9;
+  --border: #e6ebee;
   --input: #e0e6e9;
   --ring: #ffbe18;
 
   /* Charts — amarelo Metta como destaque, escala azul acinzentado pro resto */
   --chart-1: #ffbe18;
-  --chart-2: #688594;
-  --chart-3: #2e3e47;
+  --chart-2: #435965;
+  --chart-3: #688594;
   --chart-4: #75919f;
   --chart-5: #a8b3b9;
 
-  /* Radius — 12px nos cards (= 0.75rem) */
+  /* Radius — 12px cards (PRD §6.3) */
   --radius: 0.75rem;
 
-  /* Sidebar — branco gelo levemente destacado do main */
-  --sidebar: #fafcfd;
+  /* Sidebar — branca pura, separada do tapete por borda sutil */
+  --sidebar: #ffffff;
   --sidebar-foreground: #0c161b;
   --sidebar-primary: #ffbe18;
   --sidebar-primary-foreground: #0c161b;
-  --sidebar-accent: #ebf3f7;
+  --sidebar-accent: #f4f7f9;
   --sidebar-accent-foreground: #0c161b;
-  --sidebar-border: #e0e6e9;
+  --sidebar-border: #e6ebee;
   --sidebar-ring: #ffbe18;
 }
 
