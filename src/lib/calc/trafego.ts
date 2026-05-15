@@ -12,23 +12,27 @@ import {
 } from "./shared";
 import type {
   FilterState,
+  Funil,
   RawData,
   TrafegoComboPoint,
+  TrafegoFunilResumo,
   TrafegoKPIs,
+  TrafegoMqlCmqlPorFunil,
   TrafegoRankingRow,
   TrafegoResult,
   FunnelStep,
 } from "./types";
 
 /**
- * Tráfego Pago — KPIs, série combo, ranking de campanhas, funil de tráfego.
- * Fonte: PRD §5.2.2 (linhas 1587-1900).
+ * Tráfego Pago — KPIs, série combo, ranking de campanhas/adsets, funil de tráfego.
+ * Fonte: PRD §5.2.2 (linhas 1587-1900) + docs/inventario-completude.md linhas 140-263.
  */
 export function calcTrafego(
   data: Pick<RawData, "fb_todos" | "leads">,
   filters: FilterState
 ): TrafegoResult {
   const funis = filters.funis ?? ["todos"];
+  const rankingBy: "campanha" | "adset" = filters.rankingBy ?? "campanha";
 
   // 1. Filtros base (funil + período)
   const fbTodosF = filterFbTodosByFunil(data.fb_todos, funis);
@@ -42,13 +46,18 @@ export function calcTrafego(
   const investimento = sumBy(fbInRange, (r) => r.amountSpent);
   const impressoes = sumBy(fbInRange, (r) => r.impressions);
   const cliques = sumBy(fbInRange, (r) => r.linkClicks);
+  const lpViews = sumBy(fbInRange, (r) => r.landingPageViews);
 
+  const leadsCount = leadsUnicos.length;
   const mql = leadsUnicos.filter((l) => isMql(l.qualificacao)).length;
 
   const ctr = safeRate(cliques, impressoes);
   const cpc = safeRate(investimento, cliques);
   const cpm = impressoes > 0 ? (investimento * 1000) / impressoes : 0;
+  const cpl = safeRate(investimento, leadsCount);
   const cmql = safeRate(investimento, mql);
+  const txLpLead = safeRate(leadsCount, lpViews);
+  const txLeadMql = safeRate(mql, leadsCount);
 
   const kpis: TrafegoKPIs = {
     investimento,
@@ -57,11 +66,15 @@ export function calcTrafego(
     ctr,
     cpc,
     cpm,
+    leads: leadsCount,
+    cpl,
+    txLpLead,
     mql,
     cmql,
+    txLeadMql,
   };
 
-  // 3. Série combo diária (Investimento, Cliques, MQL) — PRD §5.2.2 "Combo investimento/MQL/CMQL"
+  // 3. Série combo diária (Investimento, Cliques, Leads, MQL, CMQL) — PRD §5.2.2 "Combo investimento/MQL/CMQL"
   const days = eachDay(filters.from, filters.to);
   const serieCombo: TrafegoComboPoint[] = days.map((dia) => {
     const dayStart = startOfDayBrt(dia).getTime();
@@ -73,52 +86,108 @@ export function calcTrafego(
     const leadsDay = leadsInRange.filter((r) => inDay(r.dataInscricao));
     const leadsDayUnicos = dedupeLeadsByEmail(leadsDay);
 
+    const invDay = sumBy(fbDay, (r) => r.amountSpent);
+    const leadsDayCount = leadsDayUnicos.length;
+    const mqlDay = leadsDayUnicos.filter((l) => isMql(l.qualificacao)).length;
+
     return {
       dia,
-      investimento: sumBy(fbDay, (r) => r.amountSpent),
+      investimento: invDay,
       cliques: sumBy(fbDay, (r) => r.linkClicks),
-      mql: leadsDayUnicos.filter((l) => isMql(l.qualificacao)).length,
+      leads: leadsDayCount,
+      mql: mqlDay,
+      cmql: mqlDay > 0 ? invDay / mqlDay : null,
     };
   });
 
-  // 4. Ranking por campanha — PRD §5.2.2 "Ranking de mídia"
-  // Agrupa fb_todos por campaignName; cruza leads via utm_campaign (substring match bidireccional).
-  const fbByCampanha = groupBy(fbInRange, (r) => r.campaignName);
+  // 4. MQL & CMQL por funil — 5 funis fixos.
+  // Refiltra fb_todos + leads pelo funil específico, ignorando `funis` selecionado
+  // (PRD §5.2.2.E linhas 1772-1778: gráfico mostra TODOS os 5 funis sempre).
+  const FUNIS_FIXOS: Funil[] = ["sala", "aplica", "sessao", "isca", "reality"];
+  const mqlCmqlPorFunil: TrafegoMqlCmqlPorFunil[] = FUNIS_FIXOS.map((funil) => {
+    const fbFunil = filterByDate(
+      filterFbTodosByFunil(data.fb_todos, [funil]),
+      (r) => r.day,
+      filters.from,
+      filters.to
+    );
+    const leadsFunil = dedupeLeadsByEmail(
+      filterByDate(
+        filterLeadsByFunil(data.leads, [funil]),
+        (r) => r.dataInscricao,
+        filters.from,
+        filters.to
+      )
+    );
+    const invFunil = sumBy(fbFunil, (r) => r.amountSpent);
+    const mqlFunil = leadsFunil.filter((l) => isMql(l.qualificacao)).length;
+    return {
+      funil,
+      mql: mqlFunil,
+      cmql: mqlFunil > 0 ? invFunil / mqlFunil : null,
+      investimento: invFunil,
+    };
+  });
+
+  // 5. Ranking de mídia — agrupa por campaignName OU adSetName (toggle filters.rankingBy).
+  // Match de leads por utm_campaign (substring nos dois sentidos — UTM pode ser truncado ou conter sufixo).
+  const keyFn = rankingBy === "adset"
+    ? (r: typeof fbInRange[number]) => r.adSetName
+    : (r: typeof fbInRange[number]) => r.campaignName;
+
+  const fbByKey = groupBy(fbInRange, keyFn);
 
   const ranking: TrafegoRankingRow[] = [];
-  for (const [campanha, rows] of fbByCampanha.entries()) {
-    if (!campanha) continue;
+  for (const [nome, rows] of fbByKey.entries()) {
+    if (!nome) continue;
     const inv = sumBy(rows, (r) => r.amountSpent);
     const imp = sumBy(rows, (r) => r.impressions);
     const clk = sumBy(rows, (r) => r.linkClicks);
+    const lpv = sumBy(rows, (r) => r.landingPageViews);
 
-    // Match de leads por UTM (substring nos dois sentidos — UTM pode ser truncado ou conter sufixo).
-    const leadsCamp = leadsUnicos.filter((l) => {
+    // Match de leads por UTM (substring nos dois sentidos).
+    // No modo 'adset', mantém a mesma lógica de utm_campaign — UTM normalmente
+    // referencia o nome de campanha, e não há utm_adset; aceitamos a aproximação
+    // (lead atribuído à campanha que contém o adset; pode dar overcount inter-adsets
+    // dentro da mesma campanha, mas é o melhor join disponível).
+    const leadsRow = leadsUnicos.filter((l) => {
       const utm = l.utmCampaign;
       if (!utm) return false;
-      return campanha.includes(utm) || utm.includes(campanha);
+      return nome.includes(utm) || utm.includes(nome);
     });
-    const mqlCamp = leadsCamp.filter((l) => isMql(l.qualificacao)).length;
+    const leadsRowCount = leadsRow.length;
+    const mqlRow = leadsRow.filter((l) => isMql(l.qualificacao)).length;
 
     ranking.push({
-      campanha,
+      nome,
+      agrupamento: rankingBy,
       investimento: inv,
       impressoes: imp,
       cliques: clk,
       ctr: safeRate(clk, imp),
       cpc: safeRate(inv, clk),
-      mql: mqlCamp,
-      cmql: safeRate(inv, mqlCamp),
+      cpm: imp > 0 ? (inv * 1000) / imp : 0,
+      lpViews: lpv,
+      leads: leadsRowCount,
+      cpl: safeRate(inv, leadsRowCount),
+      mql: mqlRow,
+      cmql: mqlRow > 0 ? inv / mqlRow : Infinity,
     });
   }
-  // Ordenação default: investimento desc (proxy de relevância — PRD sugere CMQL asc,
-  // mas com muitas linhas zeradas isso enche o topo de "—"; mantemos invest desc).
-  ranking.sort((a, b) => b.investimento - a.investimento);
 
-  // 5. Funil de tráfego (5 etapas) — PRD §5.2.2 "Funil de tráfego"
-  const lpViews = sumBy(fbInRange, (r) => r.landingPageViews);
-  const leadsCount = leadsUnicos.length;
+  // Ordenação default: CMQL ASC (PRD §5.2.2.E linha 1807).
+  // Linhas sem MQL (cmql = Infinity) vão pro fim, ordenadas internamente por investimento desc
+  // (assim quem gasta mais sem converter aparece antes dos pequenos zerados).
+  ranking.sort((a, b) => {
+    const aInf = !Number.isFinite(a.cmql);
+    const bInf = !Number.isFinite(b.cmql);
+    if (aInf && bInf) return b.investimento - a.investimento;
+    if (aInf) return 1;
+    if (bInf) return -1;
+    return a.cmql - b.cmql;
+  });
 
+  // 6. Funil de tráfego (5 etapas) — PRD §5.2.2 "Funil de tráfego"
   const funilTrafego: FunnelStep[] = [
     {
       etapa: "Impressões",
@@ -147,10 +216,28 @@ export function calcTrafego(
     },
   ];
 
+  // 7. Funil resumo — snapshot dos totais com métricas secundárias por etapa.
+  // null nos secundários quando o denominador é zero (preserva diferença entre "zero" e "indefinido").
+  const funilTrafegoResumo: TrafegoFunilResumo = {
+    impressoes,
+    cliques,
+    lpViews,
+    leads: leadsCount,
+    mql,
+    cpm: impressoes > 0 ? (investimento * 1000) / impressoes : null,
+    cpc: cliques > 0 ? investimento / cliques : null,
+    ctr: impressoes > 0 ? cliques / impressoes : null,
+    cpl: leadsCount > 0 ? investimento / leadsCount : null,
+    cmql: mql > 0 ? investimento / mql : null,
+    txLpLead: lpViews > 0 ? leadsCount / lpViews : null,
+  };
+
   return {
     kpis,
     serieCombo,
-    ranking,
+    mqlCmqlPorFunil,
     funilTrafego,
+    funilTrafegoResumo,
+    ranking,
   };
 }

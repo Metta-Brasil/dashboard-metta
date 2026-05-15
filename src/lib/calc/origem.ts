@@ -1,3 +1,4 @@
+import type { LeadRow, SdrRow, VendaRow } from "@/lib/sheets/schemas";
 import {
   dedupeLeadsByEmail,
   filterByDate,
@@ -6,8 +7,7 @@ import {
   indexLeadsByEmail,
   isMql,
   isReuniaoRealizada,
-  safeRate,
-  sumBy,
+  normalizeQualif,
 } from "./shared";
 import type {
   FilterState,
@@ -17,17 +17,25 @@ import type {
 } from "./types";
 
 /**
- * Origem — PRD §5.2.7 da tarefa: 7 categorias por classificação de UTM source.
+ * Origem — PRD §5.2.6 / wireframe linhas 1334-1425.
  *
- * Para cada categoria (facebook, instagram, google, organico, indicacao, evento,
- * outros) produz uma tabela com:
- *  - 1 linha por utm_medium daquele bucket
- *  - 1 linha "total" agregando a categoria
+ * 7 dimensões distintas (não 7 categorias de UTM source agregadas como antes).
+ * Cada array de OrigemRow agrupa as métricas do funil por um critério:
  *
- * Join: leads.email -> sdr.email -> vendas.email para contar funil completo.
- * Para sdr/vendas, se a coluna primária estiver vazia (no caso desses schemas,
- * SDR e VendaRow só têm utmSourceSnap/utmMediumSnap como snapshot do lead), o
- * classificador cai no snapshot.
+ *  1. porUtmSource     — distinct(lead.utmSource lower)
+ *  2. porUtmMedium     — distinct(lead.utmMedium lower)
+ *  3. porUtmCampaign   — distinct(lead.utmCampaign)
+ *  4. porQualificacao  — Enterprise / MQL 1 / MQL 2 (labels com espaço)
+ *  5. porCargo         — lista fixa (Empresário, Sócio, CEO, Diretor de vendas,
+ *                        Gerente, Outros); resto cai em "Outros".
+ *  6. porFaturamento   — 7 faixas qualificadas (PRD §5.1.5) + coluna `qualif`.
+ *  7. porSegmento      — lista fixa de 6 segmentos.
+ *
+ * Métricas: leadsQualif (=count leads MQL únicos por email), mql (alias),
+ * agendamentos, reunioesAgendadas (=agendamentos), reunioesRealizadas, vendas,
+ * faturamento. Join via lead.email; quando sdr/vendas não bate em lead, usa o
+ * snapshot (utmSourceSnap, cargoSnap, faturamentoSnap, segmentoSnap,
+ * qualificacaoSnap).
  */
 export function calcOrigem(
   data: Pick<RawData, "leads" | "sdr" | "vendas">,
@@ -66,253 +74,380 @@ export function calcOrigem(
 
   const leadsUnicos = dedupeLeadsByEmail(leadsInRange);
   const leadByEmail = indexLeadsByEmail(leadsUnicos);
+  const leadsMql = leadsUnicos.filter((l) => isMql(l.qualificacao));
 
-  // Bucket: categoria -> medium -> métricas.
+  // ----- Construtores genéricos ----------------------------------------------
+
   type Metrics = {
-    leads: number;
+    leadsQualif: number;
     mql: number;
     agendamentos: number;
-    reunioes: number;
+    reunioesAgendadas: number;
+    reunioesRealizadas: number;
     vendas: number;
     faturamento: number;
   };
-  const empty = (): Metrics => ({
-    leads: 0,
+  const emptyMetrics = (): Metrics => ({
+    leadsQualif: 0,
     mql: 0,
     agendamentos: 0,
-    reunioes: 0,
+    reunioesAgendadas: 0,
+    reunioesRealizadas: 0,
     vendas: 0,
     faturamento: 0,
   });
 
-  // Inicializa todas as 7 categorias mesmo que vazias (acceptance UI).
-  const buckets = new Map<OrigemCategoria, Map<string, Metrics>>();
-  for (const cat of ALL_CATEGORIAS) buckets.set(cat, new Map());
-
-  const ensure = (cat: OrigemCategoria, medium: string): Metrics => {
-    const sub = buckets.get(cat)!;
-    const med = medium || "(direct)";
-    let m = sub.get(med);
-    if (!m) {
-      m = empty();
-      sub.set(med, m);
-    }
-    return m;
+  const toRow = (dimensao: string, m: Metrics, qualif?: OrigemRow["qualif"]): OrigemRow => {
+    const row: OrigemRow = {
+      dimensao,
+      leadsQualif: m.leadsQualif,
+      mql: m.mql,
+      agendamentos: m.agendamentos,
+      reunioesAgendadas: m.reunioesAgendadas,
+      reunioesRealizadas: m.reunioesRealizadas,
+      vendas: m.vendas,
+      faturamento: m.faturamento,
+    };
+    if (qualif) row.qualif = qualif;
+    return row;
   };
 
-  // Leads
-  for (const lead of leadsUnicos) {
-    const cat = classifyUtmSource(lead.utmSource);
-    const medium = (lead.utmMedium || "").toLowerCase();
-    const m = ensure(cat, medium);
-    m.leads += 1;
-    if (isMql(lead.qualificacao)) m.mql += 1;
+  /**
+   * Agrupa o funil por uma chave dinâmica.
+   *  - `keyFromLead`: agrupa o lead (só MQL contam pra leadsQualif/mql).
+   *  - `keyFromSdr`/`keyFromVenda`: usados quando NÃO há lead match — usam o
+   *    snapshot. Quando há match, reaproveitam keyFromLead(lead) pra manter
+   *    consistência.
+   *  - `allowedKeys`: se passado, ignora chaves fora dessa lista (ou redireciona
+   *    pra fallback). Quando undefined, toda chave entra.
+   *  - `fallbackKey`: chave usada quando o valor não está em allowedKeys (ex:
+   *    cargo fora da lista vira "Outros"). Se undefined, o registro é
+   *    descartado.
+   */
+  function aggregate(opts: {
+    keyFromLead: (l: LeadRow) => string | null;
+    keyFromSdr: (s: SdrRow) => string | null;
+    keyFromVenda: (v: VendaRow) => string | null;
+    allowedKeys?: ReadonlySet<string>;
+    fallbackKey?: string | null;
+    onlyMqlLeads?: boolean;
+  }): Map<string, Metrics> {
+    const buckets = new Map<string, Metrics>();
+
+    const resolveKey = (raw: string | null): string | null => {
+      if (raw == null) return opts.fallbackKey ?? null;
+      const trimmed = raw.trim();
+      if (!trimmed) return opts.fallbackKey ?? null;
+      if (opts.allowedKeys && !opts.allowedKeys.has(trimmed)) {
+        return opts.fallbackKey ?? null;
+      }
+      return trimmed;
+    };
+
+    const ensure = (key: string): Metrics => {
+      let m = buckets.get(key);
+      if (!m) {
+        m = emptyMetrics();
+        buckets.set(key, m);
+      }
+      return m;
+    };
+
+    // Leads (só os MQL pra "leadsQualif"; "mql" é alias)
+    const leadsPool = opts.onlyMqlLeads === false ? leadsUnicos : leadsMql;
+    for (const lead of leadsPool) {
+      const key = resolveKey(opts.keyFromLead(lead));
+      if (!key) continue;
+      const m = ensure(key);
+      m.leadsQualif += 1;
+      m.mql += 1;
+    }
+
+    // Agendamentos = reuniões agendadas (todos os registros com dataAgendamento no range)
+    for (const s of sdrAgendInRange) {
+      const lead = leadByEmail.get(s.email);
+      const raw = lead ? opts.keyFromLead(lead) : opts.keyFromSdr(s);
+      const key = resolveKey(raw);
+      if (!key) continue;
+      const m = ensure(key);
+      m.agendamentos += 1;
+      m.reunioesAgendadas += 1;
+    }
+
+    // Reuniões realizadas
+    for (const s of sdrReuniaoInRange) {
+      if (!isReuniaoRealizada(s.status)) continue;
+      const lead = leadByEmail.get(s.email);
+      const raw = lead ? opts.keyFromLead(lead) : opts.keyFromSdr(s);
+      const key = resolveKey(raw);
+      if (!key) continue;
+      const m = ensure(key);
+      m.reunioesRealizadas += 1;
+    }
+
+    // Vendas
+    for (const v of vendasInRange) {
+      const lead = leadByEmail.get(v.email);
+      const raw = lead ? opts.keyFromLead(lead) : opts.keyFromVenda(v);
+      const key = resolveKey(raw);
+      if (!key) continue;
+      const m = ensure(key);
+      m.vendas += 1;
+      m.faturamento += v.valorContrato;
+    }
+
+    return buckets;
   }
 
-  // Agendamentos (join via email para usar a classificação do lead; fallback no snapshot)
-  for (const s of sdrAgendInRange) {
-    const lead = leadByEmail.get(s.email);
-    const source = lead?.utmSource || s.utmSourceSnap;
-    const medium = (lead?.utmMedium || s.utmMediumSnap || "").toLowerCase();
-    const cat = classifyUtmSource(source);
-    const m = ensure(cat, medium);
-    m.agendamentos += 1;
-  }
+  // ----- Helpers de normalização ---------------------------------------------
 
-  // Reuniões realizadas (status "realizada")
-  for (const s of sdrReuniaoInRange) {
-    if (!isReuniaoRealizada(s.status)) continue;
-    const lead = leadByEmail.get(s.email);
-    const source = lead?.utmSource || s.utmSourceSnap;
-    const medium = (lead?.utmMedium || s.utmMediumSnap || "").toLowerCase();
-    const cat = classifyUtmSource(source);
-    const m = ensure(cat, medium);
-    m.reunioes += 1;
-  }
+  const lower = (s: string | null | undefined): string | null => {
+    if (s == null) return null;
+    const t = String(s).toLowerCase().trim();
+    return t || null;
+  };
+  const raw = (s: string | null | undefined): string | null => {
+    if (s == null) return null;
+    const t = String(s).trim();
+    return t || null;
+  };
 
-  // Vendas
-  for (const v of vendasInRange) {
-    const lead = leadByEmail.get(v.email);
-    const source = lead?.utmSource || v.utmSourceSnap;
-    const medium = (lead?.utmMedium || v.utmMediumSnap || "").toLowerCase();
-    const cat = classifyUtmSource(source);
-    const m = ensure(cat, medium);
-    m.vendas += 1;
-    m.faturamento += v.valorContrato;
-  }
+  // ----- 1) Por UTM Source ---------------------------------------------------
+  const utmSourceMap = aggregate({
+    keyFromLead: (l) => lower(l.utmSource),
+    keyFromSdr: (s) => lower(s.utmSourceSnap),
+    keyFromVenda: (v) => lower(v.utmSourceSnap),
+  });
+  const porUtmSource = mapToSortedRows(utmSourceMap, toRow);
 
-  // Monta result final
-  const porCategoria = ALL_CATEGORIAS.map((cat) => {
-    const sub = buckets.get(cat)!;
-    const rows: OrigemRow[] = Array.from(sub.entries())
-      .map(([medium, met]) => toRow(medium, met))
-      .sort((a, b) => b.leads - a.leads || a.origem.localeCompare(b.origem));
-    const totalMetrics = aggregate(rows);
-    const total: OrigemRow = toRow("Total", totalMetrics);
-    return { categoria: cat, rows, total };
+  // ----- 2) Por UTM Medium ---------------------------------------------------
+  const utmMediumMap = aggregate({
+    keyFromLead: (l) => lower(l.utmMedium),
+    keyFromSdr: (s) => lower(s.utmMediumSnap),
+    keyFromVenda: (v) => lower(v.utmMediumSnap),
+  });
+  const porUtmMedium = mapToSortedRows(utmMediumMap, toRow);
+
+  // ----- 3) Por UTM Campaign -------------------------------------------------
+  const utmCampaignMap = aggregate({
+    keyFromLead: (l) => raw(l.utmCampaign),
+    keyFromSdr: (s) => raw(s.utmCampaignSnap),
+    keyFromVenda: (v) => raw(v.utmCampaignSnap),
+  });
+  const porUtmCampaign = mapToSortedRows(utmCampaignMap, toRow);
+
+  // ----- 4) Por Qualificação -------------------------------------------------
+  // normalizeQualif retorna "Enterprise"|"MQL1"|"MQL2"|"Outros".
+  // Wireframe quer labels com espaço: "MQL 1" / "MQL 2".
+  const qualifAllowed = new Set(["Enterprise", "MQL 1", "MQL 2"]);
+  const qualifLabel = (q: string): string | null => {
+    const norm = normalizeQualif(q);
+    if (norm === "Enterprise") return "Enterprise";
+    if (norm === "MQL1") return "MQL 1";
+    if (norm === "MQL2") return "MQL 2";
+    return null; // "Outros" descartado
+  };
+  const qualifMap = aggregate({
+    keyFromLead: (l) => qualifLabel(l.qualificacao),
+    keyFromSdr: (s) => qualifLabel(s.qualificacaoSnap),
+    keyFromVenda: (v) => qualifLabel(v.qualificacaoSnap),
+    allowedKeys: qualifAllowed,
+  });
+  const porQualificacao = QUALIF_ORDER.map((label) => {
+    const m = qualifMap.get(label) ?? emptyMetrics();
+    return toRow(label, m);
   });
 
-  return { porCategoria };
+  // ----- 5) Por Cargo --------------------------------------------------------
+  const cargoMap = aggregate({
+    keyFromLead: (l) => classifyCargo(l.cargo),
+    keyFromSdr: (s) => classifyCargo(s.cargoSnap),
+    keyFromVenda: (v) => classifyCargo(v.cargoSnap),
+    allowedKeys: CARGO_ALLOWED_SET,
+    fallbackKey: "Outros",
+  });
+  const porCargo = CARGO_ORDER.map((label) => {
+    const m = cargoMap.get(label) ?? emptyMetrics();
+    return toRow(label, m);
+  });
+
+  // ----- 6) Por Faixa de Faturamento ----------------------------------------
+  const fatMap = aggregate({
+    keyFromLead: (l) => classifyFaturamento(l.faturamento),
+    keyFromSdr: (s) => classifyFaturamento(s.faturamentoSnap),
+    keyFromVenda: (v) => classifyFaturamento(v.faturamentoSnap),
+    allowedKeys: FATURAMENTO_FAIXAS_SET,
+  });
+  const porFaturamento = FATURAMENTO_FAIXAS_QUALIFICADAS.map(({ label, qualif }) => {
+    const m = fatMap.get(label) ?? emptyMetrics();
+    return toRow(label, m, qualif);
+  });
+
+  // ----- 7) Por Segmento -----------------------------------------------------
+  const segMap = aggregate({
+    keyFromLead: (l) => classifySegmento(l.segmento),
+    keyFromSdr: (s) => classifySegmento(s.segmentoSnap),
+    keyFromVenda: (v) => classifySegmento(v.segmentoSnap),
+    allowedKeys: SEGMENTO_ALLOWED_SET,
+  });
+  const porSegmento = SEGMENTO_ORDER.map((label) => {
+    const m = segMap.get(label) ?? emptyMetrics();
+    return toRow(label, m);
+  });
+
+  return {
+    porUtmSource,
+    porUtmMedium,
+    porUtmCampaign,
+    porQualificacao,
+    porCargo,
+    porFaturamento,
+    porSegmento,
+  };
 }
 
-// ----- Tipos auxiliares ---------------------------------------------------------
+// ----- Sorted rows (UTM tables: por leadsQualif desc, depois dimensao asc) ---
 
-type OrigemCategoria =
-  | "facebook"
-  | "instagram"
-  | "google"
-  | "organico"
-  | "indicacao"
-  | "evento"
-  | "outros";
+function mapToSortedRows(
+  map: Map<string, { leadsQualif: number; mql: number; agendamentos: number; reunioesAgendadas: number; reunioesRealizadas: number; vendas: number; faturamento: number }>,
+  toRow: (dimensao: string, m: { leadsQualif: number; mql: number; agendamentos: number; reunioesAgendadas: number; reunioesRealizadas: number; vendas: number; faturamento: number }) => OrigemRow
+): OrigemRow[] {
+  return Array.from(map.entries())
+    .map(([dim, m]) => toRow(dim, m))
+    .sort(
+      (a, b) =>
+        b.leadsQualif - a.leadsQualif ||
+        b.faturamento - a.faturamento ||
+        a.dimensao.localeCompare(b.dimensao)
+    );
+}
 
-const ALL_CATEGORIAS: OrigemCategoria[] = [
-  "facebook",
-  "instagram",
-  "google",
-  "organico",
-  "indicacao",
-  "evento",
-  "outros",
-];
+// ----- Qualificação ---------------------------------------------------------
 
-// ----- Classificação UTM source -------------------------------------------------
+const QUALIF_ORDER = ["Enterprise", "MQL 1", "MQL 2"] as const;
+
+// ----- Cargo ----------------------------------------------------------------
+
+const CARGO_ORDER = [
+  "Empresário",
+  "Sócio",
+  "CEO",
+  "Diretor de vendas",
+  "Gerente",
+  "Outros",
+] as const;
+const CARGO_ALLOWED_SET = new Set<string>(CARGO_ORDER);
 
 /**
- * 7 categorias por palavras-chave em utm_source (case-insensitive, substring):
- *  - facebook : fb, facebook, meta
- *  - instagram: ig, instagram
- *  - google   : google, gads, googleads
- *  - organico : organic, direct, "" vazio, refer/no utm
- *  - indicacao: indica, member-get-member, mgm
- *  - evento   : evento, palestra, summit
- *  - outros   : resto
- *
- * Regras de desambiguação:
- *  - "instagram" e "facebook" são checados antes de "meta" pra não cair tudo
- *    em facebook (ex: "Meta_Instagram" → instagram).
- *  - "google" prevalece sobre "ads" genérico.
- *  - "MetaAds_Adv" → facebook (matchea "meta").
- *  - "facebookads" → facebook (matchea "facebook"/"fb").
+ * Classifica cargo livre em uma das 6 categorias fixas (case-insensitive, sem
+ * acento). Qualquer coisa que não bata vai pra "Outros".
  */
-export function classifyUtmSource(raw: string | null | undefined): OrigemCategoria {
-  if (raw == null) return "organico";
-  const s = String(raw).toLowerCase().trim();
-  if (!s) return "organico";
-
-  // Indicação primeiro (palavras compostas mais específicas).
-  if (
-    s.includes("indica") ||
-    s.includes("member-get-member") ||
-    s.includes("mgm")
-  ) {
-    return "indicacao";
-  }
-
-  // Evento
-  if (
-    s.includes("evento") ||
-    s.includes("palestra") ||
-    s.includes("summit")
-  ) {
-    return "evento";
-  }
-
-  // Instagram antes de meta/facebook (Meta_Instagram, IG_Stories, etc.)
-  if (containsToken(s, "instagram") || containsToken(s, "ig")) {
-    return "instagram";
-  }
-
-  // Facebook
-  if (
-    containsToken(s, "facebook") ||
-    containsToken(s, "fb") ||
-    s.includes("meta")
-  ) {
-    return "facebook";
-  }
-
-  // Google
-  if (
-    s.includes("google") ||
-    s.includes("gads") ||
-    s.includes("googleads")
-  ) {
-    return "google";
-  }
-
-  // Orgânico/direto/referral
-  if (
-    s.includes("organic") ||
-    s.includes("direct") ||
-    s.includes("refer") ||
-    s === "(none)" ||
-    s === "none"
-  ) {
-    return "organico";
-  }
-
-  return "outros";
+function classifyCargo(rawCargo: string | null | undefined): string {
+  if (!rawCargo) return "Outros";
+  const s = stripAccents(String(rawCargo).toLowerCase().trim());
+  if (!s) return "Outros";
+  if (s.includes("empresari")) return "Empresário";
+  if (s.includes("socio") || s === "sócio") return "Sócio";
+  if (s === "ceo" || s.includes(" ceo") || s.startsWith("ceo")) return "CEO";
+  if (s.includes("diretor") && s.includes("venda")) return "Diretor de vendas";
+  if (s.includes("gerente")) return "Gerente";
+  return "Outros";
 }
 
-/** Match "token" como palavra (limites alfanuméricos) OU como substring se token < 3 chars. */
-function containsToken(haystack: string, token: string): boolean {
-  if (token.length <= 2) {
-    // "fb", "ig" — exige limite pra não pegar "fbi" ou "trigger"
-    const re = new RegExp(`(^|[^a-z0-9])${escapeRegex(token)}([^a-z0-9]|$)`, "i");
-    return re.test(haystack);
+// ----- Faturamento ----------------------------------------------------------
+
+/**
+ * 7 faixas qualificadas (PRD §5.1.5 / wireframe linhas 1403-1409).
+ * Label exato como aparece na planilha + qualificação derivada.
+ */
+const FATURAMENTO_FAIXAS_QUALIFICADAS: ReadonlyArray<{
+  label: string;
+  qualif: "Enterprise" | "MQL 1" | "MQL 2";
+}> = [
+  { label: "Acima de 4 milhões", qualif: "Enterprise" },
+  { label: "De 1 milhão a 4 milhões", qualif: "MQL 1" },
+  { label: "De 701 mil a 1 milhão", qualif: "MQL 1" },
+  { label: "De 501 mil a 700 mil", qualif: "MQL 1" },
+  { label: "De 301 mil a 500 mil", qualif: "MQL 1" },
+  { label: "De 201 mil a 300 mil", qualif: "MQL 1" },
+  { label: "De 101 mil a 200 mil", qualif: "MQL 2" },
+];
+const FATURAMENTO_FAIXAS_SET = new Set<string>(
+  FATURAMENTO_FAIXAS_QUALIFICADAS.map((f) => f.label)
+);
+
+/**
+ * A planilha já entrega o faturamento como string da faixa (dropdown). Faz
+ * match flexível: normaliza espaço/acento e procura por substring exata da
+ * label. Qualquer coisa fora das 7 faixas qualificadas é descartada (PRD pede
+ * "apenas leads qualificados").
+ */
+function classifyFaturamento(rawFat: string | null | undefined): string | null {
+  if (!rawFat) return null;
+  const s = stripAccents(String(rawFat).toLowerCase().trim().replace(/\s+/g, " "));
+  if (!s) return null;
+  for (const { label } of FATURAMENTO_FAIXAS_QUALIFICADAS) {
+    const norm = stripAccents(label.toLowerCase().trim().replace(/\s+/g, " "));
+    if (s === norm || s.includes(norm) || norm.includes(s)) return label;
   }
-  return haystack.includes(token);
-}
-
-function escapeRegex(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-// ----- Helpers de agregação -----------------------------------------------------
-
-function toRow(
-  origem: string,
-  m: {
-    leads: number;
-    mql: number;
-    agendamentos: number;
-    reunioes: number;
-    vendas: number;
-    faturamento: number;
+  // Match parcial por marcadores ("acima 4", "1 milhao a 4", etc.)
+  if (s.includes("acima") && s.includes("4")) return "Acima de 4 milhões";
+  if (s.includes("1 milhao") && s.includes("4")) return "De 1 milhão a 4 milhões";
+  if (s.includes("701") || (s.includes("700") && s.includes("1 milhao"))) {
+    return "De 701 mil a 1 milhão";
   }
-): OrigemRow {
-  return {
-    origem,
-    leads: m.leads,
-    mql: m.mql,
-    agendamentos: m.agendamentos,
-    reunioes: m.reunioes,
-    vendas: m.vendas,
-    faturamento: m.faturamento,
-    conversaoLeadVenda: safeRate(m.vendas, m.leads),
-  };
+  if (s.includes("501") || (s.includes("500") && s.includes("700"))) {
+    return "De 501 mil a 700 mil";
+  }
+  if (s.includes("301") || (s.includes("300") && s.includes("500"))) {
+    return "De 301 mil a 500 mil";
+  }
+  if (s.includes("201") || (s.includes("200") && s.includes("300"))) {
+    return "De 201 mil a 300 mil";
+  }
+  if (s.includes("101") || (s.includes("100") && s.includes("200"))) {
+    return "De 101 mil a 200 mil";
+  }
+  return null;
 }
 
-function aggregate(rows: OrigemRow[]): {
-  leads: number;
-  mql: number;
-  agendamentos: number;
-  reunioes: number;
-  vendas: number;
-  faturamento: number;
-} {
-  return {
-    leads: sumBy(rows, (r) => r.leads),
-    mql: sumBy(rows, (r) => r.mql),
-    agendamentos: sumBy(rows, (r) => r.agendamentos),
-    reunioes: sumBy(rows, (r) => r.reunioes),
-    vendas: sumBy(rows, (r) => r.vendas),
-    faturamento: sumBy(rows, (r) => r.faturamento),
-  };
+// ----- Segmento -------------------------------------------------------------
+
+const SEGMENTO_ORDER = [
+  "Indústria",
+  "Varejo",
+  "Serviços",
+  "Tecnologia",
+  "Agronegócio",
+  "Marketing",
+] as const;
+const SEGMENTO_ALLOWED_SET = new Set<string>(SEGMENTO_ORDER);
+
+function classifySegmento(rawSeg: string | null | undefined): string | null {
+  if (!rawSeg) return null;
+  const s = stripAccents(String(rawSeg).toLowerCase().trim());
+  if (!s) return null;
+  if (s.includes("industri")) return "Indústria";
+  if (s.includes("varejo")) return "Varejo";
+  if (s.includes("servico")) return "Serviços";
+  if (s.includes("tecnolog") || s.includes("ti ") || s === "ti") return "Tecnologia";
+  if (s.includes("agro")) return "Agronegócio";
+  if (s.includes("marketing")) return "Marketing";
+  return null;
+}
+
+// ----- Utils ---------------------------------------------------------------
+
+function stripAccents(s: string): string {
+  return s.normalize("NFD").replace(/[̀-ͯ]/g, "");
 }
 
 export const __internals = {
-  classifyUtmSource,
-  ALL_CATEGORIAS,
+  classifyCargo,
+  classifyFaturamento,
+  classifySegmento,
+  FATURAMENTO_FAIXAS_QUALIFICADAS,
+  CARGO_ORDER,
+  SEGMENTO_ORDER,
+  QUALIF_ORDER,
 };

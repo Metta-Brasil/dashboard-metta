@@ -281,3 +281,18 @@ export const METAS_COLUMN_MAP = {
   metrica: 2,
   valor: 3,
 } as const;
+
+// ----- ads links (alimentada por workflow externo) ---------------------------
+
+export const AdsLinkRowSchema = z.object({
+  adName: zString,
+  instagramPermalink: zString,
+  imageUrl: zString,
+});
+export type AdsLinkRow = z.infer<typeof AdsLinkRowSchema>;
+
+export const ADS_LINKS_COLUMN_MAP = {
+  adName: 0,
+  instagramPermalink: 1,
+  imageUrl: 2,
+} as const;

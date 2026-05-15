@@ -3,6 +3,9 @@ import { cacheLife, cacheTag } from "next/cache";
 import { assertSheetsEnv, sheetsClient, SPREADSHEET_ID } from "./client";
 import { parseSheetData } from "./parse";
 import {
+  ADS_LINKS_COLUMN_MAP,
+  AdsLinkRow,
+  AdsLinkRowSchema,
   FB_TODOS_COLUMN_MAP,
   FbTodosRow,
   FbTodosRowSchema,
@@ -20,7 +23,13 @@ import {
   VENDAS_COLUMN_MAP,
 } from "./schemas";
 
-export type SheetTab = "fb_todos" | "leads" | "sdr" | "vendas" | "Metas";
+export type SheetTab =
+  | "fb_todos"
+  | "leads"
+  | "sdr"
+  | "vendas"
+  | "Metas"
+  | "ads_links";
 
 export const SHEETS_CACHE_TAG = "sheets-data";
 
@@ -30,6 +39,7 @@ const RANGES: Record<SheetTab, string> = {
   sdr: "sdr!A:AB",
   vendas: "vendas!A:AC",
   Metas: "Metas!A:D",
+  ads_links: "'ads links'!A:C",
 };
 
 type TabRowMap = {
@@ -38,6 +48,7 @@ type TabRowMap = {
   sdr: SdrRow;
   vendas: VendaRow;
   Metas: MetaRow;
+  ads_links: AdsLinkRow;
 };
 
 function parseTab<T extends SheetTab>(
@@ -63,6 +74,10 @@ function parseTab<T extends SheetTab>(
       }) as TabRowMap[T][];
     case "Metas":
       return parseSheetData(MetaRowSchema, values, METAS_COLUMN_MAP, {
+        tab,
+      }) as TabRowMap[T][];
+    case "ads_links":
+      return parseSheetData(AdsLinkRowSchema, values, ADS_LINKS_COLUMN_MAP, {
         tab,
       }) as TabRowMap[T][];
     default:
