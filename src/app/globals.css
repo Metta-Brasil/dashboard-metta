@@ -1,0 +1,166 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* ============================================================
+   Metta Design Tokens
+   - Background principal: branco puro
+   - Primary: amarelo Metta #FFBE18
+   - Foreground: azul noite #0C161B
+   - Accents: gelo azulado / azul acinzentado
+   ============================================================ */
+
+:root {
+  /* Surfaces */
+  --background: #ffffff;
+  --foreground: #0c161b;
+
+  --card: #ffffff;
+  --card-foreground: #0c161b;
+
+  --popover: #ffffff;
+  --popover-foreground: #0c161b;
+
+  /* Brand */
+  --primary: #ffbe18;
+  --primary-foreground: #0c161b;
+
+  --secondary: #ebf3f7;
+  --secondary-foreground: #0c161b;
+
+  --muted: #fafcfd;
+  --muted-foreground: #688594;
+
+  --accent: #ebf3f7;
+  --accent-foreground: #0c161b;
+
+  --destructive: #dc2626;
+
+  --border: #e0e6e9;
+  --input: #e0e6e9;
+  --ring: #ffbe18;
+
+  /* Charts — amarelo Metta como destaque, escala azul acinzentado pro resto */
+  --chart-1: #ffbe18;
+  --chart-2: #688594;
+  --chart-3: #2e3e47;
+  --chart-4: #75919f;
+  --chart-5: #a8b3b9;
+
+  /* Radius — 12px nos cards (= 0.75rem) */
+  --radius: 0.75rem;
+
+  /* Sidebar — branco gelo levemente destacado do main */
+  --sidebar: #fafcfd;
+  --sidebar-foreground: #0c161b;
+  --sidebar-primary: #ffbe18;
+  --sidebar-primary-foreground: #0c161b;
+  --sidebar-accent: #ebf3f7;
+  --sidebar-accent-foreground: #0c161b;
+  --sidebar-border: #e0e6e9;
+  --sidebar-ring: #ffbe18;
+}
+
+.dark {
+  --background: #0c161b;
+  --foreground: #fafcfd;
+
+  --card: #16242b;
+  --card-foreground: #fafcfd;
+
+  --popover: #16242b;
+  --popover-foreground: #fafcfd;
+
+  --primary: #ffbe18;
+  --primary-foreground: #0c161b;
+
+  --secondary: #2e3e47;
+  --secondary-foreground: #fafcfd;
+
+  --muted: #2e3e47;
+  --muted-foreground: #a8b3b9;
+
+  --accent: #2e3e47;
+  --accent-foreground: #fafcfd;
+
+  --destructive: #ef4444;
+
+  --border: rgba(250, 252, 253, 0.08);
+  --input: rgba(250, 252, 253, 0.12);
+  --ring: #ffbe18;
+
+  --chart-1: #ffbe18;
+  --chart-2: #a8b3b9;
+  --chart-3: #75919f;
+  --chart-4: #688594;
+  --chart-5: #e0e6e9;
+
+  --sidebar: #0c161b;
+  --sidebar-foreground: #fafcfd;
+  --sidebar-primary: #ffbe18;
+  --sidebar-primary-foreground: #0c161b;
+  --sidebar-accent: #2e3e47;
+  --sidebar-accent-foreground: #fafcfd;
+  --sidebar-border: rgba(250, 252, 253, 0.08);
+  --sidebar-ring: #ffbe18;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "cv11", "ss01", "ss03";
+    -webkit-font-smoothing: antialiased;
+  }
+  html {
+    @apply font-sans;
+  }
+}
