@@ -22,9 +22,7 @@ import type {
   TabelaDiariaRow,
   TabelaDiariaTotal,
 } from "@/lib/calc/types";
-import { calcVisaoGeral } from "@/lib/calc/visao-geral";
-import { parseFilters } from "@/lib/filters";
-import { readAllSheets } from "@/lib/sheets/read";
+import { getFilters, getVisaoGeral } from "@/lib/page-data";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -99,22 +97,16 @@ export default function VisaoGeralPage({ searchParams }: PageProps) {
 }
 
 async function VisaoGeralToolbar({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const filters = parseFilters(params);
+  const filters = await getFilters(searchParams);
   return <Toolbar from={filters.from} to={filters.to} />;
 }
 
 // ---------------------------------------------------------------------------
-// Async sections — cada uma re-lê e calcula. Cache de readAllSheets evita
-// chamadas duplicadas ao Sheets API.
+// Async sections — todas chamam getVisaoGeral (memoizado via React.cache),
+// então o fetch+calc roda UMA vez por request, compartilhado entre as 6.
 // ---------------------------------------------------------------------------
 
-async function loadVisaoGeral(searchParams: PageProps["searchParams"]) {
-  const params = await searchParams;
-  const filters = parseFilters(params);
-  const data = await readAllSheets(["fb_todos", "leads", "sdr", "vendas"]);
-  return calcVisaoGeral(data, filters);
-}
+const loadVisaoGeral = getVisaoGeral;
 
 async function KpisSection({ searchParams }: PageProps) {
   const result = await loadVisaoGeral(searchParams);

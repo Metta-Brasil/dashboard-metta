@@ -3,7 +3,6 @@ import { Suspense } from "react";
 import { MetricTable, type Column } from "@/components/dashboard/metric-table";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
-import { calcMetas } from "@/lib/calc/metas";
 import {
   formatBRL,
   formatBRLCompact,
@@ -17,8 +16,7 @@ import type {
   MetasPacingPoint,
   MetricaMetaReal,
 } from "@/lib/calc/types";
-import { parseFilters } from "@/lib/filters";
-import { readAllSheets } from "@/lib/sheets/read";
+import { getMetas, getFilters } from "@/lib/page-data";
 import { cn } from "@/lib/utils";
 
 type PageProps = {
@@ -36,17 +34,10 @@ export default function MetasPage({ searchParams }: PageProps) {
 }
 
 async function MetasContent({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const filters = parseFilters(params);
-
-  const data = await readAllSheets([
-    "fb_todos",
-    "leads",
-    "sdr",
-    "vendas",
-    "Metas",
+  const [result, filters] = await Promise.all([
+    getMetas(searchParams),
+    getFilters(searchParams),
   ]);
-  const result = calcMetas(data, filters);
 
   // ---- Funil columns ------------------------------------------------------
   const funilColumns: Column<MetricaMetaReal>[] = [

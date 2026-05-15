@@ -5,7 +5,6 @@ import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
 import { MetricTable, type Column } from "@/components/dashboard/metric-table";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
-import { calcTrafego } from "@/lib/calc/trafego";
 import {
   formatBRL,
   formatBRLCompact,
@@ -19,8 +18,7 @@ import type {
   TrafegoMqlCmqlPorFunil,
   TrafegoRankingRow,
 } from "@/lib/calc/types";
-import { parseFilters } from "@/lib/filters";
-import { readAllSheets } from "@/lib/sheets/read";
+import { getFilters, getTrafego } from "@/lib/page-data";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -90,8 +88,7 @@ export default function TrafegoPage({ searchParams }: PageProps) {
 // ---------------------------------------------------------------------------
 
 async function TrafegoToolbar({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const filters = parseFilters(params);
+  const filters = await getFilters(searchParams);
   return <Toolbar from={filters.from} to={filters.to} funil />;
 }
 
@@ -100,10 +97,7 @@ async function TrafegoToolbar({ searchParams }: PageProps) {
 // ---------------------------------------------------------------------------
 
 async function TrafegoKpis({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const filters = parseFilters(params);
-  const data = await readAllSheets(["fb_todos", "leads"]);
-  const result = calcTrafego(data, filters);
+  const result = await getTrafego(searchParams);
   const k = result.kpis;
 
   const kpis: Kpi[] = [
@@ -142,10 +136,7 @@ async function TrafegoKpis({ searchParams }: PageProps) {
 // ---------------------------------------------------------------------------
 
 async function EvolucaoDiaria({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const filters = parseFilters(params);
-  const data = await readAllSheets(["fb_todos", "leads"]);
-  const result = calcTrafego(data, filters);
+  const result = await getTrafego(searchParams);
 
   const columns: Column<TrafegoComboPoint>[] = [
     {
@@ -200,10 +191,7 @@ async function EvolucaoDiaria({ searchParams }: PageProps) {
 // ---------------------------------------------------------------------------
 
 async function MqlPorFunil({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const filters = parseFilters(params);
-  const data = await readAllSheets(["fb_todos", "leads"]);
-  const result = calcTrafego(data, filters);
+  const result = await getTrafego(searchParams);
 
   const columns: Column<TrafegoMqlCmqlPorFunil>[] = [
     {
@@ -246,10 +234,7 @@ async function MqlPorFunil({ searchParams }: PageProps) {
 // ---------------------------------------------------------------------------
 
 async function FunilTrafego({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const filters = parseFilters(params);
-  const data = await readAllSheets(["fb_todos", "leads"]);
-  const result = calcTrafego(data, filters);
+  const result = await getTrafego(searchParams);
 
   return (
     <div className="flex flex-col gap-3">
@@ -297,10 +282,10 @@ function FunilResumo({ resumo }: { resumo: TrafegoFunilResumo }) {
 // ---------------------------------------------------------------------------
 
 async function RankingMidia({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const filters = parseFilters(params);
-  const data = await readAllSheets(["fb_todos", "leads"]);
-  const result = calcTrafego(data, filters);
+  const [result, filters] = await Promise.all([
+    getTrafego(searchParams),
+    getFilters(searchParams),
+  ]);
 
   const agrupamento =
     result.ranking[0]?.agrupamento ?? filters.rankingBy ?? "campanha";

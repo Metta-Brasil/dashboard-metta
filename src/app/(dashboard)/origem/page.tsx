@@ -3,11 +3,9 @@ import { Suspense } from "react";
 import { MetricTable, type Column } from "@/components/dashboard/metric-table";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
-import { calcOrigem } from "@/lib/calc/origem";
 import { formatBRLCompact, formatInt } from "@/lib/calc/shared";
 import type { OrigemRow } from "@/lib/calc/types";
-import { parseFilters } from "@/lib/filters";
-import { readAllSheets } from "@/lib/sheets/read";
+import { getOrigem, getFilters } from "@/lib/page-data";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -32,17 +30,12 @@ export default function OrigemPage({ searchParams }: PageProps) {
 }
 
 async function OrigemToolbar({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const filters = parseFilters(params);
+  const filters = await getFilters(searchParams);
   return <Toolbar from={filters.from} to={filters.to} funil />;
 }
 
 async function OrigemContent({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const filters = parseFilters(params);
-
-  const data = await readAllSheets(["leads", "sdr", "vendas"]);
-  const result = calcOrigem(data, filters);
+  const result = await getOrigem(searchParams);
 
   const baseColumns: Column<OrigemRow>[] = [
     {

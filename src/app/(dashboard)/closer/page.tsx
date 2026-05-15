@@ -4,7 +4,6 @@ import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
 import { MetricTable, type Column } from "@/components/dashboard/metric-table";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
-import { calcCloser } from "@/lib/calc/closer";
 import {
   formatBRL,
   formatBRLCompact,
@@ -17,8 +16,7 @@ import type {
   CloserRow,
   CloserVendaRow,
 } from "@/lib/calc/types";
-import { parseFilters } from "@/lib/filters";
-import { readAllSheets } from "@/lib/sheets/read";
+import { getCloser, getFilters } from "@/lib/page-data";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -33,17 +31,10 @@ export default function CloserPage({ searchParams }: PageProps) {
 }
 
 async function CloserContent({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const filters = parseFilters(params);
-
-  const data = await readAllSheets([
-    "fb_todos",
-    "leads",
-    "sdr",
-    "vendas",
-    "Metas",
+  const [result, filters] = await Promise.all([
+    getCloser(searchParams),
+    getFilters(searchParams),
   ]);
-  const result = calcCloser(data, filters);
   const k = result.kpis;
 
   const kpis: Kpi[] = [

@@ -6,7 +6,6 @@ import { MetricTable, type Column } from "@/components/dashboard/metric-table";
 import { SDRHeatmap } from "@/components/dashboard/sdr-heatmap";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
-import { calcSdr } from "@/lib/calc/sdr";
 import {
   formatBRL,
   formatBRLCompact,
@@ -14,8 +13,7 @@ import {
   formatPercent,
 } from "@/lib/calc/shared";
 import type { SDRRow } from "@/lib/calc/types";
-import { parseFilters } from "@/lib/filters";
-import { readAllSheets } from "@/lib/sheets/read";
+import { getSdr, getFilters } from "@/lib/page-data";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -40,17 +38,12 @@ export default function SdrPage({ searchParams }: PageProps) {
 }
 
 async function SdrToolbar({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const filters = parseFilters(params);
+  const filters = await getFilters(searchParams);
   return <Toolbar from={filters.from} to={filters.to} funil />;
 }
 
 async function SdrContent({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const filters = parseFilters(params);
-
-  const data = await readAllSheets(["leads", "sdr", "vendas"]);
-  const result = calcSdr(data, filters);
+  const result = await getSdr(searchParams);
   const k = result.kpis;
 
   const kpis: Kpi[] = [

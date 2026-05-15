@@ -3,7 +3,6 @@ import { Suspense } from "react";
 import { MetricTable, type Column } from "@/components/dashboard/metric-table";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
-import { calcAnuncios } from "@/lib/calc/anuncios";
 import {
   formatBRL,
   formatBRLCompact,
@@ -11,8 +10,7 @@ import {
   formatPercent,
 } from "@/lib/calc/shared";
 import type { AnuncioCard, AnunciosResult } from "@/lib/calc/types";
-import { parseFilters } from "@/lib/filters";
-import { readAllSheets } from "@/lib/sheets/read";
+import { getAnuncios, getFilters } from "@/lib/page-data";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -37,23 +35,12 @@ export default function AnunciosPage({ searchParams }: PageProps) {
 }
 
 async function AnunciosToolbar({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const filters = parseFilters(params);
+  const filters = await getFilters(searchParams);
   return <Toolbar from={filters.from} to={filters.to} funil />;
 }
 
 async function AnunciosContent({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const filters = parseFilters(params);
-
-  const data = await readAllSheets([
-    "fb_todos",
-    "leads",
-    "sdr",
-    "vendas",
-    "ads_links",
-  ]);
-  const result: AnunciosResult = calcAnuncios(data, filters);
+  const result: AnunciosResult = await getAnuncios(searchParams);
 
   return (
     <>
