@@ -1,0 +1,33 @@
+name: refresh-cache
+
+# Mantém o cache Upstash quente. O Vercel Cron (Hobby) só permite 1x/dia;
+# o GitHub Actions schedule roda de hora em hora (grátis, repo privado).
+# Cada run força refreshAllSheets() → dados nunca > 1h de idade e o
+# usuário final sempre pega cache quente (< ~2s) em vez do fetch frio.
+
+on:
+  schedule:
+    - cron: "0 * * * *" # toda hora (UTC; GitHub pode atrasar minutos em pico)
+  workflow_dispatch: {} # permite disparo manual pela UI/CLI
+
+concurrency:
+  group: refresh-cache
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: POST /api/revalidate (refresh Upstash cache)
+        run: |
+          set -euo pipefail
+          code=$(curl -sS -o /tmp/resp.json -w "%{http_code}" \
+            -X POST \
+            -H "x-revalidate-secret: ${{ secrets.REVALIDATE_SECRET }}" \
+            --max-time 120 \
+            "https://dashboard-metta-perpetuo.vercel.app/api/revalidate")
+          echo "HTTP $code"
+          cat /tmp/resp.json
+          echo
+          test "$code" = "200"
