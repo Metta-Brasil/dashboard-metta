@@ -1,55 +1,21 @@
-import { google, type sheets_v4 } from "googleapis";
-import { JWT } from "google-auth-library";
+import { google } from "googleapis";
 
-const SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"];
+const auth = new google.auth.JWT({
+  email: process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
+  key: process.env.GOOGLE_SHEETS_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+  scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+});
 
-let cachedClient: sheets_v4.Sheets | null = null;
+export const sheetsClient = google.sheets({ version: "v4", auth });
 
-/**
- * Returns a memoized, read-only Google Sheets API v4 client authenticated
- * via Service Account (JWT). Throws if required env vars are missing.
- *
- * `GOOGLE_SHEETS_PRIVATE_KEY` is normalized so it works whether stored as a
- * multi-line value (local .env) or a single-line value with escaped \n (Vercel).
- */
-export function getSheetsClient(): sheets_v4.Sheets {
-  if (cachedClient) return cachedClient;
+export const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_ID ?? "";
 
-  const clientEmail = process.env.GOOGLE_SHEETS_CLIENT_EMAIL;
-  const rawPrivateKey = process.env.GOOGLE_SHEETS_PRIVATE_KEY;
-
-  if (!clientEmail) {
-    throw new Error(
-      "GOOGLE_SHEETS_CLIENT_EMAIL is not set. Configure the Service Account email in env vars.",
-    );
+export function assertSheetsEnv(): void {
+  const missing: string[] = [];
+  if (!process.env.GOOGLE_SHEETS_CLIENT_EMAIL) missing.push("GOOGLE_SHEETS_CLIENT_EMAIL");
+  if (!process.env.GOOGLE_SHEETS_PRIVATE_KEY) missing.push("GOOGLE_SHEETS_PRIVATE_KEY");
+  if (!process.env.GOOGLE_SHEETS_ID) missing.push("GOOGLE_SHEETS_ID");
+  if (missing.length > 0) {
+    throw new Error(`Sheets env vars ausentes: ${missing.join(", ")}`);
   }
-  if (!rawPrivateKey) {
-    throw new Error(
-      "GOOGLE_SHEETS_PRIVATE_KEY is not set. Configure the Service Account private key in env vars.",
-    );
-  }
-
-  const privateKey = rawPrivateKey.replace(/\\n/g, "\n");
-
-  const auth = new JWT({
-    email: clientEmail,
-    key: privateKey,
-    scopes: SCOPES,
-  });
-
-  cachedClient = google.sheets({ version: "v4", auth });
-  return cachedClient;
-}
-
-/**
- * Returns the configured spreadsheet ID. Throws if missing.
- */
-export function getSpreadsheetId(): string {
-  const id = process.env.GOOGLE_SHEETS_ID;
-  if (!id) {
-    throw new Error(
-      "GOOGLE_SHEETS_ID is not set. Configure the source spreadsheet ID in env vars.",
-    );
-  }
-  return id;
 }

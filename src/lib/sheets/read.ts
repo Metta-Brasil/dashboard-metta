@@ -1,88 +1,124 @@
-import { cacheLife, cacheTag } from "next/cache";
-import { getSheetsClient, getSpreadsheetId } from "./client";
 import {
+  unstable_cacheLife as cacheLife,
+  unstable_cacheTag as cacheTag,
+} from "next/cache";
+
+import { assertSheetsEnv, sheetsClient, SPREADSHEET_ID } from "./client";
+import { parseSheetData } from "./parse";
+import {
+  FB_TODOS_COLUMN_MAP,
+  FbTodosRow,
   FbTodosRowSchema,
-  LeadsRowSchema,
+  LEADS_COLUMN_MAP,
+  LeadRow,
+  LeadRowSchema,
+  MetaRow,
+  MetaRowSchema,
+  METAS_COLUMN_MAP,
+  SdrRow,
   SdrRowSchema,
-  VendasRowSchema,
-  parseRows,
-  type FbTodosRow,
-  type LeadsRow,
-  type SdrRow,
-  type VendasRow,
+  SDR_COLUMN_MAP,
+  VendaRow,
+  VendaRowSchema,
+  VENDAS_COLUMN_MAP,
 } from "./schemas";
 
-export type SheetTab = "fb_todos" | "leads" | "sdr" | "vendas";
+export type SheetTab = "fb_todos" | "leads" | "sdr" | "vendas" | "Metas";
 
 export const SHEETS_CACHE_TAG = "sheets-data";
 
-// Default range per tab. Kept narrow (not A:Z) to stay under the Sheets API
-// 10MB response limit — fb_todos is the big one (~51k rows).
-const TAB_RANGES: Record<SheetTab, string> = {
+const RANGES: Record<SheetTab, string> = {
   fb_todos: "fb_todos!A:R",
-  leads: "leads!A:Z",
-  sdr: "sdr!A:Z",
-  vendas: "vendas!A:Z",
+  leads: "leads!A:P",
+  sdr: "sdr!A:AB",
+  vendas: "vendas!A:AC",
+  Metas: "Metas!A:D",
 };
 
-// Type-level dispatch so callers get the right row type back per tab.
-export type SheetRowOf<T extends SheetTab> = T extends "fb_todos"
-  ? FbTodosRow
-  : T extends "leads"
-    ? LeadsRow
-    : T extends "sdr"
-      ? SdrRow
-      : T extends "vendas"
-        ? VendasRow
-        : never;
+type TabRowMap = {
+  fb_todos: FbTodosRow;
+  leads: LeadRow;
+  sdr: SdrRow;
+  vendas: VendaRow;
+  Metas: MetaRow;
+};
+
+function parseTab<T extends SheetTab>(
+  tab: T,
+  values: unknown[][] | undefined
+): TabRowMap[T][] {
+  switch (tab) {
+    case "fb_todos":
+      return parseSheetData(FbTodosRowSchema, values, FB_TODOS_COLUMN_MAP, {
+        tab,
+      }) as TabRowMap[T][];
+    case "leads":
+      return parseSheetData(LeadRowSchema, values, LEADS_COLUMN_MAP, {
+        tab,
+      }) as TabRowMap[T][];
+    case "sdr":
+      return parseSheetData(SdrRowSchema, values, SDR_COLUMN_MAP, {
+        tab,
+      }) as TabRowMap[T][];
+    case "vendas":
+      return parseSheetData(VendaRowSchema, values, VENDAS_COLUMN_MAP, {
+        tab,
+      }) as TabRowMap[T][];
+    case "Metas":
+      return parseSheetData(MetaRowSchema, values, METAS_COLUMN_MAP, {
+        tab,
+      }) as TabRowMap[T][];
+    default:
+      throw new Error(`Aba desconhecida: ${tab}`);
+  }
+}
 
 /**
- * Reads and parses a single tab from the source spreadsheet.
- *
- * Cached server-side via Next 16 Cache Components:
- *   - revalidate: 600s (10 min) — matches the Vercel Cron warmup cadence.
- *   - expire:     3600s (1 h)   — hard ceiling; after this, next request
- *                                 waits for fresh data synchronously.
- *   - tag:        "sheets-data" — single tag for all tabs so the cron
- *                                 invalidates them in one call.
- *
- * Values are requested as UNFORMATTED_VALUE / SERIAL_NUMBER, so dates arrive
- * as Sheets serial numbers (see utils.sheetSerialToDate) and numbers stay
- * numeric (no thousand-separator strings to clean up).
+ * Lê uma aba específica. Cacheada (use cache do Next 16).
  */
 export async function readSheet<T extends SheetTab>(
-  tab: T,
-): Promise<SheetRowOf<T>[]> {
+  tab: T
+): Promise<TabRowMap[T][]> {
+  "use cache";
+  cacheLife({ revalidate: 600, expire: 3600 });
+  cacheTag(SHEETS_CACHE_TAG, `sheets-${tab}`);
+  assertSheetsEnv();
+
+  const { data } = await sheetsClient.spreadsheets.values.get({
+    spreadsheetId: SPREADSHEET_ID,
+    range: RANGES[tab],
+    valueRenderOption: "UNFORMATTED_VALUE",
+    dateTimeRenderOption: "FORMATTED_STRING",
+  });
+
+  return parseTab(tab, data.values as unknown[][] | undefined);
+}
+
+/**
+ * Lê múltiplas abas em paralelo (1 request HTTP via batchGet).
+ */
+export async function readAllSheets<T extends SheetTab>(
+  tabs: T[]
+): Promise<{ [K in T]: TabRowMap[K][] }> {
   "use cache";
   cacheLife({ revalidate: 600, expire: 3600 });
   cacheTag(SHEETS_CACHE_TAG);
+  assertSheetsEnv();
 
-  const sheets = getSheetsClient();
-  const spreadsheetId = getSpreadsheetId();
-  const range = TAB_RANGES[tab];
-
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId,
-    range,
+  const { data } = await sheetsClient.spreadsheets.values.batchGet({
+    spreadsheetId: SPREADSHEET_ID,
+    ranges: tabs.map((t) => RANGES[t]),
     valueRenderOption: "UNFORMATTED_VALUE",
-    dateTimeRenderOption: "SERIAL_NUMBER",
+    dateTimeRenderOption: "FORMATTED_STRING",
   });
 
-  const rawRows = (res.data.values ?? []) as unknown[][];
-
-  switch (tab) {
-    case "fb_todos":
-      return parseRows(rawRows, FbTodosRowSchema) as SheetRowOf<T>[];
-    case "leads":
-      return parseRows(rawRows, LeadsRowSchema) as SheetRowOf<T>[];
-    case "sdr":
-      return parseRows(rawRows, SdrRowSchema) as SheetRowOf<T>[];
-    case "vendas":
-      return parseRows(rawRows, VendasRowSchema) as SheetRowOf<T>[];
-    default: {
-      // Exhaustiveness guard
-      const _exhaustive: never = tab;
-      throw new Error(`Unknown sheet tab: ${String(_exhaustive)}`);
-    }
-  }
+  const result = {} as { [K in T]: TabRowMap[K][] };
+  data.valueRanges?.forEach((vr, i) => {
+    const tab = tabs[i];
+    result[tab] = parseTab(
+      tab,
+      vr.values as unknown[][] | undefined
+    ) as TabRowMap[typeof tab][];
+  });
+  return result;
 }

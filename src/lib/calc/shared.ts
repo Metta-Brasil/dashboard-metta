@@ -1,136 +1,291 @@
-/**
- * Helpers puros de parsing, normalização e agregação.
- * Tudo aqui é stateless, sem fetch e sem side effects.
- */
+import type { FbTodosRow, LeadRow, SdrRow, VendaRow } from "@/lib/sheets/schemas";
+import type { Funil } from "./types";
 
 /**
- * Parse de valores monetários ou numéricos vindos do Sheets.
- *
- * Aceita:
- *   - number já parseado (passa direto)
- *   - "R$ 1.234,56" (formato BR)
- *   - "1.234,56"
- *   - "1,234.56" (formato US, fallback)
- *   - "1234.56"
- *   - "" / null / undefined / NaN -> 0
+ * Helpers puros de filtragem, normalização e agregação.
+ * Fonte: PRD §5.1.
  */
-export function parseValor(s: string | number | null | undefined): number {
-  if (s === null || s === undefined) return 0;
-  if (typeof s === "number") {
-    return Number.isFinite(s) ? s : 0;
-  }
 
-  const trimmed = s.trim();
-  if (!trimmed) return 0;
+// ----- Funis ------------------------------------------------------------------
 
-  // Remove R$, espaços, e qualquer caractere não-numérico fora de . , -
-  const cleaned = trimmed
-    .replace(/R\$/gi, "")
-    .replace(/\s/g, "")
-    .replace(/[^0-9,.\-]/g, "");
+/** Marcadores que devem TODOS estar presentes no Campaign Name (substring). */
+export const FUNIL_CAMPAIGN_MARKERS: Record<Funil, string[]> = {
+  sala: ["PERP", "CAPT", "SALA"],
+  aplica: ["PERP", "CAPT", "APLICA"],
+  sessao: ["PERP", "CAPT", "SESSAO"],
+  isca: ["PERP", "CAPT", "ISCA"],
+  reality: ["PERP", "CAPT", "REALITY"],
+  todos: ["PERP", "CAPT"],
+};
 
-  if (!cleaned || cleaned === "-") return 0;
+/** Regex aplicadas à coluna `funil` em leads/sdr/vendas. */
+export const FUNIL_LEAD_PATTERNS: Record<Funil, RegExp> = {
+  sala: /sala/i,
+  aplica: /aplica/i,
+  sessao: /sess[ãa]o|diagn/i,
+  isca: /isca/i,
+  reality: /real/i,
+  todos: /sala|aplica|sess[ãa]o|diagn|isca|real/i,
+};
 
-  const lastComma = cleaned.lastIndexOf(",");
-  const lastDot = cleaned.lastIndexOf(".");
-
-  let normalized: string;
-  if (lastComma === -1 && lastDot === -1) {
-    normalized = cleaned;
-  } else if (lastComma > lastDot) {
-    // formato BR: vírgula é decimal, ponto é milhar
-    normalized = cleaned.replace(/\./g, "").replace(",", ".");
-  } else {
-    // formato US: ponto é decimal, vírgula é milhar
-    normalized = cleaned.replace(/,/g, "");
-  }
-
-  const n = Number(normalized);
-  return Number.isFinite(n) ? n : 0;
-}
-
-/**
- * Parse de datas vindas do Sheets.
- *
- * Aceita:
- *   - Date direto
- *   - string ISO ("2026-05-14", "2026-05-14T10:00:00Z")
- *   - string BR ("14/05/2026" ou "14/05/2026 10:00:00")
- *   - serial number do Sheets (dias desde 1899-12-30)
- *   - "" / null / undefined / inválido -> null
- */
-export function parseData(value: unknown): Date | null {
-  if (value === null || value === undefined || value === "") return null;
-
-  if (value instanceof Date) {
-    return Number.isFinite(value.getTime()) ? value : null;
-  }
-
-  if (typeof value === "number") {
-    // Serial number do Sheets: dias desde 1899-12-30 (epoch do Lotus 1-2-3).
-    // Ex: 1 -> 1899-12-31, 25569 -> 1970-01-01.
-    if (!Number.isFinite(value)) return null;
-    const ms = Math.round((value - 25569) * 86400 * 1000);
-    const d = new Date(ms);
-    return Number.isFinite(d.getTime()) ? d : null;
-  }
-
-  if (typeof value === "string") {
-    const s = value.trim();
-    if (!s) return null;
-
-    // BR "dd/mm/yyyy" (com hora opcional)
-    const br = s.match(
-      /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})(?:[ T](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/
+export function filterFbTodosByFunil(
+  rows: FbTodosRow[],
+  funis: Funil[]
+): FbTodosRow[] {
+  if (!funis.length || funis.includes("todos")) {
+    return rows.filter((r) =>
+      FUNIL_CAMPAIGN_MARKERS.todos.every((m) => r.campaignName.includes(m))
     );
-    if (br) {
-      const [, dd, mm, yyyyRaw, hh, mi, ss] = br;
-      const year =
-        yyyyRaw.length === 2 ? 2000 + Number(yyyyRaw) : Number(yyyyRaw);
-      const d = new Date(
-        year,
-        Number(mm) - 1,
-        Number(dd),
-        hh ? Number(hh) : 0,
-        mi ? Number(mi) : 0,
-        ss ? Number(ss) : 0
-      );
-      return Number.isFinite(d.getTime()) ? d : null;
-    }
-
-    // ISO ou qualquer coisa que Date() entenda
-    const d = new Date(s);
-    return Number.isFinite(d.getTime()) ? d : null;
   }
-
-  return null;
+  return rows.filter((r) =>
+    funis.some((f) => FUNIL_CAMPAIGN_MARKERS[f].every((m) => r.campaignName.includes(m)))
+  );
 }
 
-/**
- * Filtra rows por intervalo de data [from, to] inclusivo nas duas pontas.
- * Linhas sem data válida são descartadas.
- */
+export function filterLeadsByFunil<T extends { funil: string }>(
+  rows: T[],
+  funis: Funil[]
+): T[] {
+  if (!funis.length || funis.includes("todos")) {
+    return rows.filter((r) => FUNIL_LEAD_PATTERNS.todos.test(r.funil));
+  }
+  return rows.filter((r) => funis.some((f) => FUNIL_LEAD_PATTERNS[f].test(r.funil)));
+}
+
+export function filterVendasByFunil(rows: VendaRow[], funis: Funil[]): VendaRow[] {
+  if (!funis.length || funis.includes("todos")) {
+    return rows.filter((r) => FUNIL_LEAD_PATTERNS.todos.test(r.funilCompra));
+  }
+  return rows.filter((r) =>
+    funis.some((f) => FUNIL_LEAD_PATTERNS[f].test(r.funilCompra))
+  );
+}
+
+// ----- Qualificação -----------------------------------------------------------
+
+const MQL_PATTERN = /mql|inter|enterprise/i;
+
+export function isMql(qualificacao: string): boolean {
+  return MQL_PATTERN.test(qualificacao);
+}
+
+export function normalizeQualif(
+  raw: string | null | undefined
+): "Enterprise" | "MQL1" | "MQL2" | "Outros" {
+  if (!raw) return "Outros";
+  const s = String(raw).toLowerCase().replace(/\s+/g, "");
+  if (!s) return "Outros";
+  if (s.includes("enterprise") || s.includes("interprise")) return "Enterprise";
+  if (s.includes("mql1")) return "MQL1";
+  if (s.includes("mql2")) return "MQL2";
+  return "Outros";
+}
+
+// ----- Datas (BR timezone) ----------------------------------------------------
+
+export const TZ = "America/Sao_Paulo";
+
+/** Início do dia em BRT (UTC-3) — comparável entre rows. */
+export function startOfDayBrt(d: Date): Date {
+  const iso = new Intl.DateTimeFormat("en-CA", {
+    timeZone: TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+  return new Date(`${iso}T00:00:00-03:00`);
+}
+
+export function isSameDayBrt(a: Date, b: Date): boolean {
+  return startOfDayBrt(a).getTime() === startOfDayBrt(b).getTime();
+}
+
+/** Filtro inclusivo em data BR (>= from, <= to no final do dia). */
 export function filterByDate<T>(
   rows: T[],
-  getter: (r: T) => Date | null,
+  getDate: (r: T) => Date | null,
   from: Date,
   to: Date
 ): T[] {
-  const fromMs = from.getTime();
-  const toMs = to.getTime();
+  const f = startOfDayBrt(from).getTime();
+  const t = startOfDayBrt(to).getTime() + 24 * 60 * 60 * 1000 - 1;
   return rows.filter((r) => {
-    const d = getter(r);
+    const d = getDate(r);
     if (!d) return false;
-    const t = d.getTime();
-    return t >= fromMs && t <= toMs;
+    const ts = d.getTime();
+    return ts >= f && ts <= t;
   });
 }
 
-/**
- * Filtra rows cujo valor extraído pelo getter contém algum dos funis informados.
- * Comparação case-insensitive, sem acento sensível (mas sem normalização de acento por padrão).
- * Se `funis` for vazio ou undefined, retorna `rows` sem filtrar.
- */
+export function startOfDay(d: Date): Date {
+  const c = new Date(d);
+  c.setHours(0, 0, 0, 0);
+  return c;
+}
+
+export function eachDay(from: Date, to: Date): Date[] {
+  const out: Date[] = [];
+  const cur = startOfDay(from);
+  const end = startOfDay(to);
+  while (cur.getTime() <= end.getTime()) {
+    out.push(new Date(cur));
+    cur.setDate(cur.getDate() + 1);
+  }
+  return out;
+}
+
+export function dayKey(d: Date): string {
+  const iso = new Intl.DateTimeFormat("en-CA", {
+    timeZone: TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+  return iso;
+}
+
+// ----- Dedup / Index ----------------------------------------------------------
+
+/** Dedupe por email mantendo a entrada mais recente (data de inscrição). */
+export function dedupeLeadsByEmail(leads: LeadRow[]): LeadRow[] {
+  const map = new Map<string, LeadRow>();
+  for (const lead of leads) {
+    if (!lead.email) continue;
+    const existing = map.get(lead.email);
+    if (
+      !existing ||
+      (lead.dataInscricao &&
+        existing.dataInscricao &&
+        lead.dataInscricao > existing.dataInscricao)
+    ) {
+      map.set(lead.email, lead);
+    }
+  }
+  return Array.from(map.values());
+}
+
+export function indexLeadsByEmail(leads: LeadRow[]): Map<string, LeadRow> {
+  const idx = new Map<string, LeadRow>();
+  for (const l of leads) {
+    if (l.email) idx.set(l.email, l);
+  }
+  return idx;
+}
+
+export function joinSdrWithLead(
+  sdr: SdrRow,
+  leadIdx: Map<string, LeadRow>
+): LeadRow | null {
+  return leadIdx.get(sdr.email) ?? null;
+}
+
+// ----- Agregação --------------------------------------------------------------
+
+export function groupBy<T, K>(rows: T[], keyFn: (r: T) => K): Map<K, T[]> {
+  const out = new Map<K, T[]>();
+  for (const r of rows) {
+    const k = keyFn(r);
+    const bucket = out.get(k);
+    if (bucket) bucket.push(r);
+    else out.set(k, [r]);
+  }
+  return out;
+}
+
+export function sumBy<T>(rows: T[], fn: (r: T) => number): number {
+  let acc = 0;
+  for (const r of rows) acc += fn(r);
+  return acc;
+}
+
+export function safeRate(numerator: number, denominator: number): number {
+  if (!denominator || !Number.isFinite(denominator)) return 0;
+  return numerator / denominator;
+}
+
+// ----- Status (SDR) -----------------------------------------------------------
+
+export function isReuniaoRealizada(status: string): boolean {
+  return /realiz/i.test(status);
+}
+
+export function isAgendamento(status: string): boolean {
+  // Toda reunião realizada também foi agendada
+  return /agend|realiz|no.?show|reagend/i.test(status) || status.trim() !== "";
+}
+
+export function isPropostaEnviada(envioProposta: string): boolean {
+  return /sim|fechada|recusada/i.test(envioProposta);
+}
+
+// ----- Formatação -------------------------------------------------------------
+
+export function formatBRL(n: number): string {
+  if (!Number.isFinite(n)) n = 0;
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(n);
+}
+
+export function formatBRLCompact(n: number): string {
+  if (!Number.isFinite(n)) n = 0;
+  if (Math.abs(n) >= 1000) {
+    return `R$ ${(n / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}k`;
+  }
+  return formatBRL(n);
+}
+
+export function formatPercent(n: number, decimals = 1): string {
+  if (!Number.isFinite(n)) n = 0;
+  return `${(n * 100).toFixed(decimals)}%`;
+}
+
+export function formatInt(n: number): string {
+  if (!Number.isFinite(n)) n = 0;
+  return new Intl.NumberFormat("pt-BR").format(Math.round(n));
+}
+
+// ----- Compatibilidade com PRD plano legacy -----------------------------------
+
+/** Mantido por compat: parse de valores monetários soltos (não vindos do Zod). */
+export function parseValor(v: string | number | null | undefined): number {
+  if (v == null) return 0;
+  if (typeof v === "number") return Number.isFinite(v) ? v : 0;
+  const cleaned = String(v).replace(/R\$\s?/, "").replace(/\./g, "").replace(",", ".");
+  const n = parseFloat(cleaned);
+  return Number.isFinite(n) ? n : 0;
+}
+
+export function parseData(value: unknown): Date | null {
+  if (value == null || value === "") return null;
+  if (value instanceof Date) return Number.isFinite(value.getTime()) ? value : null;
+  if (typeof value === "number") {
+    const ms = (value - 25569) * 86400 * 1000;
+    const d = new Date(ms);
+    return Number.isFinite(d.getTime()) ? d : null;
+  }
+  if (typeof value === "string") {
+    const s = value.trim();
+    const br = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (br) {
+      const [, d, m, y] = br;
+      return new Date(`${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}T03:00:00.000Z`);
+    }
+    const iso = new Date(s);
+    return Number.isFinite(iso.getTime()) ? iso : null;
+  }
+  return null;
+}
+
+export function extractFunilFromConversao(conversao: string | null | undefined): string | null {
+  if (!conversao) return null;
+  const m = conversao.match(/perp\s*\+\s*capt\s*\+\s*(.+)/i);
+  return m && m[1] ? m[1].trim() : null;
+}
+
 export function filterByFunil<T>(
   rows: T[],
   getter: (r: T) => string | undefined | null,
@@ -144,128 +299,4 @@ export function filterByFunil<T>(
     const vLower = v.toLowerCase();
     return lower.some((f) => vLower.includes(f));
   });
-}
-
-/**
- * Agrupa rows por chave arbitrária retornada por keyFn.
- */
-export function groupBy<T, K>(rows: T[], keyFn: (r: T) => K): Map<K, T[]> {
-  const out = new Map<K, T[]>();
-  for (const r of rows) {
-    const k = keyFn(r);
-    const bucket = out.get(k);
-    if (bucket) bucket.push(r);
-    else out.set(k, [r]);
-  }
-  return out;
-}
-
-/**
- * Soma um valor numérico extraído de cada row.
- */
-export function sumBy<T>(rows: T[], fn: (r: T) => number): number {
-  let acc = 0;
-  for (const r of rows) acc += fn(r);
-  return acc;
-}
-
-/**
- * Normaliza a coluna de qualificação de leads para um enum estável.
- * Aceita variações como "MQL 1", "mql1", "Enterprise", "enterprise ", etc.
- */
-export function normalizeQualif(
-  raw: string | null | undefined
-): "Enterprise" | "MQL1" | "MQL2" | "Outros" {
-  if (!raw) return "Outros";
-  const s = raw.toString().toLowerCase().replace(/\s+/g, "").trim();
-  if (!s) return "Outros";
-  if (s.includes("enterprise")) return "Enterprise";
-  if (s.includes("mql1") || s === "mql-1" || s === "mql_1") return "MQL1";
-  if (s.includes("mql2") || s === "mql-2" || s === "mql_2") return "MQL2";
-  return "Outros";
-}
-
-/**
- * Extrai o nome do funil da string padrão "PERP+CAPT+<funil>".
- * Retorna o trecho após o segundo "+", ou null se o padrão não bater.
- *
- * Aceita também variações com espaços e diferentes capitalizações ("Perp+Capt+...").
- */
-export function extractFunilFromConversao(
-  conversao: string | null | undefined
-): string | null {
-  if (!conversao) return null;
-  const s = conversao.toString().trim();
-  if (!s) return null;
-
-  // Match case-insensitive de PERP+CAPT+<resto>
-  const m = s.match(/perp\s*\+\s*capt\s*\+\s*(.+)/i);
-  if (m && m[1]) return m[1].trim();
-  return null;
-}
-
-/**
- * Formata número como Real brasileiro: "R$ 12.345,67".
- */
-export function formatBRL(n: number): string {
-  if (!Number.isFinite(n)) n = 0;
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(n);
-}
-
-/**
- * Formata número como percentual: 0.123 -> "12.3%" (com 1 casa por padrão).
- * O input é assumido como fração já (ex: 0.5 = 50%). Se for > 1, ainda assim
- * será formatado multiplicando por 100? NÃO — assumimos sempre fração. Use
- * `formatPercent(0.5)` para "50.0%". Se o valor já é um percentual cru,
- * divida por 100 antes.
- */
-export function formatPercent(n: number, decimals = 1): string {
-  if (!Number.isFinite(n)) n = 0;
-  return `${(n * 100).toFixed(decimals)}%`;
-}
-
-/**
- * Calcula taxa de conversão segura (0 quando denominador for 0).
- */
-export function safeRate(numerator: number, denominator: number): number {
-  if (!denominator || !Number.isFinite(denominator)) return 0;
-  return numerator / denominator;
-}
-
-/**
- * Retorna a data com hora zerada (início do dia local).
- */
-export function startOfDay(d: Date): Date {
-  const c = new Date(d);
-  c.setHours(0, 0, 0, 0);
-  return c;
-}
-
-/**
- * Itera dia a dia entre from e to (inclusivos), retornando array de Date no início do dia.
- */
-export function eachDay(from: Date, to: Date): Date[] {
-  const out: Date[] = [];
-  const cur = startOfDay(from);
-  const end = startOfDay(to);
-  while (cur.getTime() <= end.getTime()) {
-    out.push(new Date(cur));
-    cur.setDate(cur.getDate() + 1);
-  }
-  return out;
-}
-
-/**
- * Chave estável "YYYY-MM-DD" para agrupar por dia.
- */
-export function dayKey(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
 }

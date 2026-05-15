@@ -1,125 +1,283 @@
 import { z } from "zod";
 
 /**
- * Schemas for the four source tabs in the "BASE DE DADOS - PALIATIVO" spreadsheet.
+ * Schemas Zod das 5 abas-fonte da planilha
+ * "BASE DE DADOS - PALIATIVO - FUNIS PAGOS - JANEIRO 2026".
  *
- * Column names below match the planilha conventions inferred from the plan
- * (see ~/.claude/plans/u-vamos-l-eu-resilient-scroll.md):
- *
- *   - fb_todos.C   = "PERP+CAPT+<funil>" conversion classifier
- *   - leads.I      = funil
- *   - sdr.K        = status (e.g. "Realizada")
- *   - vendas.K     = funil
- *
- * The full column set is not yet locked down, so most fields are tolerant
- * (optional / nullable). Critical fields used by the analytics layer are
- * required and properly typed. Header parsing is case-insensitive and tolerant
- * to whitespace via `normalizeHeader` below.
+ * Fonte: PRD §4.2 — mapeamento exato das colunas.
  */
 
-// ---------- fb_todos ----------
+// ----- Helpers de coerção -----------------------------------------------------
+
+/** Converte "6,38" | "R$ 11.200,00" | 6.38 | "" | null → number. */
+const zCurrency = z
+  .union([z.string(), z.number(), z.null()])
+  .transform((v) => {
+    if (v == null || v === "") return 0;
+    if (typeof v === "number") return v;
+    const cleaned = v.replace(/R\$\s?/, "").replace(/\./g, "").replace(",", ".");
+    const n = parseFloat(cleaned);
+    return Number.isFinite(n) ? n : 0;
+  });
+
+/** Converte inteiro string ou number → number. Vazio → 0. */
+const zInt = z
+  .union([z.string(), z.number(), z.null()])
+  .transform((v) => {
+    if (v == null || v === "") return 0;
+    const n = typeof v === "number" ? v : parseInt(String(v), 10);
+    return Number.isFinite(n) ? n : 0;
+  });
+
+/** Converte "01/05/2026" | serial Sheets | ISO → Date. Vazio/inválido → null. */
+const zDate = z
+  .union([z.string(), z.number(), z.null()])
+  .transform((v) => {
+    if (v == null || v === "") return null;
+    if (typeof v === "number") {
+      const ms = (v - 25569) * 86400 * 1000;
+      const d = new Date(ms);
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+    const str = String(v).trim();
+    const br = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (br) {
+      const [, d, m, y] = br;
+      return new Date(
+        `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}T03:00:00.000Z`
+      );
+    }
+    const iso = new Date(str);
+    return Number.isNaN(iso.getTime()) ? null : iso;
+  });
+
+const zString = z
+  .union([z.string(), z.number(), z.null()])
+  .transform((v) => (v == null ? "" : String(v).trim()));
+
+const zEmail = zString.transform((s) => s.toLowerCase());
+
+// ----- Schemas das abas -------------------------------------------------------
 
 export const FbTodosRowSchema = z.object({
-  data: z.union([z.number(), z.string()]).nullable().optional(),
-  conversao: z.string().optional().default(""), // col C ("PERP+CAPT+<funil>")
-  campaign: z.string().optional().default(""),
-  adset: z.string().optional().default(""),
-  ad: z.string().optional().default(""),
-  utm_content: z.string().optional().default(""),
-  spend: z.union([z.number(), z.string()]).nullable().optional(),
-  impressions: z.union([z.number(), z.string()]).nullable().optional(),
-  clicks: z.union([z.number(), z.string()]).nullable().optional(),
+  accountName: zString,
+  day: zDate,
+  campaignName: zString,
+  adSetName: zString,
+  adName: zString,
+  alcance: zInt,
+  impressions: zInt,
+  linkClicks: zInt,
+  landingPageViews: zInt,
+  leadsMeta: zInt,
+  visitasPerfil: zInt,
+  seguidores: zInt,
+  video3s: zInt,
+  video25: zInt,
+  video95: zInt,
+  checkouts: zInt,
+  compras: zInt,
+  amountSpent: zCurrency,
 });
 export type FbTodosRow = z.infer<typeof FbTodosRowSchema>;
 
-// ---------- leads ----------
+export const FB_TODOS_COLUMN_MAP = {
+  accountName: 0,
+  day: 1,
+  campaignName: 2,
+  adSetName: 3,
+  adName: 4,
+  alcance: 5,
+  impressions: 6,
+  linkClicks: 7,
+  landingPageViews: 8,
+  leadsMeta: 9,
+  visitasPerfil: 10,
+  seguidores: 11,
+  video3s: 12,
+  video25: 13,
+  video95: 14,
+  checkouts: 15,
+  compras: 16,
+  amountSpent: 17,
+} as const;
 
-export const LeadsRowSchema = z.object({
-  data: z.union([z.number(), z.string()]).nullable().optional(),
-  funil: z.string().optional().default(""), // col I
-  origem: z.string().optional().default(""),
-  qualificacao: z.string().optional().default(""), // Enterprise / MQL1 / MQL2
-  email: z.string().optional().default(""),
+export const LeadRowSchema = z.object({
+  dataInscricaoOriginal: zDate,
+  nome: zString,
+  email: zEmail,
+  telefone: zString,
+  cargo: zString,
+  faturamento: zString,
+  segmento: zString,
+  qualificacao: zString,
+  funil: zString,
+  utmSource: zString,
+  utmMedium: zString,
+  utmCampaign: zString,
+  utmId: zString,
+  utmContent: zString,
+  utmTerm: zString,
+  dataInscricao: zDate,
 });
-export type LeadsRow = z.infer<typeof LeadsRowSchema>;
+export type LeadRow = z.infer<typeof LeadRowSchema>;
 
-// ---------- sdr ----------
+export const LEADS_COLUMN_MAP = {
+  dataInscricaoOriginal: 0,
+  nome: 1,
+  email: 2,
+  telefone: 3,
+  cargo: 4,
+  faturamento: 5,
+  segmento: 6,
+  qualificacao: 7,
+  funil: 8,
+  utmSource: 9,
+  utmMedium: 10,
+  utmCampaign: 11,
+  utmId: 12,
+  utmContent: 13,
+  utmTerm: 14,
+  dataInscricao: 15,
+} as const;
 
 export const SdrRowSchema = z.object({
-  data: z.union([z.number(), z.string()]).nullable().optional(),
-  sdr: z.string().optional().default(""),
-  status: z.string().optional().default(""), // col K ("Realizada", etc.)
-  lead_id: z.string().optional().default(""),
+  dataAgendamento: zDate,
+  dataReuniao: zDate,
+  quemAgendou: zString,
+  responsavel: zString,
+  qualificacaoSdr: zString,
+  lead: zString,
+  cargo: zString,
+  email: zEmail,
+  origem: zString,
+  funil: zString,
+  status: zString,
+  envioProposta: zString,
+  valorProposta: zCurrency,
+  dataInscricaoSnap: zDate,
+  nomeSnap: zString,
+  telefoneSnap: zString,
+  cargoSnap: zString,
+  faturamentoSnap: zString,
+  segmentoSnap: zString,
+  qualificacaoSnap: zString,
+  funilSnap: zString,
+  utmSourceSnap: zString,
+  utmMediumSnap: zString,
+  utmCampaignSnap: zString,
+  utmIdSnap: zString,
+  utmContentSnap: zString,
+  utmTermSnap: zString,
 });
 export type SdrRow = z.infer<typeof SdrRowSchema>;
 
-// ---------- vendas ----------
+export const SDR_COLUMN_MAP = {
+  dataAgendamento: 0,
+  dataReuniao: 1,
+  quemAgendou: 2,
+  responsavel: 3,
+  qualificacaoSdr: 4,
+  lead: 5,
+  cargo: 6,
+  email: 7,
+  origem: 8,
+  funil: 9,
+  status: 10,
+  envioProposta: 11,
+  valorProposta: 12,
+  dataInscricaoSnap: 13,
+  nomeSnap: 14,
+  telefoneSnap: 15,
+  cargoSnap: 16,
+  faturamentoSnap: 17,
+  segmentoSnap: 18,
+  qualificacaoSnap: 19,
+  funilSnap: 20,
+  utmSourceSnap: 21,
+  utmMediumSnap: 22,
+  utmCampaignSnap: 23,
+  utmIdSnap: 24,
+  utmContentSnap: 25,
+  utmTermSnap: 26,
+} as const;
 
-export const VendasRowSchema = z.object({
-  data: z.union([z.number(), z.string()]).nullable().optional(),
-  funil: z.string().optional().default(""), // col K
-  closer: z.string().optional().default(""),
-  valor: z.union([z.number(), z.string()]).nullable().optional(),
+export const VendaRowSchema = z.object({
+  nomeComprador: zString,
+  empresa: zString,
+  email: zEmail,
+  valorContrato: zCurrency,
+  dataEntradaBase: zDate,
+  dataAceite: zDate,
+  dataCriacaoContrato: zDate,
+  dataAssinatura: zDate,
+  cargoComprador: zString,
+  origemFunil: zString,
+  funilCompra: zString,
+  produto: zString,
+  pixAceite: zString,
+  formaPagamento: zString,
+  dataCompra: zDate,
+  dataCadastroSnap: zDate,
+  nomeSnap: zString,
+  telefoneSnap: zString,
+  cargoSnap: zString,
+  faturamentoSnap: zString,
+  segmentoSnap: zString,
+  qualificacaoSnap: zString,
+  funilSnap: zString,
+  utmSourceSnap: zString,
+  utmMediumSnap: zString,
+  utmCampaignSnap: zString,
+  utmIdSnap: zString,
+  utmContentSnap: zString,
+  utmTermSnap: zString,
 });
-export type VendasRow = z.infer<typeof VendasRowSchema>;
+export type VendaRow = z.infer<typeof VendaRowSchema>;
 
-// ---------- helpers ----------
+export const VENDAS_COLUMN_MAP = {
+  nomeComprador: 0,
+  empresa: 1,
+  email: 2,
+  valorContrato: 3,
+  dataEntradaBase: 4,
+  dataAceite: 5,
+  dataCriacaoContrato: 6,
+  dataAssinatura: 7,
+  cargoComprador: 8,
+  origemFunil: 9,
+  funilCompra: 10,
+  produto: 11,
+  pixAceite: 12,
+  formaPagamento: 13,
+  dataCompra: 14,
+  dataCadastroSnap: 15,
+  nomeSnap: 16,
+  telefoneSnap: 17,
+  cargoSnap: 18,
+  faturamentoSnap: 19,
+  segmentoSnap: 20,
+  qualificacaoSnap: 21,
+  funilSnap: 22,
+  utmSourceSnap: 23,
+  utmMediumSnap: 24,
+  utmCampaignSnap: 25,
+  utmIdSnap: 26,
+  utmContentSnap: 27,
+  utmTermSnap: 28,
+} as const;
 
-/**
- * Lower-cases, trims, removes accents, and collapses non-alphanumeric runs
- * to a single underscore. Used so that header cells like "Conversão", "UTM
- * Content " or "Lead ID" all map to canonical schema keys.
- */
-function normalizeHeader(raw: unknown): string {
-  return String(raw ?? "")
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
-}
+export const MetaRowSchema = z.object({
+  mes: zDate,
+  funil: zString,
+  metrica: zString,
+  valor: zCurrency,
+});
+export type MetaRow = z.infer<typeof MetaRowSchema>;
 
-/**
- * Generic row parser:
- *   1. Reads the header row (default: row 0).
- *   2. For every subsequent row, builds an object keyed by normalized headers.
- *   3. Runs schema.safeParse on it. Failures are logged with the row index
- *      and dropped — we never abort the whole sheet for a single bad row.
- */
-export function parseRows<T>(
-  rawRows: unknown[][],
-  schema: z.ZodSchema<T>,
-  headerRow: number = 0,
-): T[] {
-  if (!Array.isArray(rawRows) || rawRows.length <= headerRow) return [];
-
-  const headerCells = rawRows[headerRow] ?? [];
-  const headers = headerCells.map((h) => normalizeHeader(h));
-
-  const out: T[] = [];
-  for (let i = headerRow + 1; i < rawRows.length; i++) {
-    const row = rawRows[i];
-    if (!row || row.length === 0) continue;
-
-    const obj: Record<string, unknown> = {};
-    for (let c = 0; c < headers.length; c++) {
-      const key = headers[c];
-      if (!key) continue;
-      obj[key] = row[c];
-    }
-
-    const parsed = schema.safeParse(obj);
-    if (parsed.success) {
-      out.push(parsed.data);
-    } else {
-      // Tolerant: log and drop. Do not throw so a single malformed row
-      // does not nuke the entire snapshot.
-      console.warn(
-        `[sheets.parseRows] row ${i} failed validation`,
-        parsed.error.issues,
-      );
-    }
-  }
-  return out;
-}
+export const METAS_COLUMN_MAP = {
+  mes: 0,
+  funil: 1,
+  metrica: 2,
+  valor: 3,
+} as const;
