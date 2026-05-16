@@ -1,6 +1,23 @@
+import { Suspense } from "react";
+
+import { auth } from "@/auth";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+
+async function UserSidebar() {
+  const session = await auth();
+  return (
+    <AppSidebar
+      variant="inset"
+      user={{
+        name: session?.user?.name ?? "Usuário",
+        email: session?.user?.email ?? "",
+        avatar: session?.user?.image ?? "",
+      }}
+    />
+  );
+}
 
 export default function DashboardLayout({
   children,
@@ -16,7 +33,16 @@ export default function DashboardLayout({
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant="inset" />
+      <Suspense
+        fallback={
+          <AppSidebar
+            variant="inset"
+            user={{ name: "Carregando…", email: "", avatar: "" }}
+          />
+        }
+      >
+        <UserSidebar />
+      </Suspense>
       <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col">{children}</div>

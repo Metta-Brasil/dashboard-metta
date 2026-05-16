@@ -22,26 +22,26 @@ import {
   UserCheckIcon,
   HandshakeIcon,
   Share2Icon,
+  SettingsIcon,
 } from "lucide-react";
 
-const data = {
-  user: {
-    name: "Metta",
-    email: "user@mettabrasil.com.br",
-    avatar: "",
-  },
-  navMain: [
-    { title: "Visão Geral", url: "/", icon: LayoutDashboardIcon },
-    { title: "Metas vs Realizado", url: "/metas", icon: TargetIcon },
-    { title: "Tráfego Pago", url: "/trafego", icon: MegaphoneIcon },
-    { title: "Anúncios", url: "/anuncios", icon: ImageIcon },
-    { title: "Comercial SDR", url: "/sdr", icon: UserCheckIcon },
-    { title: "Comercial Closer", url: "/closer", icon: HandshakeIcon },
-    { title: "Origem", url: "/origem", icon: Share2Icon },
-  ],
-};
+const navMain = [
+  { title: "Visão Geral", url: "/", icon: LayoutDashboardIcon },
+  { title: "Metas vs Realizado", url: "/metas", icon: TargetIcon },
+  { title: "Tráfego Pago", url: "/trafego", icon: MegaphoneIcon },
+  { title: "Anúncios", url: "/anuncios", icon: ImageIcon },
+  { title: "Comercial SDR", url: "/sdr", icon: UserCheckIcon },
+  { title: "Comercial Closer", url: "/closer", icon: HandshakeIcon },
+  { title: "Origem", url: "/origem", icon: Share2Icon },
+  { title: "Configurações", url: "/configuracoes", icon: SettingsIcon },
+];
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+type SidebarUser = { name: string; email: string; avatar: string };
+
+export function AppSidebar({
+  user,
+  ...props
+}: React.ComponentProps<typeof Sidebar> & { user: SidebarUser }) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -74,10 +74,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   );

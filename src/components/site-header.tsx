@@ -12,6 +12,7 @@ const TITLES: Record<string, string> = {
   "/sdr": "Comercial SDR",
   "/closer": "Comercial Closer",
   "/origem": "Origem",
+  "/configuracoes": "Configurações",
 };
 
 export function SiteHeader() {

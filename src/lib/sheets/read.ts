@@ -20,7 +20,12 @@ import {
   VendaRowSchema,
   VENDAS_COLUMN_MAP,
 } from "./schemas";
-import { cacheGet, cacheSet, cacheStampNow } from "@/lib/cache/upstash";
+import {
+  cacheGet,
+  cacheGetStamp,
+  cacheSet,
+  cacheStampNow,
+} from "@/lib/cache/upstash";
 
 export type SheetTab =
   | "fb_todos"
@@ -68,6 +73,11 @@ type TabRowMap = {
 const RAW_TTL_SECONDS = 6 * 60 * 60; // 6h
 const cacheKey = (tab: SheetTab) => `raw:${tab}`;
 const STAMP_KEY = "raw:lastRefresh";
+
+/** Timestamp (ms) do último refresh do cache. 0 se nunca rodou. */
+export async function getLastRefreshTs(): Promise<number> {
+  return cacheGetStamp(STAMP_KEY);
+}
 
 function parseTab<T extends SheetTab>(
   tab: T,
