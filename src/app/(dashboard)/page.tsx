@@ -75,22 +75,37 @@ export default function VisaoGeralPage({ searchParams }: PageProps) {
         <KpisSection searchParams={searchParams} />
       </Suspense>
 
-      <Suspense fallback={<SectionFallback label="Carregando funil…" />}>
-        <FunilSection searchParams={searchParams} />
-      </Suspense>
+      {/* Linha 1 — Evolução (largo) + Funil consolidado (estreito) */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <Suspense fallback={<SectionFallback label="Carregando evolução…" />}>
+            <EvolucaoDiariaSection searchParams={searchParams} />
+          </Suspense>
+        </div>
+        <div className="lg:col-span-1">
+          <Suspense fallback={<SectionFallback label="Carregando funil…" />}>
+            <FunilSection searchParams={searchParams} />
+          </Suspense>
+        </div>
+      </div>
 
-      <Suspense fallback={<SectionFallback label="Carregando evolução diária…" />}>
-        <EvolucaoDiariaSection searchParams={searchParams} />
-      </Suspense>
+      {/* Linha 2 — Distribuição (estreito) + Custo por etapa (largo) */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-1">
+          <Suspense
+            fallback={<SectionFallback label="Carregando distribuição…" />}
+          >
+            <DistribuicaoSection searchParams={searchParams} />
+          </Suspense>
+        </div>
+        <div className="lg:col-span-2">
+          <Suspense fallback={<SectionFallback label="Carregando custo…" />}>
+            <CustoPorEtapaSection searchParams={searchParams} />
+          </Suspense>
+        </div>
+      </div>
 
-      <Suspense fallback={<SectionFallback label="Carregando custo por etapa…" />}>
-        <CustoPorEtapaSection searchParams={searchParams} />
-      </Suspense>
-
-      <Suspense fallback={<SectionFallback label="Carregando distribuição por funil…" />}>
-        <DistribuicaoSection searchParams={searchParams} />
-      </Suspense>
-
+      {/* Linha 3 — Tabela diária, largura total */}
       <Suspense fallback={<SectionFallback label="Carregando tabela diária…" />}>
         <TabelaDiariaSection searchParams={searchParams} />
       </Suspense>

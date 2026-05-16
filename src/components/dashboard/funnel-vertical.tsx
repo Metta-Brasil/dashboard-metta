@@ -1,5 +1,6 @@
 import { formatBRLCompact, formatInt, formatPercent } from "@/lib/calc/shared";
 import type { FunnelStep } from "@/lib/calc/types";
+import { cn } from "@/lib/utils";
 
 type FunnelVerticalProps = {
   title?: string;
@@ -7,50 +8,76 @@ type FunnelVerticalProps = {
   steps: FunnelStep[];
   /** Etapas tratadas como monetárias (Investimento, Faturamento, etc.) */
   monetaryEtapas?: string[];
+  className?: string;
 };
 
+/**
+ * Funil de verdade: barras CENTRADAS que estreitam etapa a etapa
+ * (largura ∝ valor/topo), formando a silhueta afunilada. Entre as
+ * etapas, um chip central mostra a conversão (queda) daquela passagem.
+ */
 export function FunnelVertical({
   title,
   description,
   steps,
   monetaryEtapas = ["Investimento", "Faturamento"],
+  className,
 }: FunnelVerticalProps) {
   if (!steps.length) return null;
-  const max = steps[0]?.valor || 1;
   const monetarySet = new Set(monetaryEtapas);
+  // Taper ESQUEMÁTICO: cada etapa estritamente mais estreita que a
+  // anterior, de 100% até ~32%. Valor proporcional ao topo colapsaria
+  // as etapas baixas (vendas << investimento) num bloco indistinto —
+  // a silhueta afunilada é esquemática; o dado real é o número/%.
+  const n = steps.length;
+  const widthAt = (i: number) =>
+    n <= 1 ? 100 : 100 - (i / (n - 1)) * 68;
 
   return (
-    <div className="surface-card p-5 lg:p-6">
+    <div className={cn("surface-card p-5 lg:p-6", className)}>
       {(title || description) && (
         <div className="mb-5 flex items-baseline justify-between gap-2">
           {title && <h3 className="panel-title">{title}</h3>}
           {description && <span className="panel-desc">{description}</span>}
         </div>
       )}
-      <div className="flex flex-col gap-2.5">
+
+      <div className="flex flex-col items-center">
         {steps.map((s, i) => {
           const isMonetario = monetarySet.has(s.etapa);
-          const pct = Math.max((s.valor / max) * 100, 3);
+          const pct = widthAt(i);
+          // Profundidade visual: cada degrau um pouco mais escuro.
+          const shade = 1 - i * (0.5 / Math.max(n - 1, 1));
+
           return (
-            <div key={s.etapa} className="flex items-center gap-4">
-              <div className="w-28 shrink-0 text-sm font-medium text-muted-foreground sm:w-36">
-                {s.etapa}
-              </div>
-              <div className="relative h-10 flex-1 overflow-hidden rounded-lg bg-muted/70">
-                <div
-                  className="h-full rounded-lg bg-primary transition-all duration-500"
-                  style={{ width: `${pct}%` }}
-                />
-                <div className="absolute inset-0 flex items-center justify-end px-3.5">
-                  <span className="text-sm font-semibold tabular-nums text-foreground">
-                    {isMonetario
-                      ? formatBRLCompact(s.valor)
-                      : formatInt(s.valor)}
+            <div key={s.etapa} className="flex w-full flex-col items-center">
+              {i > 0 && (
+                <div className="flex items-center gap-1.5 py-1.5 text-xs font-medium text-muted-foreground">
+                  <span aria-hidden className="text-[10px]">
+                    ▼
+                  </span>
+                  <span className="tabular-nums">
+                    {formatPercent(s.conversaoEtapa)}
                   </span>
                 </div>
-              </div>
-              <div className="w-16 shrink-0 text-right text-xs font-medium tabular-nums text-muted-foreground">
-                {i === 0 ? "—" : formatPercent(s.conversaoEtapa)}
+              )}
+              <div
+                className="flex h-12 items-center justify-between gap-3 rounded-lg px-4 transition-all duration-500"
+                style={{
+                  width: `${pct}%`,
+                  backgroundColor: `color-mix(in srgb, var(--primary) ${
+                    shade * 100
+                  }%, var(--card))`,
+                }}
+              >
+                <span className="truncate text-sm font-semibold text-foreground">
+                  {s.etapa}
+                </span>
+                <span className="shrink-0 text-sm font-bold tabular-nums text-foreground">
+                  {isMonetario
+                    ? formatBRLCompact(s.valor)
+                    : formatInt(s.valor)}
+                </span>
               </div>
             </div>
           );
