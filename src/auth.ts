@@ -6,9 +6,8 @@ import Credentials from "next-auth/providers/credentials";
  * Auth.js v5 — Google OAuth + e-mail/senha (Credentials), sem banco.
  * Sessão JWT. Acesso restrito a @mettabrasil.com.br.
  *
- * E-mail/senha: validado contra a allowlist em AUTH_CREDENTIALS
- * (formato "email:senha,email:senha" — env encriptada no Vercel,
- * mesmo nível dos demais segredos). Sem a env, só o Google funciona.
+ * E-mail/senha: contas criadas na página de cadastro, persistidas no
+ * Upstash (que o projeto já usa) com hash bcrypt. Sem env manual.
  */
 const ALLOWED_DOMAIN = "mettabrasil.com.br";
 
@@ -19,29 +18,6 @@ type GoogleProfile = {
   picture?: string;
 };
 
-function checkCredentials(
-  email: string,
-  password: string
-): { email: string; name: string } | null {
-  const e = email.trim().toLowerCase();
-  if (!e.endsWith(`@${ALLOWED_DOMAIN}`) || !password) return null;
-  const ok = { email: e, name: e.split("@")[0] };
-
-  // 1) Senha única do time: qualquer @mettabrasil.com.br + AUTH_TEAM_PASSWORD.
-  const team = process.env.AUTH_TEAM_PASSWORD ?? "";
-  if (team && password === team) return ok;
-
-  // 2) Allowlist opcional por usuário (AUTH_CREDENTIALS = "email:senha,...").
-  const raw = process.env.AUTH_CREDENTIALS ?? "";
-  for (const pair of raw.split(",")) {
-    const idx = pair.indexOf(":");
-    if (idx < 0) continue;
-    const u = pair.slice(0, idx).trim().toLowerCase();
-    const p = pair.slice(idx + 1);
-    if (u === e && p === password) return ok;
-  }
-  return null;
-}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -51,10 +27,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { label: "E-mail", type: "email" },
         password: { label: "Senha", type: "password" },
       },
-      authorize(creds) {
-        const email = String(creds?.email ?? "");
-        const password = String(creds?.password ?? "");
-        return checkCredentials(email, password);
+      async authorize(creds) {
+        // Import dinâmico: mantém bcrypt/store fora do bundle do middleware.
+        const { verifyUser } = await import("@/lib/auth/users");
+        return verifyUser(
+          String(creds?.email ?? ""),
+          String(creds?.password ?? "")
+        );
       },
     }),
   ],

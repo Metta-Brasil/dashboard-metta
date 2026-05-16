@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { signIn } from "@/auth";
+import { createUser } from "@/lib/auth/users";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,24 +15,32 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-async function loginWithCredentials(formData: FormData) {
+async function signUp(formData: FormData) {
   "use server";
-  await signIn("credentials", {
-    email: String(formData.get("email") ?? ""),
-    password: String(formData.get("password") ?? ""),
-    redirectTo: "/",
-  });
+  const name = String(formData.get("name") ?? "");
+  const email = String(formData.get("email") ?? "");
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
+  if (password !== confirm) {
+    redirect("/signup?error=" + encodeURIComponent("As senhas não conferem."));
+  }
+  const res = await createUser(email, name, password);
+  if (!res.ok) {
+    redirect("/signup?error=" + encodeURIComponent(res.error));
+  }
+  await signIn("credentials", { email, password, redirectTo: "/" });
 }
 
-async function loginWithGoogle() {
+async function signUpWithGoogle() {
   "use server";
   await signIn("google", { redirectTo: "/" });
 }
 
-export function LoginForm({
+export function SignupForm({
+  error,
   className,
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div"> & { error?: string }) {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
@@ -46,14 +56,24 @@ export function LoginForm({
                     className="size-6"
                   />
                 </span>
-                <h1 className="text-2xl font-bold">Bem-vindo de volta</h1>
-                <p className="text-balance text-muted-foreground">
-                  Entre no Dashboard Metta
+                <h1 className="text-2xl font-bold">Criar sua conta</h1>
+                <p className="text-sm text-balance text-muted-foreground">
+                  Use seu e-mail @mettabrasil.com.br para criar a conta
                 </p>
               </div>
 
-              <form action={loginWithCredentials}>
+              {error && (
+                <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
+                  {error}
+                </p>
+              )}
+
+              <form action={signUp}>
                 <FieldGroup>
+                  <Field>
+                    <FieldLabel htmlFor="name">Nome</FieldLabel>
+                    <Input id="name" name="name" type="text" required />
+                  </Field>
                   <Field>
                     <FieldLabel htmlFor="email">E-mail</FieldLabel>
                     <Input
@@ -63,26 +83,37 @@ export function LoginForm({
                       placeholder="voce@mettabrasil.com.br"
                       required
                     />
+                    <FieldDescription>
+                      Só contas @mettabrasil.com.br.
+                    </FieldDescription>
                   </Field>
                   <Field>
-                    <div className="flex items-center">
-                      <FieldLabel htmlFor="password">Senha</FieldLabel>
-                      <a
-                        href="#"
-                        className="ml-auto text-sm underline-offset-2 hover:underline"
-                      >
-                        Esqueceu a senha?
-                      </a>
-                    </div>
-                    <Input
-                      id="password"
-                      name="password"
-                      type="password"
-                      required
-                    />
+                    <Field className="grid grid-cols-2 gap-4">
+                      <Field>
+                        <FieldLabel htmlFor="password">Senha</FieldLabel>
+                        <Input
+                          id="password"
+                          name="password"
+                          type="password"
+                          required
+                        />
+                      </Field>
+                      <Field>
+                        <FieldLabel htmlFor="confirm">Confirmar</FieldLabel>
+                        <Input
+                          id="confirm"
+                          name="confirm"
+                          type="password"
+                          required
+                        />
+                      </Field>
+                    </Field>
+                    <FieldDescription>
+                      Mínimo de 8 caracteres.
+                    </FieldDescription>
                   </Field>
                   <Field>
-                    <Button type="submit">Entrar</Button>
+                    <Button type="submit">Criar conta</Button>
                   </Field>
                 </FieldGroup>
               </form>
@@ -91,7 +122,7 @@ export function LoginForm({
                 Ou continue com
               </FieldSeparator>
 
-              <form action={loginWithGoogle}>
+              <form action={signUpWithGoogle}>
                 <Button variant="outline" type="submit" className="w-full">
                   <svg className="size-4" viewBox="0 0 24 24" aria-hidden>
                     <path
@@ -104,9 +135,9 @@ export function LoginForm({
               </form>
 
               <FieldDescription className="text-center">
-                Não tem conta?{" "}
-                <Link href="/signup" className="underline underline-offset-4">
-                  Cadastre-se
+                Já tem conta?{" "}
+                <Link href="/login" className="underline underline-offset-4">
+                  Entrar
                 </Link>
               </FieldDescription>
             </FieldGroup>

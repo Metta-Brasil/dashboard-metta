@@ -7,9 +7,10 @@ import { auth } from "@/auth";
 export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
-  const isLoginRoute = nextUrl.pathname === "/login";
+  const isAuthRoute =
+    nextUrl.pathname === "/login" || nextUrl.pathname === "/signup";
 
-  if (isLoginRoute) {
+  if (isAuthRoute) {
     if (isLoggedIn) {
       return Response.redirect(new URL("/", nextUrl));
     }
