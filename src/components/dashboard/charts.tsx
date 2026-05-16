@@ -236,6 +236,7 @@ export function AreaLineChart({
   area,
   lines,
   height = 280,
+  className,
 }: {
   title: string;
   description?: string;
@@ -244,11 +245,12 @@ export function AreaLineChart({
   area: SeriesDef;
   lines: SeriesDef[];
   height?: number;
+  className?: string;
 }) {
   const config = buildConfig([area, ...lines]);
 
   return (
-    <ChartCard title={title} description={description}>
+    <ChartCard title={title} description={description} className={className}>
       <ChartContainer config={config} className="aspect-auto w-full" style={{ height }}>
         <ComposedChart data={data} margin={{ left: 4, right: 4, top: 8 }}>
           <CartesianGrid vertical={false} strokeDasharray="3 3" />

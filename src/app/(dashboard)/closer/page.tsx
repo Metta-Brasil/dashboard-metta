@@ -197,22 +197,30 @@ async function CloserContent({ searchParams }: PageProps) {
     >
       <KpiGrid kpis={kpis} />
 
-      <DonutChart
-        title="Receita por funil"
-        description="Distribuição de faturamento por funil de origem"
-        data={receitaPorFunilData}
-        centerLabel="Receita total"
-        centerValue={formatBRLCompact(receitaTotal)}
-      />
-
-      <AreaLineChart
-        title="Evolução de receita (12 meses)"
-        description="Faturamento mensal vs meta"
-        data={evolucaoData}
-        xKey="mes"
-        area={{ key: "receita", label: "Receita" }}
-        lines={[{ key: "meta", label: "Meta", dashed: true }]}
-      />
+      {/* g-2 do #p4: Receita por funil (donut) + Evolução de receita */}
+      <div className="grid items-stretch gap-6 lg:grid-cols-2">
+        <div className="flex">
+          <DonutChart
+            title="Receita por funil"
+            description="Distribuição de faturamento por funil de origem"
+            data={receitaPorFunilData}
+            centerLabel="Receita total"
+            centerValue={formatBRLCompact(receitaTotal)}
+            className="h-full w-full"
+          />
+        </div>
+        <div className="flex">
+          <AreaLineChart
+            title="Evolução de receita (12 meses)"
+            description="Faturamento mensal vs meta"
+            data={evolucaoData}
+            xKey="mes"
+            area={{ key: "receita", label: "Receita" }}
+            lines={[{ key: "meta", label: "Meta", dashed: true }]}
+            className="h-full w-full"
+          />
+        </div>
+      </div>
 
       <MetricTable
         title="Vendas do período"
