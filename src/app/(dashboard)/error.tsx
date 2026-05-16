@@ -38,6 +38,11 @@ export default function DashboardError({
     if (!isSkew) sessionStorage.removeItem(RELOAD_FLAG);
   }, [isSkew]);
 
+  useEffect(() => {
+    // Diagnóstico temporário: superfície o erro real no console.
+    console.error("[dashboard/error]", error?.name, error?.message, error);
+  }, [error]);
+
   return (
     <div className="flex min-h-[60vh] flex-1 items-center justify-center p-6">
       <div className="surface-card flex max-w-md flex-col items-center gap-5 p-8 text-center">
@@ -75,11 +80,10 @@ export default function DashboardError({
             </button>
           </div>
         )}
-        {error?.digest && (
-          <p className="text-[11px] text-muted-foreground/70">
-            Ref. {error.digest}
-          </p>
-        )}
+        <p className="max-w-full break-words rounded-md bg-muted px-3 py-2 text-left font-mono text-[11px] text-muted-foreground">
+          <strong>{error?.name || "Error"}</strong>: {error?.message || "(sem mensagem)"}
+          {error?.digest ? ` · ref ${error.digest}` : ""}
+        </p>
       </div>
     </div>
   );
