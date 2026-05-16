@@ -23,17 +23,22 @@ function checkCredentials(
   email: string,
   password: string
 ): { email: string; name: string } | null {
-  const raw = process.env.AUTH_CREDENTIALS ?? "";
   const e = email.trim().toLowerCase();
-  if (!e.endsWith(`@${ALLOWED_DOMAIN}`)) return null;
+  if (!e.endsWith(`@${ALLOWED_DOMAIN}`) || !password) return null;
+  const ok = { email: e, name: e.split("@")[0] };
+
+  // 1) Senha única do time: qualquer @mettabrasil.com.br + AUTH_TEAM_PASSWORD.
+  const team = process.env.AUTH_TEAM_PASSWORD ?? "";
+  if (team && password === team) return ok;
+
+  // 2) Allowlist opcional por usuário (AUTH_CREDENTIALS = "email:senha,...").
+  const raw = process.env.AUTH_CREDENTIALS ?? "";
   for (const pair of raw.split(",")) {
     const idx = pair.indexOf(":");
     if (idx < 0) continue;
     const u = pair.slice(0, idx).trim().toLowerCase();
     const p = pair.slice(idx + 1);
-    if (u === e && p === password) {
-      return { email: e, name: e.split("@")[0] };
-    }
+    if (u === e && p === password) return ok;
   }
   return null;
 }
