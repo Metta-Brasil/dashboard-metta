@@ -6,7 +6,24 @@ import {
   Field,
   FieldDescription,
   FieldGroup,
+  FieldLabel,
+  FieldSeparator,
 } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+
+async function loginWithCredentials(formData: FormData) {
+  "use server";
+  await signIn("credentials", {
+    email: String(formData.get("email") ?? ""),
+    password: String(formData.get("password") ?? ""),
+    redirectTo: "/",
+  });
+}
+
+async function loginWithGoogle() {
+  "use server";
+  await signIn("google", { redirectTo: "/" });
+}
 
 export function LoginForm({
   className,
@@ -16,16 +33,10 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <form
-            className="p-6 md:p-8"
-            action={async () => {
-              "use server";
-              await signIn("google", { redirectTo: "/" });
-            }}
-          >
+          <div className="p-6 md:p-8">
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <span className="mb-2 flex size-11 items-center justify-center rounded-xl bg-foreground">
+                <span className="mb-1 flex size-11 items-center justify-center rounded-xl bg-foreground">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src="/brand/metta-symbol.svg"
@@ -38,8 +49,48 @@ export function LoginForm({
                   Entre no Dashboard Metta
                 </p>
               </div>
-              <Field>
-                <Button variant="outline" type="submit">
+
+              <form action={loginWithCredentials}>
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel htmlFor="email">E-mail</FieldLabel>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="voce@mettabrasil.com.br"
+                      required
+                    />
+                  </Field>
+                  <Field>
+                    <div className="flex items-center">
+                      <FieldLabel htmlFor="password">Senha</FieldLabel>
+                      <a
+                        href="#"
+                        className="ml-auto text-sm underline-offset-2 hover:underline"
+                      >
+                        Esqueceu a senha?
+                      </a>
+                    </div>
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      required
+                    />
+                  </Field>
+                  <Field>
+                    <Button type="submit">Entrar</Button>
+                  </Field>
+                </FieldGroup>
+              </form>
+
+              <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
+                Ou continue com
+              </FieldSeparator>
+
+              <form action={loginWithGoogle}>
+                <Button variant="outline" type="submit" className="w-full">
                   <svg className="size-4" viewBox="0 0 24 24" aria-hidden>
                     <path
                       fill="currentColor"
@@ -48,12 +99,14 @@ export function LoginForm({
                   </svg>
                   Continuar com Google
                 </Button>
-              </Field>
+              </form>
+
               <FieldDescription className="text-center">
                 Acesso restrito a contas @mettabrasil.com.br.
               </FieldDescription>
             </FieldGroup>
-          </form>
+          </div>
+
           <div className="bg-foreground relative hidden md:block">
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -69,9 +122,6 @@ export function LoginForm({
           </div>
         </CardContent>
       </Card>
-      <FieldDescription className="px-6 text-center">
-        Login via Google Workspace — sem senha, sem cadastro.
-      </FieldDescription>
     </div>
   );
 }
