@@ -9,6 +9,7 @@ import {
   Line,
   Pie,
   PieChart,
+  ReferenceLine,
   XAxis,
   YAxis,
 } from "recharts";
@@ -428,6 +429,111 @@ export function GroupedBarChart({
               maxBarSize={32}
             />
           ))}
+        </ComposedChart>
+      </ChartContainer>
+    </ChartCard>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Projeção do mês — realizado (sólido até hoje) + projeção (tracejada)
+// + meta (linha horizontal) + marcador vertical "hoje"
+// ---------------------------------------------------------------------------
+
+export function ProjectionChart({
+  title,
+  description,
+  data,
+  xKey,
+  realKey,
+  projKey,
+  metaValue,
+  metaLabel,
+  hojeLabel,
+  height = 280,
+  className,
+}: {
+  title: string;
+  description?: string;
+  data: Record<string, string | number | null>[];
+  xKey: string;
+  realKey: string;
+  projKey: string;
+  metaValue?: number | null;
+  metaLabel?: string;
+  /** Valor de xKey onde fica o marcador "hoje". */
+  hojeLabel?: string;
+  height?: number;
+  className?: string;
+}) {
+  const config: ChartConfig = {
+    [realKey]: { label: "Realizado", color: "var(--chart-1)" },
+    [projKey]: { label: "Projeção", color: "var(--chart-2)" },
+  };
+
+  return (
+    <ChartCard title={title} description={description} className={className}>
+      <ChartContainer
+        config={config}
+        className="aspect-auto w-full"
+        style={{ height }}
+      >
+        <ComposedChart data={data} margin={{ left: 4, right: 4, top: 8 }}>
+          <CartesianGrid vertical={false} strokeDasharray="3 3" />
+          <XAxis
+            dataKey={xKey}
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+            minTickGap={24}
+          />
+          <YAxis tickLine={false} axisLine={false} width={56} />
+          <ChartTooltip content={<ChartTooltipContent />} />
+          <ChartLegend content={<ChartLegendContent />} />
+          {metaValue != null && (
+            <ReferenceLine
+              y={metaValue}
+              stroke="var(--primary)"
+              strokeDasharray="6 4"
+              strokeWidth={2}
+              label={{
+                value: metaLabel ?? "meta",
+                position: "insideTopRight",
+                fill: "var(--muted-foreground)",
+                fontSize: 11,
+              }}
+            />
+          )}
+          {hojeLabel && (
+            <ReferenceLine
+              x={hojeLabel}
+              stroke="var(--border)"
+              strokeDasharray="2 3"
+              label={{
+                value: "hoje",
+                position: "top",
+                fill: "var(--muted-foreground)",
+                fontSize: 11,
+              }}
+            />
+          )}
+          <Line
+            type="monotone"
+            dataKey={realKey}
+            stroke={`var(--color-${realKey})`}
+            strokeWidth={2.5}
+            dot={false}
+            connectNulls={false}
+          />
+          <Line
+            type="monotone"
+            dataKey={projKey}
+            stroke={`var(--color-${projKey})`}
+            strokeWidth={2}
+            strokeDasharray="5 4"
+            dot={false}
+            connectNulls
+          />
         </ComposedChart>
       </ChartContainer>
     </ChartCard>

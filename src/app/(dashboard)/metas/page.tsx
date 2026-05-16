@@ -1,7 +1,11 @@
 import { Suspense } from "react";
 
-import { AreaLineChart } from "@/components/dashboard/charts";
+import { ProjectionChart } from "@/components/dashboard/charts";
 import { MetricTable, type Column } from "@/components/dashboard/metric-table";
+import {
+  PacingBars,
+  ProgressStatCard,
+} from "@/components/dashboard/progress-card";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
 import {
@@ -13,17 +17,13 @@ import {
 import type {
   MetasCardTaxa,
   MetasHistoricoRow,
-  MetasPacingNecessario,
   MetricaMetaReal,
 } from "@/lib/calc/types";
 import { getMetas, getFilters } from "@/lib/page-data";
-import { cn } from "@/lib/utils";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
-
-const PACING_CHART_LIMIT = 30;
 
 export default function MetasPage({ searchParams }: PageProps) {
   return (
@@ -39,84 +39,39 @@ async function MetasContent({ searchParams }: PageProps) {
     getFilters(searchParams),
   ]);
 
-  // ---- Funil columns ------------------------------------------------------
-  const funilColumns: Column<MetricaMetaReal>[] = [
-    {
-      key: "nome",
-      header: "Métrica",
-      render: (r) => r.nome,
-    },
-    {
-      key: "real",
-      header: "Real",
-      align: "right",
-      render: (r) => formatMetricaValor(r.nome, r.realValor),
-    },
-    {
-      key: "meta",
-      header: "Meta MTD",
-      align: "right",
-      render: (r) =>
-        r.metaMtdValor !== null
-          ? formatMetricaValor(r.nome, r.metaMtdValor)
-          : "—",
-    },
-    {
-      key: "pct",
-      header: "% atingimento",
-      align: "right",
-      render: (r) =>
-        r.pctAtingimento !== null ? formatPercent(r.pctAtingimento) : "—",
-    },
-    {
-      key: "gap",
-      header: "Gap",
-      align: "right",
-      render: (r) => renderGap(r.nome, r.gap),
-    },
-  ];
+  const byNome = new Map(result.tabelaFunil.map((m) => [m.nome, m]));
+  const get = (nome: string): MetricaMetaReal | undefined => byNome.get(nome);
+  const taxa = (nome: string): MetasCardTaxa | undefined =>
+    result.cardsTaxa.find((c) => c.nome === nome);
 
-  // ---- Pacing chart (visualmente limitada aos últimos 30 dias) ------------
-  const pacingChartFull = result.pacingChart;
-  const pacingChartRows =
-    pacingChartFull.length > PACING_CHART_LIMIT
-      ? pacingChartFull.slice(pacingChartFull.length - PACING_CHART_LIMIT)
-      : pacingChartFull;
+  const realMql = get("MQL")?.realValor ?? 0;
+  const realReunAg = get("Reuniões agendadas")?.realValor ?? 0;
+  const realReunReal = get("Reuniões realizadas")?.realValor ?? 0;
 
-  const pacingChartData = pacingChartRows.map((r) => ({
-    data: formatDataBR(r.date),
-    real: Math.round(r.realAcumulado),
-    meta: r.metaAcumulada == null ? null : Math.round(r.metaAcumulada),
+  // ---- Pacing chart -------------------------------------------------------
+  const metaTotal =
+    result.pacingChart.reduce<number | null>(
+      (acc, p) => (p.metaAcumulada != null ? p.metaAcumulada : acc),
+      null
+    );
+  const pacingData = result.pacingChart.map((p) => ({
+    dia: String(p.date.getUTCDate()),
+    real: p.realAcumulado == null ? null : Math.round(p.realAcumulado),
+    proj: p.projecao == null ? null : Math.round(p.projecao),
   }));
+  const hojeLabel =
+    pacingData[result.pacingDiaAtual - 1]?.dia ??
+    pacingData[pacingData.length - 1]?.dia;
 
-  // ---- Pacing necessário --------------------------------------------------
-  const pacingNecessarioColumns: Column<MetasPacingNecessario>[] = [
-    {
-      key: "metrica",
-      header: "Métrica",
-      render: (r) => r.metrica,
-    },
-    {
-      key: "valorPorDia",
-      header: "Valor/dia necessário",
-      align: "right",
-      render: (r) => formatPacingValor(r.metrica, r.valorPorDia),
-    },
-    {
-      key: "pctAvancado",
-      header: "% avançado",
-      align: "right",
-      render: (r) => formatPercent(r.pctAvancado),
-    },
-  ];
+  const pacingRows = result.pacingNecessario.map((p) => ({
+    label: p.metrica,
+    value: formatPacingValor(p.metrica, p.valorPorDia),
+    pct: p.pctAvancado,
+  }));
 
   // ---- Histórico mensal ---------------------------------------------------
   const historicoColumns: Column<MetasHistoricoRow>[] = [
-    {
-      key: "mes",
-      header: "Mês",
-      render: (r) => formatMesBR(r.mes),
-    },
+    { key: "mes", header: "Mês", render: (r) => formatMesBR(r.mes) },
     {
       key: "investimento",
       header: "Invest",
@@ -137,7 +92,7 @@ async function MetasContent({ searchParams }: PageProps) {
     },
     {
       key: "agendamentos",
-      header: "Agend",
+      header: "Agend.",
       align: "right",
       render: (r) => formatInt(r.agendamentos),
     },
@@ -155,7 +110,7 @@ async function MetasContent({ searchParams }: PageProps) {
     },
     {
       key: "conversao",
-      header: "Conv",
+      header: "Conv.",
       align: "right",
       render: (r) => (r.conversao !== null ? formatPercent(r.conversao) : "—"),
     },
@@ -173,98 +128,96 @@ async function MetasContent({ searchParams }: PageProps) {
     },
   ];
 
-  const hero = result.hero;
-  const pacingDescricao =
-    pacingChartFull.length > PACING_CHART_LIMIT
-      ? `Real acumulado vs meta linear — últimos ${PACING_CHART_LIMIT} dias`
-      : "Real acumulado vs meta linear — mês alvo";
-
   return (
     <PageShell
       title="Metas vs Realizado"
       description="Acompanhamento de metas mensais por funil e produto."
       toolbar={<Toolbar from={filters.from} to={filters.to} funil />}
     >
-      {/* Hero — Faturamento */}
-      <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-6 shadow-xs">
-        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          Faturamento
-        </span>
-        <span className="text-4xl font-semibold tracking-tight tabular-nums text-foreground">
-          {formatBRLCompact(hero.realFaturamento)}
-        </span>
-        <div className="text-sm text-muted-foreground">
-          <span>
-            Meta MTD:{" "}
-            {hero.metaFaturamentoMtd !== null
-              ? formatBRLCompact(hero.metaFaturamentoMtd)
-              : "—"}
-          </span>
-          <span className="mx-2">·</span>
-          <span>
-            Atingimento:{" "}
-            {hero.pctAtingimento !== null
-              ? formatPercent(hero.pctAtingimento)
-              : "—"}
-          </span>
-        </div>
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
-          <span
-            className={cn(
-              "tabular-nums",
-              hero.gap === null && "text-muted-foreground",
-              hero.gap !== null && hero.gap >= 0 && "text-emerald-600",
-              hero.gap !== null && hero.gap < 0 && "text-rose-600"
-            )}
-          >
-            {renderHeroGap(hero.gap)}
-          </span>
-          <span className="text-muted-foreground">
-            Projeção fim do mês:{" "}
-            <span className="tabular-nums text-foreground">
-              {formatBRLCompact(hero.projecaoFimDoMes)}
-            </span>
-          </span>
-        </div>
+      <p className="text-xs leading-relaxed text-muted-foreground">
+        Metas proporcionais ao período selecionado (month-to-date): a meta
+        mensal é prorrateada pelos dias do filtro dentro do mês alvo.
+      </p>
+
+      {/* Topo do funil */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <ProgressStatCard {...absCard(get("Investimento"), { monetary: true })} />
+        <ProgressStatCard {...absCard(get("MQL"), { monetary: false })} />
+        <ProgressStatCard {...ceilingCard("CMQL", taxa("CMQL"))} />
       </div>
 
-      {/* Tabela funil meta x real */}
-      <MetricTable
-        title="Funil — Meta x Real"
-        description="Comparação por etapa do funil no período"
-        columns={funilColumns}
-        rows={result.tabelaFunil}
-      />
-
-      {/* 4 cards de taxa */}
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        {result.cardsTaxa.map((card) => (
-          <TaxaCard key={card.nome} card={card} />
-        ))}
+      {/* Conversões */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <ProgressStatCard
+          {...absCard(get("Agendamentos"), {
+            monetary: false,
+            sub: ratioSub(
+              taxa("Tx Agendamento / MQL"),
+              "do MQL"
+            ),
+          })}
+        />
+        <ProgressStatCard
+          {...absCard(get("Reuniões agendadas"), {
+            monetary: false,
+            sub: ratioSubAbs(realReunAg, realMql, "do MQL"),
+          })}
+        />
+        <ProgressStatCard
+          {...rateCard(
+            "Reuniões realizadas",
+            "show (realizadas/agendadas)",
+            taxa("Tx Reun. realizada / Reun. agendada"),
+            `${formatInt(realReunReal)} de ${formatInt(realReunAg)} agendadas`
+          )}
+        />
       </div>
 
-      {/* Pacing chart */}
-      <AreaLineChart
-        title="Pacing — Faturamento acumulado"
-        description={pacingDescricao}
-        data={pacingChartData}
-        xKey="data"
-        area={{ key: "real", label: "Real acumulado" }}
-        lines={[{ key: "meta", label: "Meta acumulada", dashed: true }]}
-      />
+      {/* Fim do funil */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <ProgressStatCard {...absCard(get("Vendas"), { monetary: false })} />
+        <ProgressStatCard
+          {...rateCard(
+            "Conversão de vendas",
+            "vendas / reuniões realizadas",
+            taxa("Conversão Vendas / Reun. realizada"),
+            `${formatInt(get("Vendas")?.realValor ?? 0)} vendas / ${formatInt(
+              realReunReal
+            )} reuniões realizadas`
+          )}
+        />
+        <ProgressStatCard
+          {...absCard(get("Faturamento"), { monetary: true })}
+        />
+      </div>
 
-      {/* Pacing necessário */}
-      <MetricTable
-        title="Pacing necessário"
-        description="Quanto falta por dia restante pra bater a meta total do mês"
-        columns={pacingNecessarioColumns}
-        rows={result.pacingNecessario}
-      />
+      {/* Projeção + Pacing */}
+      <div className="grid items-stretch gap-6 lg:grid-cols-2">
+        <ProjectionChart
+          title="Projeção do mês"
+          description="Realizado + projeção pelo ritmo atual vs meta"
+          data={pacingData}
+          xKey="dia"
+          realKey="real"
+          projKey="proj"
+          metaValue={metaTotal}
+          metaLabel={
+            metaTotal != null ? `meta ${formatBRLCompact(metaTotal)}` : undefined
+          }
+          hojeLabel={hojeLabel}
+          className="h-full w-full"
+        />
+        <PacingBars
+          title="Pacing"
+          description="Quanto falta por dia restante pra bater a meta do mês"
+          rows={pacingRows}
+        />
+      </div>
 
       {/* Histórico mensal */}
       <MetricTable
-        title="Histórico mensal (últimos 12 meses)"
-        description="Evolução de investimento, funil e faturamento por mês"
+        title="Histórico mensal"
+        description="Últimos 12 meses — investimento, funil e faturamento"
         columns={historicoColumns}
         rows={result.historicoMensal}
       />
@@ -273,99 +226,127 @@ async function MetasContent({ searchParams }: PageProps) {
 }
 
 // ---------------------------------------------------------------------------
-// Cards de taxa
+// Mapeadores calc → ProgressStatCard
 // ---------------------------------------------------------------------------
 
-function TaxaCard({ card }: { card: MetasCardTaxa }) {
-  const value = card.realValor !== null ? formatTaxaValor(card) : "—";
-  const meta = card.metaValor !== null ? formatTaxaMeta(card) : "—";
+type CardProps = React.ComponentProps<typeof ProgressStatCard>;
 
-  // Sinal: bom/ruim depende de isInverse.
-  let tone: "good" | "bad" | "neutral" = "neutral";
-  if (card.realValor !== null && card.metaValor !== null && card.metaValor > 0) {
-    const realMelhor = card.isInverse
-      ? card.realValor <= card.metaValor
-      : card.realValor >= card.metaValor;
-    tone = realMelhor ? "good" : "bad";
+/** Card de métrica absoluta (real vs meta MTD). */
+function absCard(
+  m: MetricaMetaReal | undefined,
+  opts: { monetary: boolean; sub?: string }
+): CardProps {
+  const fmt = opts.monetary ? formatBRL : (n: number) => formatInt(n);
+  const fmtC = opts.monetary ? formatBRLCompact : (n: number) => formatInt(n);
+  if (!m) {
+    return {
+      title: "—",
+      value: "—",
+      pct: 0,
+      footerLeft: "sem dados",
+    };
   }
+  const hasMeta = m.metaMtdValor != null;
+  const pct = m.pctAtingimento ?? 0;
+  return {
+    title: m.nome,
+    metaLabel: hasMeta ? `meta ${fmtC(m.metaMtdValor as number)}` : "sem meta",
+    value: fmt(m.realValor),
+    metaValue: hasMeta ? `/ ${fmtC(m.metaMtdValor as number)}` : undefined,
+    sub: opts.sub,
+    pct,
+    footerLeft: hasMeta ? `${formatPercent(pct)} atingido` : "—",
+    footerRight: gapText(m.gap, opts.monetary),
+  };
+}
 
-  return (
-    <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-5 shadow-xs">
-      <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-        {card.nome}
-      </span>
-      <span
-        className={cn(
-          "text-2xl font-semibold tracking-tight tabular-nums",
-          tone === "good" && "text-emerald-600",
-          tone === "bad" && "text-rose-600",
-          tone === "neutral" && "text-foreground"
-        )}
-      >
-        {value}
-      </span>
-      <span className="text-xs text-muted-foreground">Meta: {meta}</span>
-    </div>
-  );
+/** Card de teto/inverso (CMQL): menor é melhor. */
+function ceilingCard(
+  nome: string,
+  c: MetasCardTaxa | undefined
+): CardProps {
+  if (!c || c.realValor == null) {
+    return { title: nome, value: "—", pct: 0, footerLeft: "sem dados" };
+  }
+  const teto = c.metaValor;
+  const real = c.realValor;
+  const overTeto = teto != null && real > teto;
+  const pct = teto != null && teto > 0 ? Math.min(real / teto, 1) : 0;
+  return {
+    title: nome,
+    metaLabel: teto != null ? `teto ${formatBRL(teto)}` : "sem teto",
+    value: formatBRL(real),
+    pct,
+    warn: overTeto,
+    footerLeft: overTeto ? "acima do teto" : "abaixo do teto",
+    footerRight: teto != null ? `teto ${formatBRL(teto)}` : undefined,
+  };
+}
+
+/** Card de taxa (show, conversão): real% vs meta%. */
+function rateCard(
+  title: string,
+  metaLabel: string,
+  c: MetasCardTaxa | undefined,
+  sub: string
+): CardProps {
+  if (!c || c.realValor == null) {
+    return { title, value: "—", pct: 0, footerLeft: "sem dados", sub };
+  }
+  const real = c.realValor;
+  const meta = c.metaValor;
+  const hasMeta = meta != null && meta > 0;
+  const pct = hasMeta ? Math.min(real / (meta as number), 1) : 0;
+  return {
+    title,
+    metaLabel,
+    value: formatPercent(real),
+    metaValue: hasMeta ? `/ ${formatPercent(meta as number)}` : undefined,
+    sub,
+    pct,
+    warn: hasMeta ? real < (meta as number) : false,
+    footerLeft: hasMeta ? `${formatPercent(pct)} da meta` : "sem meta",
+  };
+}
+
+function ratioSub(
+  c: MetasCardTaxa | undefined,
+  suffix: string
+): string | undefined {
+  if (!c || c.realValor == null) return undefined;
+  const real = `${formatPercent(c.realValor)} ${suffix}`;
+  return c.metaValor != null
+    ? `${real} · meta ${formatPercent(c.metaValor)}`
+    : real;
+}
+
+function ratioSubAbs(
+  num: number,
+  den: number,
+  suffix: string
+): string | undefined {
+  if (den <= 0) return undefined;
+  return `${formatPercent(num / den)} ${suffix}`;
+}
+
+function gapText(gap: number | null, monetary: boolean): string | undefined {
+  if (gap == null) return undefined;
+  const f = monetary
+    ? formatBRL(Math.abs(gap))
+    : formatInt(Math.abs(gap));
+  if (gap === 0) return "no alvo";
+  return gap > 0 ? `+${f}` : `faltam ${f}`;
 }
 
 // ---------------------------------------------------------------------------
 // Formatadores locais
 // ---------------------------------------------------------------------------
 
-function isMetricaMonetaria(nome: string): boolean {
-  const s = nome.toLowerCase();
-  return s.includes("invest") || s.includes("fatur") || s.includes("receita");
-}
-
-function formatMetricaValor(nome: string, valor: number): string {
-  if (isMetricaMonetaria(nome)) return formatBRL(valor);
-  return formatInt(valor);
-}
-
-function renderGap(nome: string, gap: number | null): React.ReactNode {
-  if (gap === null) return "—";
-  const monetario = isMetricaMonetaria(nome);
-  const formatted = monetario ? formatBRL(Math.abs(gap)) : formatInt(Math.abs(gap));
-  if (gap === 0) {
-    return <span className="text-muted-foreground">0</span>;
-  }
-  if (gap > 0) {
-    return <span className="text-emerald-600">+{formatted}</span>;
-  }
-  return <span className="text-rose-600">-{formatted}</span>;
-}
-
-function renderHeroGap(gap: number | null): string {
-  if (gap === null) return "Gap: —";
-  if (gap === 0) return "No alvo da meta MTD";
-  if (gap > 0) return `Acima ${formatBRL(gap)}`;
-  return `Faltam ${formatBRL(Math.abs(gap))}`;
-}
-
-function formatTaxaValor(card: MetasCardTaxa): string {
-  if (card.realValor === null) return "—";
-  if (card.nome === "CMQL") return formatBRL(card.realValor);
-  return formatPercent(card.realValor);
-}
-
-function formatTaxaMeta(card: MetasCardTaxa): string {
-  if (card.metaValor === null) return "—";
-  if (card.nome === "CMQL") return formatBRL(card.metaValor);
-  return formatPercent(card.metaValor);
-}
-
 function formatPacingValor(metrica: string, valor: number): string {
   const s = metrica.toLowerCase();
   if (s.includes("fatur") || s.includes("invest")) return formatBRL(valor);
+  if (s.includes("vend")) return valor.toFixed(2);
   return formatInt(valor);
-}
-
-function formatDataBR(d: Date): string {
-  const dd = String(d.getUTCDate()).padStart(2, "0");
-  const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const yyyy = d.getUTCFullYear();
-  return `${dd}/${mm}/${yyyy}`;
 }
 
 const MESES_PT_ABBR = [
@@ -398,26 +379,26 @@ function MetasSkeleton() {
       title="Metas vs Realizado"
       description="Acompanhamento de metas mensais por funil e produto."
     >
-      <div className="h-40 animate-pulse rounded-xl border border-border bg-card p-6 shadow-xs" />
-      <div className="h-64 animate-pulse rounded-xl border border-border bg-card p-5 shadow-xs" />
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div
-            key={i}
-            className="flex h-[110px] flex-col gap-2 rounded-xl border border-border bg-card p-5 shadow-xs"
-          >
-            <div className="h-3 w-24 animate-pulse rounded bg-muted" />
-            <div className="h-7 w-28 animate-pulse rounded bg-muted" />
-            <div className="h-3 w-20 animate-pulse rounded bg-muted" />
-          </div>
-        ))}
-      </div>
-      {Array.from({ length: 3 }).map((_, i) => (
-        <div
-          key={i}
-          className="h-48 animate-pulse rounded-xl border border-border bg-card p-5 shadow-xs"
-        />
+      <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
+      {Array.from({ length: 3 }).map((_, row) => (
+        <div key={row} className="grid gap-6 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((__, i) => (
+            <div
+              key={i}
+              className="surface-card flex h-[170px] flex-col gap-3 p-5"
+            >
+              <div className="h-4 w-28 animate-pulse rounded bg-muted" />
+              <div className="h-7 w-32 animate-pulse rounded bg-muted" />
+              <div className="mt-auto h-2 w-full animate-pulse rounded bg-muted" />
+            </div>
+          ))}
+        </div>
       ))}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="surface-card h-72 animate-pulse" />
+        <div className="surface-card h-72 animate-pulse" />
+      </div>
+      <div className="surface-card h-64 animate-pulse" />
     </PageShell>
   );
 }

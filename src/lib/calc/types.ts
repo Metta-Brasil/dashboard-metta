@@ -388,8 +388,12 @@ export type MetasCardTaxa = {
 
 export type MetasPacingPoint = {
   date: Date;
-  realAcumulado: number;
+  /** Acumulado real; null nos dias após "hoje" (linha realizado para). */
+  realAcumulado: number | null;
   metaAcumulada: number | null;
+  /** Trajetória projetada (run-rate). null antes do dia atual; no dia
+   *  atual = realAcumulado (junção); depois = projeção linear até o fim. */
+  projecao: number | null;
 };
 
 export type MetasPacingNecessario = {
@@ -427,6 +431,8 @@ export type MetasResult = {
   tabelaFunil: MetricaMetaReal[];
   cardsTaxa: MetasCardTaxa[];
   pacingChart: MetasPacingPoint[];
+  /** Dia do mês alvo correspondente a "hoje" (1..diasNoMes). */
+  pacingDiaAtual: number;
   pacingNecessario: MetasPacingNecessario[];
   historicoMensal: MetasHistoricoRow[];
   rows?: MetaComparacao[];

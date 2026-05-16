@@ -247,11 +247,14 @@ export function calcMetas(
     },
   ];
 
-  // ---- pacingChart (real acum vs meta acum por dia do mês alvo) -----------
+  // ---- pacingChart (real acum vs meta acum + projeção por dia) -----------
+  const pacingDiaAtual = Math.min(Math.max(diasNoFiltro, 1), diasNoMes);
   const pacingChart = buildPacingChart({
     year: targetYear,
     monthIdx: targetMonthIdx,
     diasNoMes,
+    diaAtual: pacingDiaAtual,
+    projecaoFimDoMes,
     vendasDoMes: vendasNoMes(vendasF, targetYear, targetMonthIdx),
     metaFaturamentoTotal,
   });
@@ -332,6 +335,7 @@ export function calcMetas(
     tabelaFunil,
     cardsTaxa,
     pacingChart,
+    pacingDiaAtual,
     pacingNecessario,
     historicoMensal,
     rows: rowsLegado,
@@ -441,10 +445,20 @@ function buildPacingChart(opts: {
   year: number;
   monthIdx: number;
   diasNoMes: number;
+  diaAtual: number;
+  projecaoFimDoMes: number;
   vendasDoMes: VendaRow[];
   metaFaturamentoTotal: number | null;
 }): MetasPacingPoint[] {
-  const { year, monthIdx, diasNoMes, vendasDoMes, metaFaturamentoTotal } = opts;
+  const {
+    year,
+    monthIdx,
+    diasNoMes,
+    diaAtual,
+    projecaoFimDoMes,
+    vendasDoMes,
+    metaFaturamentoTotal,
+  } = opts;
 
   // Faturamento por dia.
   const porDia = new Map<number, number>();
@@ -454,6 +468,13 @@ function buildPacingChart(opts: {
     porDia.set(day, (porDia.get(day) ?? 0) + (v.valorContrato || 0));
   }
 
+  // 1ª passada: acumulado real até o dia atual (junção da projeção).
+  let realAteHoje = 0;
+  for (let dia = 1; dia <= diaAtual; dia++) {
+    realAteHoje += porDia.get(dia) ?? 0;
+  }
+  const diasRestantes = diasNoMes - diaAtual;
+
   const out: MetasPacingPoint[] = [];
   let acumulado = 0;
   for (let dia = 1; dia <= diasNoMes; dia++) {
@@ -462,10 +483,29 @@ function buildPacingChart(opts: {
       metaFaturamentoTotal != null
         ? (metaFaturamentoTotal * dia) / diasNoMes
         : null;
+
+    // Projeção: null antes de hoje; = real no dia atual (junta as linhas);
+    // depois, interpolação linear de realAteHoje → projecaoFimDoMes.
+    let projecao: number | null;
+    if (dia < diaAtual) {
+      projecao = null;
+    } else if (dia === diaAtual) {
+      projecao = realAteHoje;
+    } else {
+      projecao =
+        diasRestantes > 0
+          ? realAteHoje +
+            ((projecaoFimDoMes - realAteHoje) * (dia - diaAtual)) /
+              diasRestantes
+          : realAteHoje;
+    }
+
     out.push({
       date: new Date(Date.UTC(year, monthIdx, dia)),
-      realAcumulado: acumulado,
+      // Real só até hoje; depois vira null pra linha "realizado" parar.
+      realAcumulado: dia <= diaAtual ? acumulado : null,
       metaAcumulada,
+      projecao,
     });
   }
   return out;
