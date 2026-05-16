@@ -116,3 +116,30 @@ tabelas e cards genéricos.
 
 Cada página, ao ser corrigida, é verificada contra seu `#pX` antes de
 seguir para a próxima.
+
+---
+
+## Status final — 2026-05-16
+
+Tudo verificado contra `#pX` via medição de DOM antes de deploy. No ar
+em `dashboard-metta-perpetuo.vercel.app`.
+
+- **P6 Metas** ✅ — 9 cards-gauge + projeção (série nova no calc) +
+  pacing em barras + histórico. Aba "Metas" da planilha preenchida com
+  as metas de Maio. Bug do mês-alvo corrigido (ancorado em `filters.to`).
+- **P4 Closer** ✅ — donut + evolução lado a lado (`g-2`).
+- **P2 Tráfego** ✅ — `g-2-1` (combo+barras | funil) + FunilResumo extra
+  removido.
+- **P3 SDR** ✅ — filtros SDR e Status (selects nativos, parse aditivo,
+  default = no-op sem regressão).
+- **P8 Origem** ✅ — 1ª coluna por tabela + cabeçalhos abreviados.
+- **P7 Anúncios — Temperatura: BLOQUEADO.** O calc tem no-op consciente
+  (`anuncios.ts:129`): o PRD não define os markers de temperatura
+  (Frio/Quente/Advantage) em `campaignName`. Não shipado de propósito —
+  select morto seria desonesto e marker chutado zeraria a página.
+  **Pendência do usuário:** confirmar a convenção real dos markers.
+
+Filtros que dependiam do mesmo plumbing e foram entregues: SDR/Status
+(P3). Produto/Pagamento (P4) e Temperatura (P7) seguem fora — os dois
+primeiros foram des-escopados pelo usuário ("só layout e gráficos"); o
+terceiro está bloqueado por convenção de dado não documentada.
