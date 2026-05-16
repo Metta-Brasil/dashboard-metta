@@ -128,6 +128,11 @@ async function OrigemContent({ searchParams }: PageProps) {
         rows={result.porUtmCampaign}
       />
       <MetricTable
+        title="Por UTM Content"
+        columns={cols("Conteúdo")}
+        rows={result.porUtmContent}
+      />
+      <MetricTable
         title="Por Qualificação"
         columns={cols("Qualificação")}
         rows={result.porQualificacao}

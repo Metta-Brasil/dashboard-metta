@@ -236,6 +236,14 @@ export function calcOrigem(
   });
   const porUtmCampaign = mapToSortedRows(utmCampaignMap, toRow);
 
+  // ----- 4) Por UTM Content (ad name — raw, como campaign) -------------------
+  const utmContentMap = aggregate({
+    keyFromLead: (l) => raw(l.utmContent),
+    keyFromSdr: (s) => raw(s.utmContentSnap),
+    keyFromVenda: (v) => raw(v.utmContentSnap),
+  });
+  const porUtmContent = mapToSortedRows(utmContentMap, toRow);
+
   // ----- 4) Por Qualificação -------------------------------------------------
   // normalizeQualif retorna "Enterprise"|"MQL1"|"MQL2"|"Outros".
   // Wireframe quer labels com espaço: "MQL 1" / "MQL 2".
@@ -298,6 +306,7 @@ export function calcOrigem(
   return {
     porUtmSource,
     porUtmMedium,
+    porUtmContent,
     porUtmCampaign,
     porQualificacao,
     porCargo,

@@ -515,6 +515,7 @@ export type OrigemRow = {
 export type OrigemResult = {
   porUtmSource: OrigemRow[];
   porUtmMedium: OrigemRow[];
+  porUtmContent: OrigemRow[];
   porUtmCampaign: OrigemRow[];
   porQualificacao: OrigemRow[];
   porCargo: OrigemRow[];
