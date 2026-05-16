@@ -90,6 +90,7 @@ export function ComboBarLineChart({
   bars,
   lines,
   height = 300,
+  className,
 }: {
   title: string;
   description?: string;
@@ -98,12 +99,13 @@ export function ComboBarLineChart({
   bars: SeriesDef[];
   lines: SeriesDef[];
   height?: number;
+  className?: string;
 }) {
   const config = buildConfig([...bars, ...lines]);
   const hasRight = [...bars, ...lines].some((s) => s.axis === "right");
 
   return (
-    <ChartCard title={title} description={description}>
+    <ChartCard title={title} description={description} className={className}>
       <ChartContainer config={config} className="aspect-auto w-full" style={{ height }}>
         <ComposedChart data={data} margin={{ left: 4, right: 4, top: 8 }}>
           <CartesianGrid vertical={false} strokeDasharray="3 3" />
@@ -165,6 +167,7 @@ export function MultiLineChart({
   xKey,
   lines,
   height = 280,
+  className,
 }: {
   title: string;
   description?: string;
@@ -172,12 +175,13 @@ export function MultiLineChart({
   xKey: string;
   lines: SeriesDef[];
   height?: number;
+  className?: string;
 }) {
   const config = buildConfig(lines);
   const hasRight = lines.some((s) => s.axis === "right");
 
   return (
-    <ChartCard title={title} description={description}>
+    <ChartCard title={title} description={description} className={className}>
       <ChartContainer config={config} className="aspect-auto w-full" style={{ height }}>
         <ComposedChart data={data} margin={{ left: 4, right: 4, top: 8 }}>
           <CartesianGrid vertical={false} strokeDasharray="3 3" />
@@ -294,6 +298,7 @@ export function DonutChart({
   centerLabel,
   centerValue,
   height = 280,
+  className,
 }: {
   title: string;
   description?: string;
@@ -302,6 +307,7 @@ export function DonutChart({
   centerLabel?: string;
   centerValue?: string;
   height?: number;
+  className?: string;
 }) {
   const config: ChartConfig = {};
   data.forEach((d, i) => {
@@ -309,7 +315,7 @@ export function DonutChart({
   });
 
   return (
-    <ChartCard title={title} description={description}>
+    <ChartCard title={title} description={description} className={className}>
       {/* Wrapper de altura fixa: o gráfico preenche por absoluto e o
           valor central fica sobreposto e centrado — sem margem negativa
           (que estourava o card e invadia a seção de baixo no mobile). */}

@@ -76,13 +76,13 @@ export default function VisaoGeralPage({ searchParams }: PageProps) {
       </Suspense>
 
       {/* Linha 1 — Evolução (largo) + Funil consolidado (estreito) */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+      <div className="grid items-stretch gap-6 lg:grid-cols-3">
+        <div className="flex lg:col-span-2">
           <Suspense fallback={<SectionFallback label="Carregando evolução…" />}>
             <EvolucaoDiariaSection searchParams={searchParams} />
           </Suspense>
         </div>
-        <div className="lg:col-span-1">
+        <div className="flex lg:col-span-1">
           <Suspense fallback={<SectionFallback label="Carregando funil…" />}>
             <FunilSection searchParams={searchParams} />
           </Suspense>
@@ -90,15 +90,15 @@ export default function VisaoGeralPage({ searchParams }: PageProps) {
       </div>
 
       {/* Linha 2 — Distribuição (estreito) + Custo por etapa (largo) */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-1">
+      <div className="grid items-stretch gap-6 lg:grid-cols-3">
+        <div className="flex lg:col-span-1">
           <Suspense
             fallback={<SectionFallback label="Carregando distribuição…" />}
           >
             <DistribuicaoSection searchParams={searchParams} />
           </Suspense>
         </div>
-        <div className="lg:col-span-2">
+        <div className="flex lg:col-span-2">
           <Suspense fallback={<SectionFallback label="Carregando custo…" />}>
             <CustoPorEtapaSection searchParams={searchParams} />
           </Suspense>
@@ -198,9 +198,10 @@ async function FunilSection({ searchParams }: PageProps) {
   return (
     <FunnelVertical
       title="Funil consolidado"
-      description="7 etapas — investimento até venda"
+      description="Leads até venda"
       steps={result.funilConsolidado}
-      monetaryEtapas={["Investimento"]}
+      monetaryEtapas={[]}
+      className="h-full w-full"
     />
   );
 }
@@ -230,6 +231,7 @@ async function EvolucaoDiariaSection({ searchParams }: PageProps) {
       lines={[
         { key: "conv", label: "% Conv. acumulada", axis: "right" },
       ]}
+      className="h-full w-full"
     />
   );
 }
@@ -255,6 +257,7 @@ async function CustoPorEtapaSection({ searchParams }: PageProps) {
         { key: "cmql", label: "CMQL" },
         { key: "cac", label: "CAC", axis: "right" },
       ]}
+      className="h-full w-full"
     />
   );
 }
@@ -278,6 +281,7 @@ async function DistribuicaoSection({ searchParams }: PageProps) {
       data={data}
       centerLabel="MQL total"
       centerValue={formatInt(totalMql)}
+      className="h-full w-full"
     />
   );
 }
@@ -394,12 +398,12 @@ async function TabelaDiariaSection({ searchParams }: PageProps) {
 
 function SectionFallback({ label }: { label: string }) {
   return (
-    <div className="surface-card flex flex-col gap-4 p-5 lg:p-6">
+    <div className="surface-card flex h-full w-full flex-col gap-4 p-5 lg:p-6">
       <div className="flex flex-col gap-2">
         <div className="h-4 w-48 animate-pulse rounded bg-muted" />
         <div className="h-3 w-64 animate-pulse rounded bg-muted/70" />
       </div>
-      <div className="h-48 w-full animate-pulse rounded-lg bg-muted/60" />
+      <div className="min-h-48 flex-1 animate-pulse rounded-lg bg-muted/60" />
       <span className="sr-only">{label}</span>
     </div>
   );
