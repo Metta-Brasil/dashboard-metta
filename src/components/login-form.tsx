@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { AuthError } from "next-auth";
 
 import { signIn } from "@/auth";
 import { cn } from "@/lib/utils";
@@ -15,11 +17,23 @@ import { Input } from "@/components/ui/input";
 
 async function loginWithCredentials(formData: FormData) {
   "use server";
-  await signIn("credentials", {
-    email: String(formData.get("email") ?? ""),
-    password: String(formData.get("password") ?? ""),
-    redirectTo: "/",
-  });
+  try {
+    await signIn("credentials", {
+      email: String(formData.get("email") ?? ""),
+      password: String(formData.get("password") ?? ""),
+      redirectTo: "/",
+    });
+  } catch (error) {
+    // Credenciais inválidas → volta pro form com mensagem amigável.
+    // O redirect de sucesso lança NEXT_REDIRECT e precisa propagar.
+    if (error instanceof AuthError) {
+      redirect(
+        "/login?error=" +
+          encodeURIComponent("E-mail ou senha inválidos.")
+      );
+    }
+    throw error;
+  }
 }
 
 async function loginWithGoogle() {
@@ -28,9 +42,10 @@ async function loginWithGoogle() {
 }
 
 export function LoginForm({
+  error,
   className,
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div"> & { error?: string }) {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
@@ -49,6 +64,12 @@ export function LoginForm({
                   Entre no Dashboard Metta
                 </p>
               </div>
+
+              {error && (
+                <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
+                  {error}
+                </p>
+              )}
 
               <form action={loginWithCredentials}>
                 <FieldGroup>

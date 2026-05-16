@@ -54,24 +54,12 @@ export default function GlobalError({
             maxWidth: 420,
           }}
         >
-          <span
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: 12,
-              background: "#ffbe18",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/brand/metta-symbol.svg"
-              alt="Metta"
-              style={{ width: 24, height: 24 }}
-            />
-          </span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/metta-symbol.svg"
+            alt="Metta"
+            style={{ width: 40, height: 40 }}
+          />
           <h2 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>
             {isSkew
               ? "Atualizando o dashboard…"

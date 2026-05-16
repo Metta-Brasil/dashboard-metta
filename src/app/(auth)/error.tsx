@@ -35,10 +35,8 @@ export default function AuthError({
 
   return (
     <div className="surface-card flex w-full max-w-sm flex-col items-center gap-5 p-8 text-center">
-      <span className="flex size-12 items-center justify-center rounded-xl bg-foreground">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/brand/metta-symbol.svg" alt="Metta" className="size-6" />
-      </span>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/brand/metta-symbol.svg" alt="Metta" className="size-10" />
       <div className="flex flex-col gap-1.5">
         <h2 className="text-lg font-semibold text-foreground">
           {isSkew ? "Atualizando…" : "Não foi possível carregar"}
