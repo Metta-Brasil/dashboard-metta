@@ -38,14 +38,12 @@ export function LoginForm({
           <div className="p-6 md:p-8">
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <span className="mb-1 flex size-11 items-center justify-center rounded-xl bg-foreground">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="/brand/metta-symbol.svg"
-                    alt="Metta"
-                    className="size-6"
-                  />
-                </span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/brand/metta-symbol.svg"
+                  alt="Metta"
+                  className="mb-1 size-10"
+                />
                 <h1 className="text-2xl font-bold">Bem-vindo de volta</h1>
                 <p className="text-balance text-muted-foreground">
                   Entre no Dashboard Metta
