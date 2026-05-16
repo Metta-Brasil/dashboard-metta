@@ -110,18 +110,13 @@ export function LoginForm({
             </FieldGroup>
           </div>
 
-          <div className="bg-foreground relative hidden md:block">
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-5">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/brand/metta-symbol.svg"
-                alt=""
-                className="size-24"
-              />
-              <span className="text-xs uppercase tracking-[0.2em] text-white/55">
-                Inteligência Comercial
-              </span>
-            </div>
+          <div className="relative hidden items-center justify-center bg-muted p-10 md:flex">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/dashboard-illustration.svg"
+              alt=""
+              className="h-auto w-full max-w-sm"
+            />
           </div>
         </CardContent>
       </Card>
