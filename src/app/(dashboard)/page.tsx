@@ -388,6 +388,7 @@ async function TabelaDiariaSection({ searchParams }: PageProps) {
       columns={columns}
       rows={rows}
       footer={footer}
+      maxRows={30}
     />
   );
 }
