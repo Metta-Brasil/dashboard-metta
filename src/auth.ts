@@ -20,6 +20,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [Google],
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
+  // App roda atrás do alias fixo da Vercel — confiar no host evita
+  // erro "UntrustedHost" no fluxo OAuth em produção.
+  trustHost: true,
   callbacks: {
     async signIn({ profile }) {
       const p = profile as GoogleProfile | undefined;
