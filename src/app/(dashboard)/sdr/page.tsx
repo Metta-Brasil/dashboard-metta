@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import { FunnelVertical } from "@/components/dashboard/funnel-vertical";
 import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
+import { FilterSelect } from "@/components/dashboard/filter-select";
 import { MetricTable, type Column } from "@/components/dashboard/metric-table";
 import { SDRHeatmap } from "@/components/dashboard/sdr-heatmap";
 import { Toolbar } from "@/components/dashboard/toolbar";
@@ -38,8 +39,27 @@ export default function SdrPage({ searchParams }: PageProps) {
 }
 
 async function SdrToolbar({ searchParams }: PageProps) {
-  const filters = await getFilters(searchParams);
-  return <Toolbar from={filters.from} to={filters.to} funil />;
+  const [filters, result] = await Promise.all([
+    getFilters(searchParams),
+    getSdr(searchParams),
+  ]);
+  return (
+    <Toolbar
+      from={filters.from}
+      to={filters.to}
+      funil
+      extras={
+        <>
+          <FilterSelect param="sdr" label="SDR" options={result.sdrNames} />
+          <FilterSelect
+            param="status"
+            label="Status"
+            options={result.statusValues}
+          />
+        </>
+      }
+    />
+  );
 }
 
 async function SdrContent({ searchParams }: PageProps) {

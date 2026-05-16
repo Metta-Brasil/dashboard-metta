@@ -30,8 +30,23 @@ export function calcSdr(
 
   // 1. Filtros base — funil aplicado em leads, sdr e vendas.
   const leadsF = filterLeadsByFunil(data.leads, funis);
-  const sdrF = filterLeadsByFunil(data.sdr, funis);
+  let sdrF = filterLeadsByFunil(data.sdr, funis);
   const vendasF = filterVendasByFunil(data.vendas, funis);
+
+  // 1b. Opções dos selects (SDR/Status) — derivadas do recorte de funil
+  //     ANTES de aplicar o filtro SDR/Status, pra a lista não encolher.
+  const sdrNames = Array.from(
+    new Set(sdrF.map((s) => s.quemAgendou).filter((n) => n && n.trim() !== ""))
+  ).sort((a, b) => a.localeCompare(b, "pt-BR"));
+  const statusValues = Array.from(
+    new Set(sdrF.map((s) => s.status).filter((n) => n && n.trim() !== ""))
+  ).sort((a, b) => a.localeCompare(b, "pt-BR"));
+
+  // 1c. Filtro SDR / Status (aditivo). Default (undefined) = sem corte →
+  //     comportamento idêntico ao anterior (zero regressão). Aplicado em
+  //     sdrF pra propagar consistente a agend./reuniões/funil/heatmap/tabela.
+  if (filters.sdr) sdrF = sdrF.filter((s) => s.quemAgendou === filters.sdr);
+  if (filters.status) sdrF = sdrF.filter((s) => s.status === filters.status);
 
   // 2. Janelas temporais separadas conforme PRD §5.1.2:
   //    - Leads recebidos / qualificação    → leads.dataInscricao
@@ -225,5 +240,7 @@ export function calcSdr(
     funilSdr,
     heatmap,
     porSdr,
+    sdrNames,
+    statusValues,
   };
 }

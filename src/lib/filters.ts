@@ -20,6 +20,16 @@ export function parseFilters(
   const toStr = typeof searchParams.to === "string" ? searchParams.to : undefined;
   const funisStr = typeof searchParams.funis === "string" ? searchParams.funis : undefined;
 
+  // Filtro string opcional: vazio/"todos"/"todas" → undefined (sem filtro).
+  const str = (k: string): string | undefined => {
+    const v = searchParams[k];
+    if (typeof v !== "string") return undefined;
+    const t = v.trim();
+    const low = t.toLowerCase();
+    if (t === "" || low === "todos" || low === "todas") return undefined;
+    return t;
+  };
+
   const from = fromStr ? new Date(fromStr) : defaultFrom;
   const to = toStr ? new Date(toStr) : now;
 
@@ -31,5 +41,7 @@ export function parseFilters(
     from: Number.isFinite(from.getTime()) ? from : defaultFrom,
     to: Number.isFinite(to.getTime()) ? to : now,
     funis: funis.length ? funis : (["todos"] as Funil[]),
+    sdr: str("sdr"),
+    status: str("status"),
   };
 }

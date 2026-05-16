@@ -37,16 +37,12 @@ async function OrigemToolbar({ searchParams }: PageProps) {
 async function OrigemContent({ searchParams }: PageProps) {
   const result = await getOrigem(searchParams);
 
-  const baseColumns: Column<OrigemRow>[] = [
-    {
-      key: "dimensao",
-      header: "Dimensão",
-      render: (r) => r.dimensao,
-      align: "left",
-    },
+  // Cabeçalhos abreviados conforme wireframe #p8; o 1º cabeçalho varia
+  // por tabela (Origem / Campanha / Qualificação / Cargo / etc.).
+  const metricCols: Column<OrigemRow>[] = [
     {
       key: "leadsQualif",
-      header: "Leads qualif",
+      header: "Leads qualif.",
       render: (r) => formatInt(r.leadsQualif),
       align: "right",
     },
@@ -58,19 +54,19 @@ async function OrigemContent({ searchParams }: PageProps) {
     },
     {
       key: "agendamentos",
-      header: "Agendamentos",
+      header: "Agend.",
       render: (r) => formatInt(r.agendamentos),
       align: "right",
     },
     {
       key: "reunioesAgendadas",
-      header: "Reuniões agendadas",
+      header: "Reun. ag.",
       render: (r) => formatInt(r.reunioesAgendadas),
       align: "right",
     },
     {
       key: "reunioesRealizadas",
-      header: "Reuniões realizadas",
+      header: "Reun. real.",
       render: (r) => formatInt(r.reunioesRealizadas),
       align: "right",
     },
@@ -88,42 +84,57 @@ async function OrigemContent({ searchParams }: PageProps) {
     },
   ];
 
+  const cols = (firstHeader: string): Column<OrigemRow>[] => [
+    {
+      key: "dimensao",
+      header: firstHeader,
+      render: (r) => r.dimensao,
+      align: "left",
+    },
+    ...metricCols,
+  ];
+
   const faturamentoColumns: Column<OrigemRow>[] = [
-    baseColumns[0],
+    {
+      key: "dimensao",
+      header: "Faturamento",
+      render: (r) => r.dimensao,
+      align: "left",
+    },
     {
       key: "qualif",
       header: "Qualif.",
       render: (r) => r.qualif ?? "—",
       align: "left",
     },
-    ...baseColumns.slice(1),
+    ...metricCols,
   ];
 
   return (
     <div className="flex flex-col gap-4">
       <MetricTable
         title="Por UTM Source"
-        columns={baseColumns}
+        columns={cols("Origem")}
         rows={result.porUtmSource}
       />
       <MetricTable
         title="Por UTM Medium"
-        columns={baseColumns}
+        columns={cols("Origem")}
         rows={result.porUtmMedium}
       />
       <MetricTable
         title="Por UTM Campaign"
-        columns={baseColumns}
+        columns={cols("Campanha")}
         rows={result.porUtmCampaign}
       />
       <MetricTable
         title="Por Qualificação"
-        columns={baseColumns}
+        columns={cols("Qualificação")}
         rows={result.porQualificacao}
       />
       <MetricTable
         title="Por Cargo"
-        columns={baseColumns}
+        columns={cols("Cargo")}
         rows={result.porCargo}
       />
       <MetricTable
@@ -133,7 +144,7 @@ async function OrigemContent({ searchParams }: PageProps) {
       />
       <MetricTable
         title="Por Segmento de Mercado"
-        columns={baseColumns}
+        columns={cols("Segmento")}
         rows={result.porSegmento}
       />
     </div>

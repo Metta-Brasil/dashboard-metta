@@ -292,6 +292,9 @@ export type SDRResult = {
   funilSdr: FunnelStep[];
   heatmap: SDRHeatmapCell[];
   porSdr: SDRRow[];
+  /** Opções pros selects (todas no recorte de funil, pré filtro SDR/Status). */
+  sdrNames: string[];
+  statusValues: string[];
 };
 
 // ---------------------------------------------------------------------------
