@@ -60,8 +60,14 @@ export function calcMetas(
   const produtoNorm = produtoRaw.trim().toLowerCase();
   const produtoAll = produtoNorm === "" || produtoNorm === "todos" || produtoNorm === "all";
 
-  // Mês alvo = mês de filters.from (em BRT).
-  const targetMonth = startOfMonthBrt(filters.from);
+  // Mês alvo = mês do FIM do período (em BRT). Ancorar no `to` (não no
+  // `from`) é o que casa com a intenção: o usuário olha as metas do mês
+  // corrente/visível. Evita também o boundary em que `?from=2026-05-01`
+  // (meia-noite UTC) vira 30/04 em BRT e cairia no mês anterior, e o
+  // caso do período default (~30 dias) cujo `from` fica no mês passado.
+  // A proporção MTD continua certa: clampDaysWithinMonth conta só os
+  // dias do filtro que caem dentro deste mês alvo.
+  const targetMonth = startOfMonthBrt(filters.to);
   const targetYear = targetMonth.getUTCFullYear();
   const targetMonthIdx = targetMonth.getUTCMonth();
 
