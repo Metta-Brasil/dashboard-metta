@@ -115,7 +115,7 @@ export function LoginForm({
             <img
               src="/brand/dashboard-illustration.svg"
               alt=""
-              className="h-auto w-full max-w-sm"
+              className="h-auto w-full max-w-[30rem]"
             />
           </div>
         </CardContent>
