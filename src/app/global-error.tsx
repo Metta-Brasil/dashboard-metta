@@ -28,10 +28,6 @@ export default function GlobalError({
     window.location.reload();
   }, [isSkew]);
 
-  useEffect(() => {
-    console.error("[global-error]", error?.name, error?.message, error);
-  }, [error]);
-
   return (
     <html lang="pt-BR">
       <body
@@ -131,24 +127,17 @@ export default function GlobalError({
               </button>
             </div>
           )}
-          <p
-            style={{
-              fontSize: 11,
-              margin: 0,
-              maxWidth: 420,
-              wordBreak: "break-word",
-              fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-              color: "rgba(238,242,245,0.6)",
-              background: "rgba(255,255,255,0.05)",
-              padding: "8px 12px",
-              borderRadius: 6,
-              textAlign: "left",
-            }}
-          >
-            <strong>{error?.name || "Error"}</strong>:{" "}
-            {error?.message || "(sem mensagem)"}
-            {error?.digest ? ` · ref ${error.digest}` : ""}
-          </p>
+          {error?.digest && (
+            <p
+              style={{
+                fontSize: 11,
+                margin: 0,
+                color: "rgba(238,242,245,0.45)",
+              }}
+            >
+              Ref. {error.digest}
+            </p>
+          )}
         </div>
       </body>
     </html>
