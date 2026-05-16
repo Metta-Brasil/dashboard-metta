@@ -53,8 +53,6 @@ export function calcVisaoGeral(
 
   // ----- Métricas de tráfego -----
   const investimento = sumBy(fbInRange, (r) => r.amountSpent);
-  const impressoes = sumBy(fbInRange, (r) => r.impressions);
-  const cliques = sumBy(fbInRange, (r) => r.linkClicks);
 
   // ----- Leads (dedup por email) -----
   const leadsUnicos = dedupeLeadsByEmail(leadsInRange);
@@ -212,14 +210,14 @@ export function calcVisaoGeral(
     faturamento,
   };
 
-  // ----- Funil consolidado (manter 7 etapas atuais) -----
+  // ----- Funil consolidado — 5 etapas do wireframe #p1 -----
+  // Leads → MQL → Agendamentos → Reuniões realizadas → Vendas.
+  // conversaoEtapa = taxa sobre a etapa anterior (queda exibida entre barras).
   const funilConsolidado: FunnelStep[] = [
-    { etapa: "Investimento", valor: investimento, conversaoEtapa: 1 },
-    { etapa: "Impressões", valor: impressoes, conversaoEtapa: 1 },
-    { etapa: "Cliques", valor: cliques, conversaoEtapa: safeRate(cliques, impressoes) },
-    { etapa: "MQL", valor: mql, conversaoEtapa: safeRate(mql, cliques) },
+    { etapa: "Leads", valor: leadsCount, conversaoEtapa: 1 },
+    { etapa: "MQL", valor: mql, conversaoEtapa: safeRate(mql, leadsCount) },
     { etapa: "Agendamentos", valor: agendamentos, conversaoEtapa: safeRate(agendamentos, mql) },
-    { etapa: "Reuniões", valor: reunioes, conversaoEtapa: safeRate(reunioes, agendamentos) },
+    { etapa: "Reuniões realizadas", valor: reunioes, conversaoEtapa: safeRate(reunioes, agendamentos) },
     { etapa: "Vendas", valor: vendasCount, conversaoEtapa: safeRate(vendasCount, reunioes) },
   ];
 
