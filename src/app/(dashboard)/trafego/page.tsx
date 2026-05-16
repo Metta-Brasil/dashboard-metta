@@ -15,11 +15,7 @@ import {
   formatInt,
   formatPercent,
 } from "@/lib/calc/shared";
-import type {
-  Funil,
-  TrafegoFunilResumo,
-  TrafegoRankingRow,
-} from "@/lib/calc/types";
+import type { Funil, TrafegoRankingRow } from "@/lib/calc/types";
 import { getFilters, getTrafego } from "@/lib/page-data";
 
 type PageProps = {
@@ -43,13 +39,6 @@ function formatDayBr(d: Date): string {
   }).format(d);
 }
 
-function formatMoneyOrDash(n: number | null): string {
-  return n == null ? "—" : formatBRL(n);
-}
-
-function formatPctOrDash(n: number | null): string {
-  return n == null ? "—" : formatPercent(n);
-}
 
 export default function TrafegoPage({ searchParams }: PageProps) {
   return (
@@ -66,17 +55,23 @@ export default function TrafegoPage({ searchParams }: PageProps) {
         <TrafegoKpis searchParams={searchParams} />
       </Suspense>
 
-      <Suspense fallback={<TableFallback rows={6} />}>
-        <EvolucaoDiaria searchParams={searchParams} />
-      </Suspense>
-
-      <Suspense fallback={<TableFallback rows={5} />}>
-        <MqlPorFunil searchParams={searchParams} />
-      </Suspense>
-
-      <Suspense fallback={<FunilFallback />}>
-        <FunilTrafego searchParams={searchParams} />
-      </Suspense>
+      {/* g-2-1 do #p2: esquerda = combo + barras por funil empilhados;
+          direita = funil de tráfego */}
+      <div className="grid items-stretch gap-6 lg:grid-cols-3">
+        <div className="flex flex-col gap-6 lg:col-span-2">
+          <Suspense fallback={<TableFallback rows={6} />}>
+            <EvolucaoDiaria searchParams={searchParams} />
+          </Suspense>
+          <Suspense fallback={<TableFallback rows={5} />}>
+            <MqlPorFunil searchParams={searchParams} />
+          </Suspense>
+        </div>
+        <div className="flex lg:col-span-1">
+          <Suspense fallback={<FunilFallback />}>
+            <FunilTrafego searchParams={searchParams} />
+          </Suspense>
+        </div>
+      </div>
 
       <Suspense fallback={<TableFallback rows={6} />}>
         <RankingMidia searchParams={searchParams} />
@@ -197,43 +192,12 @@ async function FunilTrafego({ searchParams }: PageProps) {
   const result = await getTrafego(searchParams);
 
   return (
-    <div className="flex flex-col gap-3">
-      <FunnelVertical
-        title="Funil de tráfego"
-        steps={result.funilTrafego}
-        monetaryEtapas={["Investimento"]}
-      />
-      <FunilResumo resumo={result.funilTrafegoResumo} />
-    </div>
-  );
-}
-
-function FunilResumo({ resumo }: { resumo: TrafegoFunilResumo }) {
-  const items: { label: string; value: string }[] = [
-    { label: "CPM", value: formatMoneyOrDash(resumo.cpm) },
-    { label: "CPC", value: formatMoneyOrDash(resumo.cpc) },
-    { label: "CTR", value: formatPctOrDash(resumo.ctr) },
-    { label: "CPL", value: formatMoneyOrDash(resumo.cpl) },
-    { label: "CMQL", value: formatMoneyOrDash(resumo.cmql) },
-    { label: "Tx LP→Lead", value: formatPctOrDash(resumo.txLpLead) },
-  ];
-
-  return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-      {items.map((it) => (
-        <div
-          key={it.label}
-          className="flex flex-col gap-1 rounded-xl border border-border bg-card p-4 shadow-xs"
-        >
-          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            {it.label}
-          </span>
-          <span className="text-base font-semibold tabular-nums text-foreground">
-            {it.value}
-          </span>
-        </div>
-      ))}
-    </div>
+    <FunnelVertical
+      title="Funil de tráfego"
+      steps={result.funilTrafego}
+      monetaryEtapas={[]}
+      className="h-full w-full"
+    />
   );
 }
 
