@@ -123,13 +123,20 @@ export function startOfDay(d: Date): Date {
   return c;
 }
 
+/**
+ * Itera dia a dia em BRT (não UTC). Antes usava startOfDay (setHours =
+ * UTC no servidor Vercel) → as datas saíam em UTC-meia-noite e, ao
+ * formatar/bucketar em BRT (startOfDayBrt/dayKey), exibiam o dia
+ * ANTERIOR. Agora cada item é o instante de meia-noite BRT, alinhado
+ * com filterByDate/dayKey. Brasil sem DST → +24h = próximo dia BRT.
+ */
 export function eachDay(from: Date, to: Date): Date[] {
   const out: Date[] = [];
-  const cur = startOfDay(from);
-  const end = startOfDay(to);
-  while (cur.getTime() <= end.getTime()) {
-    out.push(new Date(cur));
-    cur.setDate(cur.getDate() + 1);
+  let t = startOfDayBrt(from).getTime();
+  const end = startOfDayBrt(to).getTime();
+  while (t <= end) {
+    out.push(new Date(t));
+    t += 24 * 60 * 60 * 1000;
   }
   return out;
 }
