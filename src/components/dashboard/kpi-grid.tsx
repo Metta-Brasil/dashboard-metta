@@ -28,24 +28,24 @@ const DELTA_ARROW: Record<"up" | "down" | "neutral", string> = {
 
 export function KpiGrid({
   kpis,
-  cols = "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5",
+  cols = "grid-cols-2 lg:grid-cols-3 xl:grid-cols-5",
   className,
 }: KpiGridProps) {
   return (
-    <div className={cn("grid gap-3", cols, className)}>
+    <div className={cn("grid gap-2 sm:gap-3", cols, className)}>
       {kpis.map((k) => (
         <div
           key={k.label}
-          className="surface-card surface-card-interactive flex flex-col gap-3 p-5"
+          className="surface-card surface-card-interactive flex flex-col gap-1.5 p-3 sm:gap-3 sm:p-5"
         >
-          <div className="flex items-start justify-between gap-2">
-            <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+          <div className="flex items-start justify-between gap-1.5 sm:gap-2">
+            <span className="text-[9px] font-medium uppercase tracking-[0.08em] text-muted-foreground sm:text-[11px]">
               {k.label}
             </span>
             {k.delta && (
               <span
                 className={cn(
-                  "inline-flex shrink-0 items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums ring-1 ring-inset",
+                  "inline-flex shrink-0 items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-semibold tabular-nums ring-1 ring-inset sm:px-2 sm:text-[11px]",
                   DELTA_STYLE[k.delta.direction]
                 )}
               >
@@ -54,11 +54,13 @@ export function KpiGrid({
               </span>
             )}
           </div>
-          <span className="text-[28px] font-semibold leading-none tracking-tight tabular-nums text-foreground">
+          <span className="text-lg font-semibold leading-none tracking-tight tabular-nums text-foreground sm:text-[28px]">
             {k.value}
           </span>
           {k.hint && (
-            <span className="text-xs text-muted-foreground">{k.hint}</span>
+            <span className="text-[10px] text-muted-foreground sm:text-xs">
+              {k.hint}
+            </span>
           )}
         </div>
       ))}

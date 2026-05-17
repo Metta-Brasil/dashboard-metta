@@ -19,19 +19,21 @@ export function PageShell({
 }: PageShellProps) {
   return (
     <>
-      <header className="sticky top-0 z-20 flex h-(--header-height) shrink-0 items-center gap-2 border-b border-border bg-background/80 backdrop-blur-sm">
-        <div className="flex w-full items-center gap-2 px-4 lg:px-6">
-          <SidebarTrigger className="-ml-1" />
-          <Separator
-            orientation="vertical"
-            className="mx-2 h-4 data-vertical:self-auto"
-          />
-          <h1 className="text-sm font-medium tracking-tight text-foreground">
-            {title}
-          </h1>
-          <div className="flex-1" />
+      <header className="sticky top-0 z-20 shrink-0 border-b border-border bg-background/80 backdrop-blur-sm sm:h-(--header-height)">
+        <div className="flex w-full flex-col gap-2 px-4 py-2.5 sm:h-full sm:flex-row sm:items-center sm:gap-2 sm:py-0 lg:px-6">
+          <div className="flex items-center gap-2">
+            <SidebarTrigger className="-ml-1" />
+            <Separator
+              orientation="vertical"
+              className="mx-2 h-4 data-vertical:self-auto"
+            />
+            <h1 className="text-sm font-medium tracking-tight text-foreground">
+              {title}
+            </h1>
+          </div>
+          <div className="hidden flex-1 sm:block" />
           {toolbar && (
-            <div className="flex shrink-0 items-center gap-2 overflow-x-auto">
+            <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap sm:shrink-0 sm:overflow-x-auto">
               {toolbar}
             </div>
           )}

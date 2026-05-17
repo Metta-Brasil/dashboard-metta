@@ -89,9 +89,9 @@ export function MetricTableInteractive({
           : undefined
       }
     >
-      <table className="w-full border-separate border-spacing-0 text-sm">
+      <table className="w-full border-separate border-spacing-0 text-[8.4px] sm:text-sm">
         <thead>
-          <tr className="text-[11px] uppercase tracking-[0.07em] text-muted-foreground">
+          <tr className="text-[7px] uppercase tracking-[0.07em] text-muted-foreground sm:text-[11px]">
             {columns.map((c, ci) => {
               const active = sort?.col === ci;
               const thCls = cn(
@@ -131,7 +131,7 @@ export function MetricTableInteractive({
                     <span
                       aria-hidden
                       className={cn(
-                        "text-[0.65rem] leading-none",
+                        "text-[0.4rem] leading-none sm:text-[0.65rem]",
                         active ? "opacity-100" : "opacity-30"
                       )}
                     >
