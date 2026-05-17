@@ -223,6 +223,18 @@ export type TrafegoMqlPorTemperatura = {
   mql: number;
 };
 
+/** Taxas do funil de tráfego (valor em fração 0..1). */
+export type TrafegoConversaoTaxa = {
+  metrica: string;
+  valor: number;
+};
+
+/** Custo por etapa do funil de tráfego (valor em R$). */
+export type TrafegoCustoEtapa = {
+  metrica: string;
+  valor: number;
+};
+
 export type TrafegoRankingRow = {
   nome: string;
   agrupamento: "campanha" | "adset";
@@ -246,6 +258,8 @@ export type TrafegoResult = {
   mqlPorTemperatura: TrafegoMqlPorTemperatura[];
   funilTrafego: FunnelStep[];
   funilTrafegoResumo: TrafegoFunilResumo;
+  conversoesTrafego: TrafegoConversaoTaxa[];
+  custosTrafego: TrafegoCustoEtapa[];
   ranking: TrafegoRankingRow[];
 };
 

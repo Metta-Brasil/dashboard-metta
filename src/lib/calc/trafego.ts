@@ -15,6 +15,8 @@ import type {
   Funil,
   RawData,
   TrafegoComboPoint,
+  TrafegoConversaoTaxa,
+  TrafegoCustoEtapa,
   TrafegoFunilResumo,
   TrafegoKPIs,
   TrafegoMqlCmqlPorFunil,
@@ -256,6 +258,22 @@ export function calcTrafego(
     txLpLead: lpViews > 0 ? leadsCount / lpViews : null,
   };
 
+  // 8. Conversões — taxas do funil de tráfego (fração 0..1, divisão protegida).
+  const conversoesTrafego: TrafegoConversaoTaxa[] = [
+    { metrica: "CTR", valor: safeRate(cliques, impressoes) },
+    { metrica: "Conexão LP", valor: safeRate(lpViews, cliques) },
+    { metrica: "Conversão LP", valor: safeRate(leadsCount, lpViews) },
+    { metrica: "Conversão cliques", valor: safeRate(leadsCount, cliques) },
+  ];
+
+  // 9. Custos — custo por etapa (R$), reusa os KPIs já calculados.
+  const custosTrafego: TrafegoCustoEtapa[] = [
+    { metrica: "CPC", valor: cpc },
+    { metrica: "CPM", valor: cpm },
+    { metrica: "CPL", valor: cpl },
+    { metrica: "CMQL", valor: cmql },
+  ];
+
   return {
     kpis,
     serieCombo,
@@ -263,6 +281,8 @@ export function calcTrafego(
     mqlPorTemperatura,
     funilTrafego,
     funilTrafegoResumo,
+    conversoesTrafego,
+    custosTrafego,
     ranking,
   };
 }

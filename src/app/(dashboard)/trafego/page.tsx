@@ -86,6 +86,19 @@ export default function TrafegoPage({ searchParams }: PageProps) {
         </Suspense>
       </div>
 
+      <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2">
+        <div className="flex flex-col">
+          <Suspense fallback={<ChartCardFallback />}>
+            <ConversoesTrafego searchParams={searchParams} />
+          </Suspense>
+        </div>
+        <div className="flex flex-col">
+          <Suspense fallback={<ChartCardFallback />}>
+            <CustosTrafego searchParams={searchParams} />
+          </Suspense>
+        </div>
+      </div>
+
       <Suspense fallback={<TableFallback rows={6} />}>
         <RankingMidia searchParams={searchParams} />
       </Suspense>
@@ -219,6 +232,56 @@ async function MqlPorTemperatura({ searchParams }: PageProps) {
       data={data}
       centerValue={formatInt(totalMql)}
       centerLabel="MQL"
+      className="h-full"
+    />
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Conversões — taxas do funil de tráfego (%)
+// ---------------------------------------------------------------------------
+
+async function ConversoesTrafego({ searchParams }: PageProps) {
+  const result = await getTrafego(searchParams);
+
+  const data = result.conversoesTrafego.map((r) => ({
+    metrica: r.metrica,
+    taxa: r.valor,
+  }));
+
+  return (
+    <GroupedBarChart
+      title="Conversões"
+      description="Taxas do funil de tráfego"
+      data={data}
+      xKey="metrica"
+      bars={[{ key: "taxa", label: "Taxa" }]}
+      valueFormat="percent"
+      className="h-full"
+    />
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Custos — custo por etapa (R$)
+// ---------------------------------------------------------------------------
+
+async function CustosTrafego({ searchParams }: PageProps) {
+  const result = await getTrafego(searchParams);
+
+  const data = result.custosTrafego.map((r) => ({
+    metrica: r.metrica,
+    custo: Math.round(r.valor),
+  }));
+
+  return (
+    <GroupedBarChart
+      title="Custos"
+      description="Custo por etapa"
+      data={data}
+      xKey="metrica"
+      bars={[{ key: "custo", label: "Custo" }]}
+      valueFormat="currency"
       className="h-full"
     />
   );
@@ -368,6 +431,18 @@ function TableFallback({ rows }: { rows: number }) {
           <div key={i} className="h-8 w-full animate-pulse rounded bg-muted" />
         ))}
       </div>
+    </div>
+  );
+}
+
+function ChartCardFallback() {
+  return (
+    <div className="flex h-full flex-col gap-3 rounded-xl border border-border bg-card p-5 shadow-xs">
+      <div className="flex flex-col gap-1.5">
+        <div className="h-4 w-32 animate-pulse rounded bg-muted" />
+        <div className="h-3 w-44 animate-pulse rounded bg-muted" />
+      </div>
+      <div className="h-[280px] w-full animate-pulse rounded bg-muted" />
     </div>
   );
 }
