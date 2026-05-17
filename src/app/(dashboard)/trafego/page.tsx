@@ -56,22 +56,33 @@ export default function TrafegoPage({ searchParams }: PageProps) {
         <TrafegoKpis searchParams={searchParams} />
       </Suspense>
 
-      {/* Grid 2x2: A | B em cima, NOVO (MQL por temperatura) | C embaixo */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      {/* Desenho do usuário: larguras assimétricas (3 colunas).
+          Linha 1: combo (largo, 2/3) | Funil de tráfego (estreito, 1/3).
+          Linha 2: MQL por temperatura (estreito, 1/3) | MQL e CMQL por
+          funil (largo, 2/3). */}
+      <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-3">
         <Suspense fallback={<TableFallback rows={6} />}>
-          <EvolucaoDiaria searchParams={searchParams} />
+          <div className="lg:col-span-2">
+            <EvolucaoDiaria searchParams={searchParams} />
+          </div>
         </Suspense>
 
         <Suspense fallback={<FunilFallback />}>
-          <FunilTrafego searchParams={searchParams} />
+          <div className="lg:col-span-1">
+            <FunilTrafego searchParams={searchParams} />
+          </div>
         </Suspense>
 
         <Suspense fallback={<TableFallback rows={5} />}>
-          <MqlPorTemperatura searchParams={searchParams} />
+          <div className="lg:col-span-1">
+            <MqlPorTemperatura searchParams={searchParams} />
+          </div>
         </Suspense>
 
         <Suspense fallback={<TableFallback rows={5} />}>
-          <MqlPorFunil searchParams={searchParams} />
+          <div className="lg:col-span-2">
+            <MqlPorFunil searchParams={searchParams} />
+          </div>
         </Suspense>
       </div>
 
