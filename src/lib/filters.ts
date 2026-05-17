@@ -30,8 +30,17 @@ export function parseFilters(
     return t;
   };
 
-  const from = fromStr ? new Date(fromStr) : defaultFrom;
-  const to = toStr ? new Date(toStr) : now;
+  // "YYYY-MM-DD" do date picker é interpretado pelo JS como UTC meia-noite;
+  // em BRT (UTC-3) isso vira o dia ANTERIOR e o filtro perde o último dia.
+  // Ancorar em meia-noite BRT, consistente com startOfDayBrt.
+  const parseBrtDate = (s: string): Date =>
+    new Date(
+      /^\d{4}-\d{2}-\d{2}$/.test(s.trim())
+        ? `${s.trim()}T00:00:00-03:00`
+        : s
+    );
+  const from = fromStr ? parseBrtDate(fromStr) : defaultFrom;
+  const to = toStr ? parseBrtDate(toStr) : now;
 
   const funis = funisStr
     ? funisStr.split(",").map((s) => s.trim().toLowerCase()).filter(isFunil)

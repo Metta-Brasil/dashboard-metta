@@ -104,24 +104,24 @@ async function TrafegoKpis({ searchParams }: PageProps) {
       hint: "Gasto Meta no período",
     },
     {
-      label: "Impressões",
-      value: formatInt(k.impressoes),
-      hint: `CPM ${formatBRL(k.cpm)}`,
+      label: "CPM",
+      value: formatBRL(k.cpm),
+      hint: "Custo por mil impressões",
     },
     {
-      label: "Cliques",
-      value: formatInt(k.cliques),
-      hint: `CTR ${formatPercent(k.ctr)} · CPC ${formatBRL(k.cpc)}`,
+      label: "CPC",
+      value: formatBRL(k.cpc),
+      hint: "Custo por clique",
     },
     {
-      label: "Leads",
-      value: formatInt(k.leads),
-      hint: `CPL ${formatBRL(k.cpl)} · LP→Lead ${formatPercent(k.txLpLead)}`,
+      label: "CTR",
+      value: formatPercent(k.ctr),
+      hint: "Cliques ÷ impressões",
     },
     {
-      label: "MQL",
-      value: formatInt(k.mql),
-      hint: `CMQL ${formatBRL(k.cmql)}`,
+      label: "CMQL",
+      value: formatBRL(k.cmql),
+      hint: "Investimento ÷ MQL",
     },
   ];
 

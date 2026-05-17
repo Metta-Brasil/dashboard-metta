@@ -179,7 +179,7 @@ async function KpisSection({ searchParams }: PageProps) {
       hint: "Receita ÷ Investimento",
     },
     {
-      label: "CAC",
+      label: "CPA",
       value: formatBRL(k.cac),
       hint: "Investimento ÷ Vendas",
     },
@@ -248,14 +248,14 @@ async function CustoPorEtapaSection({ searchParams }: PageProps) {
 
   return (
     <MultiLineChart
-      title="Custo por etapa (CPL · CMQL · CAC) — diário"
-      description="Escala dupla: CPL/CMQL à esquerda, CAC à direita"
+      title="Custo por etapa (CPL · CMQL · CPA) — diário"
+      description="Escala dupla: CPL/CMQL à esquerda, CPA à direita"
       data={data}
       xKey="dia"
       lines={[
         { key: "cpl", label: "CPL" },
         { key: "cmql", label: "CMQL" },
-        { key: "cac", label: "CAC", axis: "right" },
+        { key: "cac", label: "CPA", axis: "right" },
       ]}
       className="h-full w-full"
     />
