@@ -1,7 +1,10 @@
 import { cn } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 type PageShellProps = {
   title?: string;
+  /** Mantido por compat — não é mais renderizado (cabeçalho compacto). */
   description?: string;
   toolbar?: React.ReactNode;
   children: React.ReactNode;
@@ -10,37 +13,39 @@ type PageShellProps = {
 
 export function PageShell({
   title,
-  description,
   toolbar,
   children,
   className,
 }: PageShellProps) {
   return (
-    <div
-      className={cn(
-        "@container/main flex flex-1 flex-col gap-6 px-4 py-6 lg:px-6 lg:py-8",
-        className
-      )}
-    >
-      {(title || toolbar) && (
-        <div className="flex flex-col gap-4 border-b border-border/70 pb-5 sm:flex-row sm:items-end sm:justify-between">
-          <div className="flex flex-col gap-1.5">
-            {title && (
-              <h2 className="text-[26px] font-semibold leading-none tracking-tight text-foreground">
-                {title}
-              </h2>
-            )}
-            {description && (
-              <p className="text-sm text-muted-foreground">{description}</p>
-            )}
-          </div>
+    <>
+      <header className="sticky top-0 z-20 flex h-(--header-height) shrink-0 items-center gap-2 border-b border-border bg-background/80 backdrop-blur-sm">
+        <div className="flex w-full items-center gap-2 px-4 lg:px-6">
+          <SidebarTrigger className="-ml-1" />
+          <Separator
+            orientation="vertical"
+            className="mx-2 h-4 data-vertical:self-auto"
+          />
+          <h1 className="text-sm font-medium tracking-tight text-foreground">
+            {title}
+          </h1>
+          <div className="flex-1" />
           {toolbar && (
-            <div className="flex shrink-0 items-center gap-2">{toolbar}</div>
+            <div className="flex shrink-0 items-center gap-2 overflow-x-auto">
+              {toolbar}
+            </div>
           )}
         </div>
-      )}
-      {children}
-    </div>
+      </header>
+      <div
+        className={cn(
+          "@container/main flex flex-1 flex-col gap-6 px-4 py-6 lg:px-6 lg:py-8",
+          className
+        )}
+      >
+        {children}
+      </div>
+    </>
   );
 }
 

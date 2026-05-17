@@ -9,6 +9,7 @@ import {
   deleteUser,
   requestEmailChange,
   resendEmailChange,
+  updateAvatar,
   updateProfile,
 } from "@/lib/auth/users";
 import { sendEmailChangeCode } from "@/lib/email/brevo";
@@ -18,6 +19,7 @@ const q = encodeURIComponent;
 
 export type ChangePwState = { ok?: boolean; error?: string };
 export type ProfileState = { ok?: boolean; error?: string };
+export type AvatarState = { ok?: boolean; error?: string };
 
 /**
  * Troca a senha do próprio usuário logado. O e-mail vem da sessão
@@ -58,6 +60,31 @@ export async function updateProfileAction(
     phone: String(formData.get("phone") ?? ""),
     role: String(formData.get("role") ?? ""),
   });
+  return res.ok ? { ok: true } : { error: res.error };
+}
+
+/**
+ * Troca ou remove a foto de perfil do usuário logado (só credentials).
+ * A imagem chega como data URL (base64) no campo `avatar`; a flag
+ * `remove=1` apaga a foto. E-mail vem da sessão.
+ */
+export async function updateAvatarAction(
+  _prev: AvatarState,
+  formData: FormData
+): Promise<AvatarState> {
+  const session = await auth();
+  const email = session?.user?.email;
+  if (!email || session?.provider !== "credentials") {
+    return { error: "Indisponível para esta conta." };
+  }
+  const remove = String(formData.get("remove") ?? "") === "1";
+  if (remove) {
+    const res = await updateAvatar(email, null);
+    return res.ok ? { ok: true } : { error: res.error };
+  }
+  const dataUrl = String(formData.get("avatar") ?? "");
+  if (!dataUrl) return { error: "Nenhuma imagem selecionada." };
+  const res = await updateAvatar(email, dataUrl);
   return res.ok ? { ok: true } : { error: res.error };
 }
 

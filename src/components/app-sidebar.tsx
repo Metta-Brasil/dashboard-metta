@@ -49,16 +49,12 @@ export function AppSidebar({
               className="data-[slot=sidebar-menu-button]:p-1.5! data-[slot=sidebar-menu-button]:h-auto"
               render={<Link href="/" />}
             >
-              <span className="flex size-8 items-center justify-center rounded-lg bg-foreground">
-                {/* Símbolo oficial Metta (amarelo) sobre azul noite —
-                    combinação de alto contraste aprovada (PRD §9.2). */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/brand/metta-symbol.svg"
-                  alt="Metta"
-                  className="size-[18px]"
-                />
-              </span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/metta-symbol.svg"
+                alt="Metta"
+                className="size-7"
+              />
               <div className="flex flex-col leading-none">
                 <span className="text-sm font-semibold tracking-tight">
                   Metta

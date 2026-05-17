@@ -16,6 +16,7 @@ type StoredUser = {
   passwordHash: string;
   phone?: string;
   role?: string;
+  avatar?: string;
 };
 
 export type PublicUser = {
@@ -23,6 +24,7 @@ export type PublicUser = {
   name: string;
   phone?: string;
   role?: string;
+  avatar?: string;
 };
 
 async function redis<T = unknown>(
@@ -271,7 +273,51 @@ export async function getProfile(
 ): Promise<PublicUser | null> {
   const u = await getUser(email);
   if (!u) return null;
-  return { email: u.email, name: u.name, phone: u.phone, role: u.role };
+  return {
+    email: u.email,
+    name: u.name,
+    phone: u.phone,
+    role: u.role,
+    avatar: u.avatar,
+  };
+}
+
+/**
+ * Troca/remove a foto de perfil (conta e-mail/senha). A imagem é
+ * guardada como data URL (base64) no próprio registro do usuário —
+ * zero infra nova. `null` remove a foto.
+ */
+export async function updateAvatar(
+  email: string,
+  dataUrl: string | null
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const e = email.trim().toLowerCase();
+  const u = await getUser(e);
+  if (!u) return { ok: false, error: "Conta não encontrada." };
+
+  let next: StoredUser;
+  if (dataUrl === null) {
+    const rest = { ...u };
+    delete rest.avatar;
+    next = rest;
+  } else {
+    if (!/^data:image\/(png|jpeg|webp);base64,/.test(dataUrl))
+      return {
+        ok: false,
+        error: "Formato inválido. Use PNG, JPEG ou WEBP.",
+      };
+    if (dataUrl.length > 200000)
+      return {
+        ok: false,
+        error: "Imagem muito grande (máx ~150KB).",
+      };
+    next = { ...u, avatar: dataUrl };
+  }
+
+  const saved = await redis(["SET", key(e), JSON.stringify(next)]);
+  if (saved === null)
+    return { ok: false, error: "Falha ao salvar. Tente de novo." };
+  return { ok: true };
 }
 
 /** Atualiza nome/telefone/cargo. E-mail e senha não mudam aqui. */

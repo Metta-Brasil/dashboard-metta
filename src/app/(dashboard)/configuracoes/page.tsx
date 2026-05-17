@@ -7,6 +7,7 @@ import { PageShell } from "@/components/page-shell";
 import { ChangePasswordForm } from "@/components/change-password-form";
 import { ProfileForm } from "@/components/profile-form";
 import { EmailChange } from "@/components/email-change";
+import { AvatarUpload } from "@/components/avatar-upload";
 import { DeleteAccountButton } from "@/components/delete-account-button";
 
 export const metadata: Metadata = { title: "Configurações · Dashboard Metta" };
@@ -50,17 +51,12 @@ async function ConfiguracoesContent({
 
         {isCredentials ? (
           <>
-            <div className="flex items-center gap-4">
-              <span className="flex size-12 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">
-                {(profile?.name ?? user?.name ?? "?")
-                  .charAt(0)
-                  .toUpperCase()}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                Conta de e-mail e senha. Acesso restrito ao domínio
-                @mettabrasil.com.br.
-              </span>
-            </div>
+            <AvatarUpload
+              current={profile?.avatar}
+              initial={(profile?.name ?? user?.name ?? "?")
+                .charAt(0)
+                .toUpperCase()}
+            />
             <ProfileForm
               name={profile?.name ?? user?.name ?? ""}
               email={profile?.email ?? user?.email ?? ""}
