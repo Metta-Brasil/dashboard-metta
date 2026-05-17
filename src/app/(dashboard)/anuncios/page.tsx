@@ -235,7 +235,11 @@ function CreativeCard({ item }: { item: AnuncioCard }) {
         {item.adName}
       </span>
       <dl className="flex flex-col gap-2.5 text-xs">
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
+          <CreativeMetric
+            label="Investimento"
+            value={formatBRLCompact(item.investimento)}
+          />
           <CreativeMetric label="CMQL" value={formatBRL(item.cmql)} />
           <CreativeMetric label="MQL" value={formatInt(item.mql)} />
         </div>
