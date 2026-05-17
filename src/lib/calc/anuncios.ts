@@ -39,8 +39,8 @@ import type {
  *  Evita ROAS infinito de criativo zerado. */
 const TOP_ROAS_MIN_INVEST = 500;
 
-/** Limite de cards na galeria (PRD §5.2.5 — 12 cards, paginação v2). */
-const GALERIA_LIMIT = 12;
+/** Galeria fixa: exatamente 6 cards (grid 3x2), os campeões por MQL. */
+const GALERIA_LIMIT = 6;
 
 /** Normalização robusta: lowercase, remove acentos, espaços/hífens → "_",
  *  colapsa "_" repetidos, trim. Permite casar "Empresário quer..." (adName)
@@ -258,20 +258,29 @@ export function calcAnuncios(
     });
   }
 
-  // 4. Listas "Top por…".
-  const topCpl = [...cards]
-    .filter((c) => c.leads > 0)
-    .sort((a, b) => a.cpl - b.cpl)
-    .slice(0, 3);
+  // 4. Listas "Top por…" (MQL / Agendamento / Reuniões realizadas, desc).
+  //    Desempate estável: vendas desc, depois nome asc.
+  const byVendasThenName = (a: AnuncioCard, b: AnuncioCard): number => {
+    if (b.vendas !== a.vendas) return b.vendas - a.vendas;
+    return a.adName.localeCompare(b.adName);
+  };
 
-  const topCmql = [...cards]
+  const topMql = [...cards]
     .filter((c) => c.mql > 0)
-    .sort((a, b) => a.cmql - b.cmql)
+    .sort((a, b) => b.mql - a.mql || byVendasThenName(a, b))
     .slice(0, 3);
 
-  const topVendas = [...cards]
-    .filter((c) => c.vendas > 0)
-    .sort((a, b) => b.vendas - a.vendas)
+  const topAgendamento = [...cards]
+    .filter((c) => c.agendamentos > 0)
+    .sort((a, b) => b.agendamentos - a.agendamentos || byVendasThenName(a, b))
+    .slice(0, 3);
+
+  const topReunioesRealizadas = [...cards]
+    .filter((c) => c.reunioesRealizadas > 0)
+    .sort(
+      (a, b) =>
+        b.reunioesRealizadas - a.reunioesRealizadas || byVendasThenName(a, b)
+    )
     .slice(0, 3);
 
   // Legado: corte de investimento mínimo (R$ 500) + venda > 0 pra ROAS
@@ -282,16 +291,11 @@ export function calcAnuncios(
     .sort((a, b) => b.roas - a.roas)
     .slice(0, 3);
 
-  // 5. Galeria — até 12 cards com atividade (invest > 0 OU mql > 0).
-  //    Prioriza quem tem thumbnail, depois por investimento DESC.
+  // 5. Galeria — exatamente 6 cards (grid 3x2): os 6 anúncios campeões
+  //    por MQL DESC. Desempate estável: vendas desc, depois nome asc.
   const galeria = cards
     .filter((c) => c.investimento > 0 || c.mql > 0)
-    .sort((a, b) => {
-      const aThumb = a.thumbnailUrl ? 1 : 0;
-      const bThumb = b.thumbnailUrl ? 1 : 0;
-      if (aThumb !== bThumb) return bThumb - aThumb;
-      return b.investimento - a.investimento;
-    })
+    .sort((a, b) => b.mql - a.mql || byVendasThenName(a, b))
     .slice(0, GALERIA_LIMIT);
 
   // 6. Tabela completa — todos com atividade (sem limite),
@@ -307,9 +311,9 @@ export function calcAnuncios(
     });
 
   return {
-    topCpl,
-    topCmql,
-    topVendas,
+    topMql,
+    topAgendamento,
+    topReunioesRealizadas,
     galeria,
     tabelaAnuncios,
     topRoas,

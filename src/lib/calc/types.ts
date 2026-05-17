@@ -486,10 +486,13 @@ export type AnuncioCard = {
 };
 
 export type AnunciosResult = {
-  topCpl: AnuncioCard[];
-  topCmql: AnuncioCard[];
-  topVendas: AnuncioCard[];
-  /** Até 12 cards visuais com thumbnail */
+  /** Top 3 por MQL (desc) */
+  topMql: AnuncioCard[];
+  /** Top 3 por agendamentos (desc) */
+  topAgendamento: AnuncioCard[];
+  /** Top 3 por reuniões realizadas (desc) */
+  topReunioesRealizadas: AnuncioCard[];
+  /** Exatamente 6 cards (3x2), os campeões por MQL desc */
   galeria: AnuncioCard[];
   /** Todos com atividade no período (sem limite) */
   tabelaAnuncios: AnuncioCard[];

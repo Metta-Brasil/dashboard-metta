@@ -55,28 +55,28 @@ async function AnunciosContent({ searchParams }: PageProps) {
 // Top por… (3 cards lado-a-lado)
 // ---------------------------------------------------------------------------
 
-type TopMetric = "cpl" | "cmql" | "vendas";
+type TopMetric = "mql" | "agendamento" | "reunioesRealizadas";
 
 function TopCardsRow({ result }: { result: AnunciosResult }) {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
       <TopCard
-        title="Top por CPL"
-        description="Menor custo por lead"
-        items={result.topCpl}
-        metric="cpl"
+        title="Top MQL"
+        description="Mais MQL"
+        items={result.topMql}
+        metric="mql"
       />
       <TopCard
-        title="Top por CMQL"
-        description="Menor custo por MQL"
-        items={result.topCmql}
-        metric="cmql"
+        title="Top Agendamento"
+        description="Mais agendamentos"
+        items={result.topAgendamento}
+        metric="agendamento"
       />
       <TopCard
-        title="Top por Vendas"
-        description="Mais negócios fechados"
-        items={result.topVendas}
-        metric="vendas"
+        title="Top Reuniões realizadas"
+        description="Mais reuniões realizadas"
+        items={result.topReunioesRealizadas}
+        metric="reunioesRealizadas"
       />
     </div>
   );
@@ -131,22 +131,20 @@ function TopCardRow({
   metric: TopMetric;
 }) {
   const primaryLabel =
-    metric === "cpl" ? "CPL" : metric === "cmql" ? "CMQL" : "Vendas";
+    metric === "mql"
+      ? "MQL"
+      : metric === "agendamento"
+        ? "Agend"
+        : "Reun. real.";
   const primaryValue =
-    metric === "cpl"
-      ? formatBRL(item.cpl)
-      : metric === "cmql"
-        ? formatBRL(item.cmql)
-        : formatInt(item.vendas);
+    metric === "mql"
+      ? formatInt(item.mql)
+      : metric === "agendamento"
+        ? formatInt(item.agendamentos)
+        : formatInt(item.reunioesRealizadas);
 
-  const secondaryLabel =
-    metric === "cpl" ? "Leads" : metric === "cmql" ? "MQL" : "Faturamento";
-  const secondaryValue =
-    metric === "cpl"
-      ? formatInt(item.leads)
-      : metric === "cmql"
-        ? formatInt(item.mql)
-        : formatBRLCompact(item.faturamento);
+  const secondaryLabel = "Vendas";
+  const secondaryValue = formatInt(item.vendas);
 
   return (
     <li className="flex items-center gap-3">
@@ -188,7 +186,7 @@ function Galeria({ items }: { items: AnuncioCard[] }) {
             Galeria de criativos
           </h3>
           <span className="text-xs text-muted-foreground">
-            Até 12 anúncios com atividade no período.
+            6 anúncios campeões por MQL no período.
           </span>
         </div>
       </div>
@@ -197,7 +195,7 @@ function Galeria({ items }: { items: AnuncioCard[] }) {
           Sem criativos com atividade no período.
         </p>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => (
             <CreativeCard key={item.adName} item={item} />
           ))}
@@ -236,9 +234,14 @@ function CreativeCard({ item }: { item: AnuncioCard }) {
       >
         {item.adName}
       </span>
-      <dl className="grid grid-cols-3 gap-2 text-xs">
-        <CreativeMetric label="CPL" value={formatBRL(item.cpl)} />
+      <dl className="grid grid-cols-5 gap-2 text-xs">
         <CreativeMetric label="CMQL" value={formatBRL(item.cmql)} />
+        <CreativeMetric label="MQL" value={formatInt(item.mql)} />
+        <CreativeMetric label="Agend" value={formatInt(item.agendamentos)} />
+        <CreativeMetric
+          label="Reun. real."
+          value={formatInt(item.reunioesRealizadas)}
+        />
         <CreativeMetric label="Vendas" value={formatInt(item.vendas)} />
       </dl>
       {hasIg ? (
