@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { auth, signOut } from "@/auth";
 import { PageShell } from "@/components/page-shell";
+import { ChangePasswordForm } from "@/components/change-password-form";
 import { getLastRefreshTs, refreshAllSheets } from "@/lib/sheets/read";
 
 export const metadata: Metadata = { title: "Configurações · Dashboard Metta" };
@@ -36,6 +37,7 @@ export default function ConfiguracoesPage() {
 async function ConfiguracoesContent() {
   const session = await auth();
   const user = session?.user;
+  const isCredentials = session?.provider === "credentials";
   const lastRefresh = await getLastRefreshTs();
   const sheetId = process.env.GOOGLE_SHEETS_ID ?? "";
   const sheetUrl = sheetId
@@ -71,10 +73,24 @@ async function ConfiguracoesContent() {
           </div>
         </div>
         <p className="text-xs text-muted-foreground">
-          Identidade gerenciada pelo Google. Acesso restrito ao domínio
-          @mettabrasil.com.br.
+          {isCredentials
+            ? "Conta de e-mail e senha. Nome e e-mail definidos no cadastro. Acesso restrito ao domínio @mettabrasil.com.br."
+            : "Identidade gerenciada pelo Google. Acesso restrito ao domínio @mettabrasil.com.br."}
         </p>
       </div>
+
+      {/* Segurança — só para contas de e-mail/senha */}
+      {isCredentials && (
+        <div className="surface-card flex flex-col gap-4 p-5 lg:p-6">
+          <div className="flex flex-col gap-1">
+            <h3 className="panel-title">Segurança</h3>
+            <span className="panel-desc">
+              Troque a senha da sua conta de e-mail.
+            </span>
+          </div>
+          <ChangePasswordForm />
+        </div>
+      )}
 
       {/* Operação */}
       <div className="surface-card flex flex-col gap-4 p-5 lg:p-6">

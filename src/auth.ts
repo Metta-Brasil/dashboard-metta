@@ -51,7 +51,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       const verified = p?.email_verified === true;
       return verified && email.endsWith(`@${ALLOWED_DOMAIN}`);
     },
-    async jwt({ token, profile }) {
+    async jwt({ token, account, profile }) {
+      if (account?.provider) {
+        token.provider =
+          account.provider === "google" ? "google" : "credentials";
+      }
       const p = profile as GoogleProfile | undefined;
       if (p) {
         token.name = p.name ?? token.name;
@@ -61,6 +65,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token;
     },
     async session({ session, token }) {
+      session.provider = token.provider;
       if (session.user) {
         if (typeof token.name === "string") session.user.name = token.name;
         if (typeof token.email === "string") session.user.email = token.email;

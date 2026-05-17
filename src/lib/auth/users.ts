@@ -89,3 +89,33 @@ export async function verifyUser(
   const ok = await bcrypt.compare(password, u.passwordHash);
   return ok ? { email: u.email, name: u.name } : null;
 }
+
+/** Troca a senha de uma conta e-mail/senha. Exige a senha atual. */
+export async function changePassword(
+  email: string,
+  currentPassword: string,
+  newPassword: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const e = email.trim().toLowerCase();
+  const u = await getUser(e);
+  if (!u) return { ok: false, error: "Conta não encontrada." };
+  const ok = await bcrypt.compare(currentPassword, u.passwordHash);
+  if (!ok) return { ok: false, error: "Senha atual incorreta." };
+  if (newPassword.length < 8)
+    return {
+      ok: false,
+      error: "A nova senha precisa de no mínimo 8 caracteres.",
+    };
+  if (await bcrypt.compare(newPassword, u.passwordHash))
+    return { ok: false, error: "A nova senha é igual à atual." };
+
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+  const saved = await redis([
+    "SET",
+    key(e),
+    JSON.stringify({ ...u, passwordHash }),
+  ]);
+  if (saved === null)
+    return { ok: false, error: "Falha ao salvar. Tente de novo." };
+  return { ok: true };
+}
