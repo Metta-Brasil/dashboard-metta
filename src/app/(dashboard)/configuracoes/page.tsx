@@ -6,23 +6,35 @@ import { getProfile } from "@/lib/auth/users";
 import { PageShell } from "@/components/page-shell";
 import { ChangePasswordForm } from "@/components/change-password-form";
 import { ProfileForm } from "@/components/profile-form";
+import { EmailChange } from "@/components/email-change";
 import { DeleteAccountButton } from "@/components/delete-account-button";
 
 export const metadata: Metadata = { title: "Configurações · Dashboard Metta" };
 
-export default function ConfiguracoesPage() {
+type SP = { ec?: string; ecerr?: string; ecsent?: string };
+
+export default function ConfiguracoesPage({
+  searchParams,
+}: {
+  searchParams: Promise<SP>;
+}) {
   return (
     <PageShell title="Configurações" description="Perfil, segurança e sessão.">
       <Suspense
         fallback={<div className="surface-card h-40 animate-pulse p-6" />}
       >
-        <ConfiguracoesContent />
+        <ConfiguracoesContent searchParams={searchParams} />
       </Suspense>
     </PageShell>
   );
 }
 
-async function ConfiguracoesContent() {
+async function ConfiguracoesContent({
+  searchParams,
+}: {
+  searchParams: Promise<SP>;
+}) {
+  const sp = await searchParams;
   const session = await auth();
   const user = session?.user;
   const isCredentials = session?.provider === "credentials";
@@ -54,6 +66,14 @@ async function ConfiguracoesContent() {
               email={profile?.email ?? user?.email ?? ""}
               phone={profile?.phone}
               role={profile?.role}
+            />
+            <EmailChange
+              currentEmail={profile?.email ?? user?.email ?? ""}
+              pendingNewEmail={
+                typeof sp.ec === "string" && sp.ec ? sp.ec : undefined
+              }
+              error={typeof sp.ecerr === "string" ? sp.ecerr : undefined}
+              sent={sp.ecsent === "1"}
             />
           </>
         ) : (

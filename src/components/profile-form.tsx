@@ -56,7 +56,8 @@ export function ProfileForm({
           className={inputCls}
         />
         <span className="text-[11px] text-muted-foreground">
-          Alterar o e-mail exige reverificação — em breve nesta tela.
+          Para trocar o e-mail use &ldquo;Alterar e-mail&rdquo; abaixo —
+          exige confirmar um código no novo endereço.
         </span>
       </div>
 

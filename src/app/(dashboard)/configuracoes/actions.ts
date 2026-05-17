@@ -5,9 +5,16 @@ import { redirect } from "next/navigation";
 import { auth, signOut } from "@/auth";
 import {
   changePassword,
+  confirmEmailChange,
   deleteUser,
+  requestEmailChange,
+  resendEmailChange,
   updateProfile,
 } from "@/lib/auth/users";
+import { sendEmailChangeCode } from "@/lib/email/brevo";
+
+const CFG = "/configuracoes";
+const q = encodeURIComponent;
 
 export type ChangePwState = { ok?: boolean; error?: string };
 export type ProfileState = { ok?: boolean; error?: string };
@@ -66,4 +73,58 @@ export async function deleteAccountAction() {
   }
   await signOut({ redirectTo: "/login" });
   redirect("/login");
+}
+
+/** Pede a troca de e-mail: envia código para o NOVO e-mail. */
+export async function requestEmailChangeAction(formData: FormData) {
+  const session = await auth();
+  const email = session?.user?.email;
+  if (!email || session?.provider !== "credentials") {
+    redirect(`${CFG}?ecerr=${q("Indisponível para esta conta.")}`);
+  }
+  const newEmail = String(formData.get("newEmail") ?? "");
+  const res = await requestEmailChange(email, newEmail);
+  if (!res.ok) redirect(`${CFG}?ecerr=${q(res.error)}`);
+  const sent = await sendEmailChangeCode(res.newEmail, res.name, res.code);
+  if (!sent.ok) {
+    redirect(`${CFG}?ecerr=${q("Não consegui enviar o e-mail. Tente de novo.")}`);
+  }
+  redirect(`${CFG}?ec=${q(res.newEmail)}`);
+}
+
+/** Reenvia o código da troca de e-mail. */
+export async function resendEmailChangeAction() {
+  const session = await auth();
+  const email = session?.user?.email;
+  if (!email || session?.provider !== "credentials") {
+    redirect(`${CFG}?ecerr=${q("Indisponível para esta conta.")}`);
+  }
+  const res = await resendEmailChange(email);
+  if (!res.ok) redirect(`${CFG}?ecerr=${q(res.error)}`);
+  const sent = await sendEmailChangeCode(res.newEmail, res.name, res.code);
+  if (!sent.ok) {
+    redirect(
+      `${CFG}?ec=${q(res.newEmail)}&ecerr=${q("Não consegui reenviar. Tente de novo.")}`
+    );
+  }
+  redirect(`${CFG}?ec=${q(res.newEmail)}&ecsent=1`);
+}
+
+/** Confirma o código e migra a conta; força novo login. */
+export async function confirmEmailChangeAction(formData: FormData) {
+  const session = await auth();
+  const email = session?.user?.email;
+  const newEmail = String(formData.get("newEmail") ?? "");
+  if (!email || session?.provider !== "credentials") {
+    redirect(`${CFG}?ecerr=${q("Indisponível para esta conta.")}`);
+  }
+  const code = String(formData.get("code") ?? "");
+  const res = await confirmEmailChange(email, code);
+  if (!res.ok) {
+    redirect(`${CFG}?ec=${q(newEmail)}&ecerr=${q(res.error)}`);
+  }
+  await signOut({ redirectTo: "/login" });
+  redirect(
+    "/login?ok=" + q("E-mail alterado. Entre com o novo e-mail.")
+  );
 }

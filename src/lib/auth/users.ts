@@ -302,3 +302,116 @@ export async function deleteUser(email: string): Promise<boolean> {
   const res = await redis<number>(["DEL", key(e)]);
   return res !== null;
 }
+
+/* ──────────── Troca de e-mail (com reverificação) ──────────── */
+
+type EmailChange = { newEmail: string; code: string; attempts: number };
+
+function emailChangeKey(email: string): string {
+  return `auth:emailchange:${email.trim().toLowerCase()}`;
+}
+
+export async function requestEmailChange(
+  currentEmail: string,
+  newEmailRaw: string
+): Promise<
+  { ok: true; newEmail: string; name: string; code: string } | { ok: false; error: string }
+> {
+  const cur = currentEmail.trim().toLowerCase();
+  const ne = newEmailRaw.trim().toLowerCase();
+  if (!isAllowedDomain(ne))
+    return { ok: false, error: "Use um e-mail @mettabrasil.com.br." };
+  if (ne === cur)
+    return { ok: false, error: "O novo e-mail é igual ao atual." };
+  const me = await getUser(cur);
+  if (!me) return { ok: false, error: "Conta não encontrada." };
+  if (await getUser(ne))
+    return { ok: false, error: "Já existe uma conta com esse e-mail." };
+  const code = genCode();
+  const saved = await redis([
+    "SET",
+    emailChangeKey(cur),
+    JSON.stringify({ newEmail: ne, code, attempts: 0 }),
+    "EX",
+    String(PENDING_TTL),
+  ]);
+  if (saved === null)
+    return { ok: false, error: "Falha ao iniciar. Tente de novo." };
+  return { ok: true, newEmail: ne, name: me.name, code };
+}
+
+export async function resendEmailChange(
+  currentEmail: string
+): Promise<
+  { ok: true; newEmail: string; name: string; code: string } | { ok: false; error: string }
+> {
+  const cur = currentEmail.trim().toLowerCase();
+  const raw = await redis<string>(["GET", emailChangeKey(cur)]);
+  if (!raw) return { ok: false, error: "Pedido expirado. Comece de novo." };
+  let p: EmailChange;
+  try {
+    p = JSON.parse(raw) as EmailChange;
+  } catch {
+    return { ok: false, error: "Pedido inválido. Comece de novo." };
+  }
+  const me = await getUser(cur);
+  if (!me) return { ok: false, error: "Conta não encontrada." };
+  const code = genCode();
+  const saved = await redis([
+    "SET",
+    emailChangeKey(cur),
+    JSON.stringify({ ...p, code, attempts: 0 }),
+    "EX",
+    String(PENDING_TTL),
+  ]);
+  if (saved === null)
+    return { ok: false, error: "Falha ao reenviar. Tente de novo." };
+  return { ok: true, newEmail: p.newEmail, name: me.name, code };
+}
+
+/** Confirma o código e migra a conta para o novo e-mail. */
+export async function confirmEmailChange(
+  currentEmail: string,
+  code: string
+): Promise<{ ok: true; newEmail: string } | { ok: false; error: string }> {
+  const cur = currentEmail.trim().toLowerCase();
+  const raw = await redis<string>(["GET", emailChangeKey(cur)]);
+  if (!raw)
+    return { ok: false, error: "Código expirado. Comece de novo." };
+  let p: EmailChange;
+  try {
+    p = JSON.parse(raw) as EmailChange;
+  } catch {
+    return { ok: false, error: "Pedido inválido. Comece de novo." };
+  }
+  if (p.attempts >= 5) {
+    await redis(["DEL", emailChangeKey(cur)]);
+    return { ok: false, error: "Muitas tentativas. Comece de novo." };
+  }
+  if (String(code).trim() !== p.code) {
+    await redis([
+      "SET",
+      emailChangeKey(cur),
+      JSON.stringify({ ...p, attempts: p.attempts + 1 }),
+      "EX",
+      String(PENDING_TTL),
+    ]);
+    return { ok: false, error: "Código incorreto." };
+  }
+  const me = await getUser(cur);
+  if (!me) {
+    await redis(["DEL", emailChangeKey(cur)]);
+    return { ok: false, error: "Conta não encontrada." };
+  }
+  if (await getUser(p.newEmail)) {
+    await redis(["DEL", emailChangeKey(cur)]);
+    return { ok: false, error: "Esse e-mail já foi usado. Comece de novo." };
+  }
+  const moved: StoredUser = { ...me, email: p.newEmail };
+  const w = await redis(["SET", key(p.newEmail), JSON.stringify(moved)]);
+  if (w === null)
+    return { ok: false, error: "Falha ao salvar. Tente de novo." };
+  await redis(["DEL", key(cur)]);
+  await redis(["DEL", emailChangeKey(cur)]);
+  return { ok: true, newEmail: p.newEmail };
+}
