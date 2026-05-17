@@ -62,25 +62,25 @@ export default function TrafegoPage({ searchParams }: PageProps) {
           funil (largo, 2/3). */}
       <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-3">
         <Suspense fallback={<TableFallback rows={6} />}>
-          <div className="lg:col-span-2">
+          <div className="flex flex-col lg:col-span-2">
             <EvolucaoDiaria searchParams={searchParams} />
           </div>
         </Suspense>
 
         <Suspense fallback={<FunilFallback />}>
-          <div className="lg:col-span-1">
+          <div className="flex flex-col lg:col-span-1">
             <FunilTrafego searchParams={searchParams} />
           </div>
         </Suspense>
 
         <Suspense fallback={<TableFallback rows={5} />}>
-          <div className="lg:col-span-1">
+          <div className="flex flex-col lg:col-span-1">
             <MqlPorTemperatura searchParams={searchParams} />
           </div>
         </Suspense>
 
         <Suspense fallback={<TableFallback rows={5} />}>
-          <div className="lg:col-span-2">
+          <div className="flex flex-col lg:col-span-2">
             <MqlPorFunil searchParams={searchParams} />
           </div>
         </Suspense>
@@ -166,6 +166,7 @@ async function EvolucaoDiaria({ searchParams }: PageProps) {
         { key: "mql", label: "MQL" },
       ]}
       lines={[{ key: "cmql", label: "CMQL", axis: "right" }]}
+      className="h-full"
     />
   );
 }
@@ -193,6 +194,7 @@ async function MqlPorFunil({ searchParams }: PageProps) {
         { key: "mql", label: "MQL" },
         { key: "cmql", label: "CMQL", axis: "right" },
       ]}
+      className="h-full"
     />
   );
 }
@@ -217,6 +219,7 @@ async function MqlPorTemperatura({ searchParams }: PageProps) {
       data={data}
       centerValue={formatInt(totalMql)}
       centerLabel="MQL"
+      className="h-full"
     />
   );
 }
