@@ -2,6 +2,52 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* ============================================================
+   Tipografia da marca — Zalando Sans (OFL, Google Fonts)
+   - "Zalando Sans Expanded": display / headlines / títulos / labels
+   - "Zalando Sans": corpo de texto
+   Subsets latin + latin-ext (PT-BR exige ambos).
+   unicode-range exatamente como retornado pelo Google Fonts.
+   ============================================================ */
+
+/* Zalando Sans — corpo (latin) */
+@font-face {
+  font-family: "Zalando Sans";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("/fonts/zalando-sans-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* Zalando Sans — corpo (latin-ext) */
+@font-face {
+  font-family: "Zalando Sans";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("/fonts/zalando-sans-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Zalando Sans Expanded — display (latin) */
+@font-face {
+  font-family: "Zalando Sans Expanded";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("/fonts/zalando-sans-expanded-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* Zalando Sans Expanded — display (latin-ext) */
+@font-face {
+  font-family: "Zalando Sans Expanded";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("/fonts/zalando-sans-expanded-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -9,7 +55,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-heading);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -57,6 +103,11 @@
    ============================================================ */
 
 :root {
+  /* Typography — Zalando Sans (corpo) + Zalando Sans Expanded (display) */
+  --font-sans: "Zalando Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Helvetica Neue", Arial, sans-serif;
+  --font-heading: "Zalando Sans Expanded", "Zalando Sans", sans-serif;
+
   /* Surfaces */
   --background: #ffffff;
   --foreground: #0c161b;
@@ -157,10 +208,19 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "cv11", "ss01", "ss03";
     -webkit-font-smoothing: antialiased;
   }
   html {
     @apply font-sans;
+  }
+  /* Headlines/títulos da marca: família expandida, tracking levemente
+     negativo e line-height compacto (guideline §4.3). Sem mexer em tamanhos. */
+  h1,
+  h2,
+  h3,
+  .panel-title {
+    font-family: var(--font-heading);
+    letter-spacing: -0.01em;
+    line-height: 1.1;
   }
 }
