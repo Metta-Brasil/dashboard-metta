@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useRef, useState } from "react";
+import { CameraIcon } from "lucide-react";
 
 import {
   updateAvatarAction,
@@ -90,25 +91,6 @@ export function AvatarUpload({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center gap-4">
-        {shown ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={shown}
-            alt="Foto de perfil"
-            className="size-12 rounded-full object-cover"
-          />
-        ) : (
-          <span className="flex size-12 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">
-            {initialChar}
-          </span>
-        )}
-        <span className="text-xs text-muted-foreground">
-          Conta de e-mail e senha. Acesso restrito ao domínio
-          @mettabrasil.com.br.
-        </span>
-      </div>
-
       <form action={formAction} ref={formRef}>
         <input ref={dataRef} type="hidden" name="avatar" />
         <input ref={removeRef} type="hidden" name="remove" />
@@ -119,25 +101,64 @@ export function AvatarUpload({
           className="hidden"
           onChange={onPick}
         />
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-4">
           <button
             type="button"
             disabled={pending}
             onClick={() => fileRef.current?.click()}
-            className="h-9 w-fit rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:opacity-90 disabled:opacity-60"
+            aria-label="Trocar foto de perfil"
+            className="group relative size-16 shrink-0 overflow-hidden rounded-full outline-none ring-offset-2 ring-offset-card focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed"
           >
-            {pending ? "Salvando…" : "Trocar foto"}
+            {shown ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={shown}
+                alt="Foto de perfil"
+                className="size-full object-cover"
+              />
+            ) : (
+              <span className="flex size-full items-center justify-center bg-muted text-lg font-semibold text-muted-foreground">
+                {initialChar}
+              </span>
+            )}
+
+            <span className="absolute inset-0 flex flex-col items-center justify-center gap-0.5 bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+              <CameraIcon className="size-4" />
+              <span className="text-[10px] font-medium leading-none">
+                {pending ? "Salvando…" : "Trocar"}
+              </span>
+            </span>
+
+            {pending && (
+              <span className="absolute inset-0 flex items-center justify-center bg-black/40">
+                <span className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+              </span>
+            )}
           </button>
-          {(current || preview) && !removing && (
-            <button
-              type="button"
-              disabled={pending}
-              onClick={onRemove}
-              className="h-9 w-fit rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground transition-colors hover:bg-accent disabled:opacity-60"
-            >
-              Remover foto
-            </button>
-          )}
+
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-muted-foreground">
+              Conta de e-mail e senha. Acesso restrito ao domínio
+              @mettabrasil.com.br.
+            </span>
+            <span className="text-[11px] text-muted-foreground">
+              Clique na foto para trocar.
+              {(current || preview) && !removing && (
+                <>
+                  {" · "}
+                  <button
+                    type="button"
+                    disabled={pending}
+                    onClick={onRemove}
+                    className="font-medium text-foreground underline-offset-2 hover:underline disabled:opacity-60"
+                  >
+                    Remover foto
+                  </button>
+                </>
+              )}
+            </span>
+          </div>
         </div>
       </form>
 
