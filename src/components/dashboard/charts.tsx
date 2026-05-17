@@ -414,6 +414,7 @@ export function GroupedBarChart({
   xKey,
   bars,
   height = 280,
+  className,
 }: {
   title: string;
   description?: string;
@@ -421,12 +422,13 @@ export function GroupedBarChart({
   xKey: string;
   bars: SeriesDef[];
   height?: number;
+  className?: string;
 }) {
   const config = buildConfig(bars);
   const hasRight = bars.some((s) => s.axis === "right");
 
   return (
-    <ChartCard title={title} description={description}>
+    <ChartCard title={title} description={description} className={className}>
       <ChartContainer config={config} className="aspect-auto w-full" style={{ height }}>
         <ComposedChart data={data} margin={{ left: 4, right: 4, top: 8 }}>
           <CartesianGrid vertical={false} strokeDasharray="3 3" />
