@@ -510,6 +510,12 @@ export async function updateGoogleProfile(
   return { ok: true };
 }
 
+/** Apaga o overlay de perfil da conta Google. */
+export async function deleteGoogleProfile(email: string): Promise<boolean> {
+  const res = await redis<number>(["DEL", profileKey(email)]);
+  return res !== null;
+}
+
 export async function updateGoogleAvatar(
   email: string,
   dataUrl: string | null

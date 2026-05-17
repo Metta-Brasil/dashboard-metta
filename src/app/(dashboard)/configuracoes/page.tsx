@@ -138,15 +138,20 @@ async function ConfiguracoesContent({
           </button>
         </form>
 
-        {isCredentials && (
-          <div className="flex flex-col gap-2 border-t border-border pt-4">
-            <span className="panel-desc">
-              Excluir a conta apaga seu acesso de e-mail e senha
-              permanentemente.
-            </span>
-            <DeleteAccountButton />
-          </div>
-        )}
+        <div className="flex flex-col gap-2 border-t border-border pt-4">
+          <span className="panel-desc">
+            {isCredentials
+              ? "Excluir a conta apaga seu acesso de e-mail e senha permanentemente."
+              : "Excluir apaga os dados de perfil salvos aqui (nome, foto, telefone, cargo) e encerra a sessão. O acesso pelo Google segue liberado enquanto seu e-mail @mettabrasil.com.br estiver autorizado."}
+          </span>
+          <DeleteAccountButton
+            confirmText={
+              isCredentials
+                ? "Isso apaga sua conta de e-mail e senha permanentemente. Não dá pra desfazer."
+                : "Isso apaga seus dados de perfil guardados aqui e encerra a sessão. Não dá pra desfazer (o acesso via Google continua enquanto o domínio for autorizado)."
+            }
+          />
+        </div>
       </div>
     </>
   );

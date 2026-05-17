@@ -4,7 +4,11 @@ import { useState } from "react";
 
 import { deleteAccountAction } from "@/app/(dashboard)/configuracoes/actions";
 
-export function DeleteAccountButton() {
+export function DeleteAccountButton({
+  confirmText = "Isso apaga sua conta de e-mail e senha permanentemente. Não dá pra desfazer.",
+}: {
+  confirmText?: string;
+}) {
   const [confirming, setConfirming] = useState(false);
 
   if (!confirming) {
@@ -21,10 +25,7 @@ export function DeleteAccountButton() {
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-sm text-destructive">
-        Isso apaga sua conta de e-mail e senha permanentemente. Não dá
-        pra desfazer.
-      </p>
+      <p className="text-sm text-destructive">{confirmText}</p>
       <div className="flex flex-wrap items-center gap-3">
         <form action={deleteAccountAction}>
           <button

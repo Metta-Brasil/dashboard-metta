@@ -6,6 +6,7 @@ import { auth, signOut } from "@/auth";
 import {
   changePassword,
   confirmEmailChange,
+  deleteGoogleProfile,
   deleteUser,
   requestEmailChange,
   resendEmailChange,
@@ -102,8 +103,14 @@ export async function updateAvatarAction(
 export async function deleteAccountAction() {
   const session = await auth();
   const email = session?.user?.email;
-  if (email && session?.provider === "credentials") {
-    await deleteUser(email);
+  if (email) {
+    if (session?.provider === "credentials") {
+      await deleteUser(email);
+    } else {
+      // Conta Google: só temos o overlay de perfil pra apagar.
+      // O acesso em si segue via Google enquanto o domínio é liberado.
+      await deleteGoogleProfile(email);
+    }
   }
   await signOut({ redirectTo: "/login" });
   redirect("/login");
