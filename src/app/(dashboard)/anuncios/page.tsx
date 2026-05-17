@@ -234,15 +234,19 @@ function CreativeCard({ item }: { item: AnuncioCard }) {
       >
         {item.adName}
       </span>
-      <dl className="grid grid-cols-5 gap-2 text-xs">
-        <CreativeMetric label="CMQL" value={formatBRL(item.cmql)} />
-        <CreativeMetric label="MQL" value={formatInt(item.mql)} />
-        <CreativeMetric label="Agend" value={formatInt(item.agendamentos)} />
-        <CreativeMetric
-          label="Reun. real."
-          value={formatInt(item.reunioesRealizadas)}
-        />
-        <CreativeMetric label="Vendas" value={formatInt(item.vendas)} />
+      <dl className="flex flex-col gap-2.5 text-xs">
+        <div className="grid grid-cols-2 gap-2">
+          <CreativeMetric label="CMQL" value={formatBRL(item.cmql)} />
+          <CreativeMetric label="MQL" value={formatInt(item.mql)} />
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          <CreativeMetric label="Agend" value={formatInt(item.agendamentos)} />
+          <CreativeMetric
+            label="Reun. real."
+            value={formatInt(item.reunioesRealizadas)}
+          />
+          <CreativeMetric label="Vendas" value={formatInt(item.vendas)} />
+        </div>
       </dl>
       {hasIg ? (
         <a
