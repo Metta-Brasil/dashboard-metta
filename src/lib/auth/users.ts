@@ -10,7 +10,20 @@ const ALLOWED_DOMAIN = "mettabrasil.com.br";
 const URL_BASE = (process.env.UPSTASH_REDIS_REST_URL ?? "").replace(/\/$/, "");
 const TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN ?? "";
 
-type StoredUser = { email: string; name: string; passwordHash: string };
+type StoredUser = {
+  email: string;
+  name: string;
+  passwordHash: string;
+  phone?: string;
+  role?: string;
+};
+
+export type PublicUser = {
+  email: string;
+  name: string;
+  phone?: string;
+  role?: string;
+};
 
 async function redis<T = unknown>(
   command: (string | number)[]
@@ -248,4 +261,44 @@ export async function confirmSignup(
     return { ok: false, error: "Falha ao criar a conta. Tente de novo." };
   await redis(["DEL", pendingKey(e)]);
   return { ok: true };
+}
+
+/* ───────────────── Perfil (conta e-mail/senha) ───────────────── */
+
+/** Lê os campos públicos do perfil. */
+export async function getProfile(
+  email: string
+): Promise<PublicUser | null> {
+  const u = await getUser(email);
+  if (!u) return null;
+  return { email: u.email, name: u.name, phone: u.phone, role: u.role };
+}
+
+/** Atualiza nome/telefone/cargo. E-mail e senha não mudam aqui. */
+export async function updateProfile(
+  email: string,
+  data: { name: string; phone: string; role: string }
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const e = email.trim().toLowerCase();
+  const u = await getUser(e);
+  if (!u) return { ok: false, error: "Conta não encontrada." };
+  const name = data.name.trim();
+  if (!name) return { ok: false, error: "O nome não pode ficar vazio." };
+  const next: StoredUser = {
+    ...u,
+    name,
+    phone: data.phone.trim() || undefined,
+    role: data.role.trim() || undefined,
+  };
+  const saved = await redis(["SET", key(e), JSON.stringify(next)]);
+  if (saved === null)
+    return { ok: false, error: "Falha ao salvar. Tente de novo." };
+  return { ok: true };
+}
+
+/** Exclui a conta e-mail/senha. */
+export async function deleteUser(email: string): Promise<boolean> {
+  const e = email.trim().toLowerCase();
+  const res = await redis<number>(["DEL", key(e)]);
+  return res !== null;
 }

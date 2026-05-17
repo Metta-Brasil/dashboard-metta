@@ -22,7 +22,6 @@ import {
   UserCheckIcon,
   HandshakeIcon,
   Share2Icon,
-  SettingsIcon,
 } from "lucide-react";
 
 const navMain = [
@@ -33,7 +32,6 @@ const navMain = [
   { title: "Comercial SDR", url: "/sdr", icon: UserCheckIcon },
   { title: "Comercial Closer", url: "/closer", icon: HandshakeIcon },
   { title: "Origem", url: "/origem", icon: Share2Icon },
-  { title: "Configurações", url: "/configuracoes", icon: SettingsIcon },
 ];
 
 type SidebarUser = { name: string; email: string; avatar: string };
