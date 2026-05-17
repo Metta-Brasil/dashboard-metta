@@ -21,6 +21,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { formatBRL, formatPercent } from "@/lib/calc/shared";
 import { cn } from "@/lib/utils";
 
 /** Tokens de cor já definidos no globals.css (paleta Metta atual). */
@@ -354,8 +355,23 @@ export function DonutChart({
 }
 
 // ---------------------------------------------------------------------------
-// Barras agrupadas (2+ barras por categoria)
+// Barras agrupadas (1+ barras por categoria)
 // ---------------------------------------------------------------------------
+
+/** Formatação de valor no eixo Y / tooltip. */
+type ValueFormat = "number" | "percent" | "currency";
+
+function makeValueFormatter(
+  fmt: ValueFormat
+): (v: string | number) => string {
+  return (v) => {
+    const n = typeof v === "number" ? v : Number(v);
+    if (!Number.isFinite(n)) return String(v);
+    if (fmt === "percent") return formatPercent(n);
+    if (fmt === "currency") return formatBRL(n);
+    return n.toLocaleString("pt-BR");
+  };
+}
 
 export function GroupedBarChart({
   title,
@@ -364,6 +380,8 @@ export function GroupedBarChart({
   xKey,
   bars,
   height = 280,
+  className,
+  valueFormat = "number",
 }: {
   title: string;
   description?: string;
@@ -371,12 +389,16 @@ export function GroupedBarChart({
   xKey: string;
   bars: SeriesDef[];
   height?: number;
+  className?: string;
+  /** Formatação do eixo Y esquerdo e do tooltip. Default "number". */
+  valueFormat?: ValueFormat;
 }) {
   const config = buildConfig(bars);
   const hasRight = bars.some((s) => s.axis === "right");
+  const fmt = makeValueFormatter(valueFormat);
 
   return (
-    <ChartCard title={title} description={description}>
+    <ChartCard title={title} description={description} className={className}>
       <ChartContainer config={config} className="aspect-auto w-full" style={{ height }}>
         <ComposedChart data={data} margin={{ left: 4, right: 4, top: 8 }}>
           <CartesianGrid vertical={false} strokeDasharray="3 3" />
@@ -386,7 +408,15 @@ export function GroupedBarChart({
             axisLine={false}
             tickMargin={8}
           />
-          <YAxis yAxisId="left" tickLine={false} axisLine={false} width={44} />
+          <YAxis
+            yAxisId="left"
+            tickLine={false}
+            axisLine={false}
+            width={valueFormat === "number" ? 44 : 56}
+            tickFormatter={
+              valueFormat === "number" ? undefined : (v) => fmt(v as number)
+            }
+          />
           {hasRight && (
             <YAxis
               yAxisId="right"
@@ -396,7 +426,26 @@ export function GroupedBarChart({
               width={48}
             />
           )}
-          <ChartTooltip content={<ChartTooltipContent />} />
+          <ChartTooltip
+            content={
+              valueFormat === "number" ? (
+                <ChartTooltipContent />
+              ) : (
+                <ChartTooltipContent
+                  formatter={(value, name) => (
+                    <div className="flex w-full items-center justify-between gap-2">
+                      <span className="text-muted-foreground">
+                        {config[name as string]?.label ?? name}
+                      </span>
+                      <span className="font-mono font-medium text-foreground tabular-nums">
+                        {fmt(value as number)}
+                      </span>
+                    </div>
+                  )}
+                />
+              )
+            }
+          />
           <ChartLegend content={<ChartLegendContent />} />
           {bars.map((b) => (
             <Bar
