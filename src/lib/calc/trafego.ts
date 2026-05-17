@@ -18,6 +18,7 @@ import type {
   TrafegoFunilResumo,
   TrafegoKPIs,
   TrafegoMqlCmqlPorFunil,
+  TrafegoMqlPorTemperatura,
   TrafegoRankingRow,
   TrafegoResult,
   FunnelStep,
@@ -129,6 +130,29 @@ export function calcTrafego(
     };
   });
 
+  // 4b. MQL por temperatura — deriva da utm_source do lead (snapshot ausente neste
+  // escopo: trafego.ts opera só sobre leads filtrados por funil/período, sem join
+  // SDR/Venda). Mapa: contém "advantage" → Advantage; "quente" → Quente; "frio" →
+  // Frio; resto não entra. MQL = mesma definição (isMql) já usada acima, sobre os
+  // leads únicos do recorte atual (período/funil aplicados).
+  const tempMql: Record<"Advantage" | "Quente" | "Frio", number> = {
+    Advantage: 0,
+    Quente: 0,
+    Frio: 0,
+  };
+  for (const lead of leadsUnicos) {
+    if (!isMql(lead.qualificacao)) continue;
+    const src = (lead.utmSource ?? "").toLowerCase();
+    if (src.includes("advantage")) tempMql.Advantage += 1;
+    else if (src.includes("quente")) tempMql.Quente += 1;
+    else if (src.includes("frio")) tempMql.Frio += 1;
+  }
+  const mqlPorTemperatura: TrafegoMqlPorTemperatura[] = [
+    { temperatura: "Advantage", mql: tempMql.Advantage },
+    { temperatura: "Quente", mql: tempMql.Quente },
+    { temperatura: "Frio", mql: tempMql.Frio },
+  ];
+
   // 5. Ranking de mídia — agrupa por campaignName OU adSetName (toggle filters.rankingBy).
   // Match de leads por utm_campaign (substring nos dois sentidos — UTM pode ser truncado ou conter sufixo).
   const keyFn = rankingBy === "adset"
@@ -236,6 +260,7 @@ export function calcTrafego(
     kpis,
     serieCombo,
     mqlCmqlPorFunil,
+    mqlPorTemperatura,
     funilTrafego,
     funilTrafegoResumo,
     ranking,
