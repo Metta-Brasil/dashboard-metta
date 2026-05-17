@@ -30,8 +30,14 @@ export function calcSdr(
 
   // 1. Filtros base — funil aplicado em leads, sdr e vendas.
   const leadsF = filterLeadsByFunil(data.leads, funis);
-  const sdrF = filterLeadsByFunil(data.sdr, funis);
+  let sdrF = filterLeadsByFunil(data.sdr, funis);
   const vendasF = filterVendasByFunil(data.vendas, funis);
+
+  // Filtros multiselect opcionais (SDR / Status). Lista vazia/undefined = todos.
+  if (filters.sdr?.length)
+    sdrF = sdrF.filter((s) => filters.sdr!.includes(s.quemAgendou));
+  if (filters.status?.length)
+    sdrF = sdrF.filter((s) => filters.status!.includes(s.status));
 
   // 2. Janelas temporais separadas conforme PRD §5.1.2:
   //    - Leads recebidos / qualificação    → leads.dataInscricao

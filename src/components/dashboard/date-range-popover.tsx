@@ -111,10 +111,13 @@ export function DateRangePopover({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         render={
-          <Button variant="outline" size="sm" className="gap-2 font-normal">
+          <button
+            type="button"
+            className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-md border border-input bg-card px-3 text-[13px] font-medium text-foreground transition-colors hover:border-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
+          >
             <CalendarIcon />
             {fmt(range.from)} — {fmt(range.to)}
-          </Button>
+          </button>
         }
       />
       <PopoverContent
