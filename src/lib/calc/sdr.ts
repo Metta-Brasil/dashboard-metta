@@ -84,9 +84,14 @@ export function calcSdr(
 
   // 6. Vendas atribuídas ao funil SDR no período:
   //    match por email entre vendas (in range por dataCompra) e o universo SDR do período.
-  const vendasAtribuidas = vendasInRange.filter(
+  const vendasAtribuidasRows = vendasInRange.filter(
     (v) => v.email && sdrEmailsDoPeriodo.has(v.email)
-  ).length;
+  );
+  const vendasAtribuidas = vendasAtribuidasRows.length;
+  const faturamentoAtribuido = sumBy(
+    vendasAtribuidasRows,
+    (v) => v.valorContrato
+  );
 
   // 7. KPIs.
   // safeRate retorna 0 quando o denominador é 0 — taxaShow=0 quando reunioesAgendadas=0,
@@ -99,6 +104,8 @@ export function calcSdr(
     propostas,
     taxaProposta: safeRate(propostas, realizadas),
     valorPropostas,
+    vendas: vendasAtribuidas,
+    faturamento: faturamentoAtribuido,
     // Legados opcionais (preservados pra consumidor antigo).
     leadsRecebidos,
     tentativasContato,

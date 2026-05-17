@@ -54,7 +54,7 @@ const RANGES: Record<SheetTab, string> = {
   fb_todos: "fb_todos!A:R",
   leads: "leads!A:P",
   sdr: "sdr!A:AB",
-  vendas: "vendas!A:AC",
+  vendas: "vendas!A:AE",
   Metas: "Metas!A:D",
   ads_links: "'ads links'!A:C",
 };

@@ -41,12 +41,6 @@ async function OrigemContent({ searchParams }: PageProps) {
   // por tabela (Origem / Campanha / Qualificação / Cargo / etc.).
   const metricCols: Column<OrigemRow>[] = [
     {
-      key: "leadsQualif",
-      header: "Leads qualif.",
-      render: (r) => formatInt(r.leadsQualif),
-      align: "right",
-    },
-    {
       key: "mql",
       header: "MQL",
       render: (r) => formatInt(r.mql),

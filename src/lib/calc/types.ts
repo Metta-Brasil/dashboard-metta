@@ -255,6 +255,8 @@ export type SDRKpis = {
   propostas: number;
   taxaProposta: number;
   valorPropostas: number;
+  vendas: number;
+  faturamento: number;
   // Legado opcional (extras úteis ainda usados por consumidor antigo)
   leadsRecebidos?: number;
   tentativasContato?: number;

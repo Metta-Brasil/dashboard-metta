@@ -92,6 +92,16 @@ async function SdrContent({ searchParams }: PageProps) {
       value: formatBRLCompact(k.valorPropostas),
       hint: "Pipeline gerado",
     },
+    {
+      label: "Vendas",
+      value: formatInt(k.vendas),
+      hint: "Atribuídas ao funil SDR",
+    },
+    {
+      label: "Faturamento",
+      value: formatBRLCompact(k.faturamento),
+      hint: "Receita das vendas atribuídas",
+    },
   ];
 
   const columns: Column<SDRRow>[] = [
