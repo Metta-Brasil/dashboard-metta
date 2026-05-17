@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { signIn } from "@/auth";
-import { createUser } from "@/lib/auth/users";
+import { startSignup } from "@/lib/auth/users";
+import { sendVerificationCode } from "@/lib/email/brevo";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,11 +25,20 @@ async function signUp(formData: FormData) {
   if (password !== confirm) {
     redirect("/signup?error=" + encodeURIComponent("As senhas não conferem."));
   }
-  const res = await createUser(email, name, password);
+  const res = await startSignup(email, name, password);
   if (!res.ok) {
     redirect("/signup?error=" + encodeURIComponent(res.error));
   }
-  await signIn("credentials", { email, password, redirectTo: "/" });
+  const sent = await sendVerificationCode(res.email, res.name, res.code);
+  if (!sent.ok) {
+    redirect(
+      "/signup?error=" +
+        encodeURIComponent(
+          "Não consegui enviar o e-mail de confirmação. Tente de novo."
+        )
+    );
+  }
+  redirect("/signup?verify=" + encodeURIComponent(res.email));
 }
 
 async function signUpWithGoogle() {

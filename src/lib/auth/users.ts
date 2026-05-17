@@ -119,3 +119,133 @@ export async function changePassword(
     return { ok: false, error: "Falha ao salvar. Tente de novo." };
   return { ok: true };
 }
+
+/* ───────────────── Cadastro com verificação de e-mail ───────────────── */
+
+type Pending = {
+  email: string;
+  name: string;
+  passwordHash: string;
+  code: string;
+  attempts: number;
+};
+
+const PENDING_TTL = 900; // 15 min
+
+function pendingKey(email: string): string {
+  return `auth:pending:${email.trim().toLowerCase()}`;
+}
+
+function genCode(): string {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+/**
+ * Inicia o cadastro: valida, gera código de 6 dígitos e grava um
+ * registro pendente (senha já com hash) no Upstash com TTL. Não cria
+ * a conta ainda — só após confirmar o código. Retorna o código para
+ * o chamador enviar por e-mail.
+ */
+export async function startSignup(
+  email: string,
+  name: string,
+  password: string
+): Promise<
+  { ok: true; email: string; name: string; code: string } | { ok: false; error: string }
+> {
+  const e = email.trim().toLowerCase();
+  if (!isAllowedDomain(e))
+    return { ok: false, error: "Use um e-mail @mettabrasil.com.br." };
+  if (password.length < 8)
+    return { ok: false, error: "A senha precisa de no mínimo 8 caracteres." };
+  if (await getUser(e))
+    return { ok: false, error: "Já existe uma conta com esse e-mail." };
+
+  const passwordHash = await bcrypt.hash(password, 10);
+  const nm = name.trim() || e.split("@")[0];
+  const code = genCode();
+  const pending: Pending = { email: e, name: nm, passwordHash, code, attempts: 0 };
+  const saved = await redis([
+    "SET",
+    pendingKey(e),
+    JSON.stringify(pending),
+    "EX",
+    String(PENDING_TTL),
+  ]);
+  if (saved === null)
+    return { ok: false, error: "Falha ao iniciar o cadastro. Tente de novo." };
+  return { ok: true, email: e, name: nm, code };
+}
+
+/** Reenvia: gera novo código, zera tentativas, renova o TTL. */
+export async function resendCode(
+  email: string
+): Promise<
+  { ok: true; email: string; name: string; code: string } | { ok: false; error: string }
+> {
+  const e = email.trim().toLowerCase();
+  const raw = await redis<string>(["GET", pendingKey(e)]);
+  if (!raw) return { ok: false, error: "Cadastro expirado. Comece de novo." };
+  let p: Pending;
+  try {
+    p = JSON.parse(raw) as Pending;
+  } catch {
+    return { ok: false, error: "Cadastro inválido. Comece de novo." };
+  }
+  const code = genCode();
+  const saved = await redis([
+    "SET",
+    pendingKey(e),
+    JSON.stringify({ ...p, code, attempts: 0 }),
+    "EX",
+    String(PENDING_TTL),
+  ]);
+  if (saved === null)
+    return { ok: false, error: "Falha ao reenviar. Tente de novo." };
+  return { ok: true, email: e, name: p.name, code };
+}
+
+/** Confirma o código e cria a conta de verdade. */
+export async function confirmSignup(
+  email: string,
+  code: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const e = email.trim().toLowerCase();
+  const raw = await redis<string>(["GET", pendingKey(e)]);
+  if (!raw)
+    return { ok: false, error: "Código expirado. Reenvie ou comece de novo." };
+  let p: Pending;
+  try {
+    p = JSON.parse(raw) as Pending;
+  } catch {
+    return { ok: false, error: "Cadastro inválido. Comece de novo." };
+  }
+  if (p.attempts >= 5) {
+    await redis(["DEL", pendingKey(e)]);
+    return { ok: false, error: "Muitas tentativas. Comece o cadastro de novo." };
+  }
+  if (String(code).trim() !== p.code) {
+    await redis([
+      "SET",
+      pendingKey(e),
+      JSON.stringify({ ...p, attempts: p.attempts + 1 }),
+      "EX",
+      String(PENDING_TTL),
+    ]);
+    return { ok: false, error: "Código incorreto." };
+  }
+  if (await getUser(e)) {
+    await redis(["DEL", pendingKey(e)]);
+    return { ok: false, error: "Conta já existe. Faça login." };
+  }
+  const user: StoredUser = {
+    email: e,
+    name: p.name,
+    passwordHash: p.passwordHash,
+  };
+  const saved = await redis(["SET", key(e), JSON.stringify(user)]);
+  if (saved === null)
+    return { ok: false, error: "Falha ao criar a conta. Tente de novo." };
+  await redis(["DEL", pendingKey(e)]);
+  return { ok: true };
+}

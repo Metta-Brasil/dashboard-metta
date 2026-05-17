@@ -43,9 +43,10 @@ async function loginWithGoogle() {
 
 export function LoginForm({
   error,
+  notice,
   className,
   ...props
-}: React.ComponentProps<"div"> & { error?: string }) {
+}: React.ComponentProps<"div"> & { error?: string; notice?: string }) {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
@@ -65,6 +66,11 @@ export function LoginForm({
                 </p>
               </div>
 
+              {notice && !error && (
+                <p className="rounded-md border border-primary/40 bg-primary/10 px-3 py-2 text-center text-sm text-foreground">
+                  {notice}
+                </p>
+              )}
               {error && (
                 <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
                   {error}
