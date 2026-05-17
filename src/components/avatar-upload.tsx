@@ -15,9 +15,11 @@ const MAX_DIM = 256;
 export function AvatarUpload({
   current,
   initial: initialChar,
+  note = "Conta de e-mail e senha. Acesso restrito ao domínio @mettabrasil.com.br.",
 }: {
   current?: string;
   initial: string;
+  note?: string;
 }) {
   const [state, formAction, pending] = useActionState(
     updateAvatarAction,
@@ -138,10 +140,7 @@ export function AvatarUpload({
           </button>
 
           <div className="flex flex-col gap-1">
-            <span className="text-xs text-muted-foreground">
-              Conta de e-mail e senha. Acesso restrito ao domínio
-              @mettabrasil.com.br.
-            </span>
+            <span className="text-xs text-muted-foreground">{note}</span>
             <span className="text-[11px] text-muted-foreground">
               Clique na foto para trocar.
               {(current || preview) && !removing && (

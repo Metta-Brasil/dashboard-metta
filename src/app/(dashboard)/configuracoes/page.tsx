@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { auth, signOut } from "@/auth";
-import { getProfile } from "@/lib/auth/users";
+import { getGoogleProfile, getProfile } from "@/lib/auth/users";
 import { PageShell } from "@/components/page-shell";
 import { ChangePasswordForm } from "@/components/change-password-form";
 import { ProfileForm } from "@/components/profile-form";
@@ -39,9 +39,36 @@ async function ConfiguracoesContent({
   const session = await auth();
   const user = session?.user;
   const isCredentials = session?.provider === "credentials";
-  const profile = isCredentials && user?.email
-    ? await getProfile(user.email)
-    : null;
+  const email = user?.email ?? "";
+
+  // Perfil unificado: credentials lê auth:user; Google usa os dados do
+  // Google como base + overlay editável (nome/foto/telefone/cargo).
+  let pf = {
+    name: user?.name ?? "",
+    email,
+    phone: undefined as string | undefined,
+    role: undefined as string | undefined,
+    avatar: undefined as string | undefined,
+  };
+  if (email && isCredentials) {
+    const g = await getProfile(email);
+    pf = {
+      name: g?.name ?? user?.name ?? "",
+      email: g?.email ?? email,
+      phone: g?.phone,
+      role: g?.role,
+      avatar: g?.avatar,
+    };
+  } else if (email) {
+    const o = await getGoogleProfile(email);
+    pf = {
+      name: o?.name ?? user?.name ?? "",
+      email,
+      phone: o?.phone,
+      role: o?.role,
+      avatar: o?.avatar ?? user?.image ?? undefined,
+    };
+  }
 
   return (
     <>
@@ -49,59 +76,35 @@ async function ConfiguracoesContent({
       <div className="surface-card flex flex-col gap-4 p-5 lg:p-6">
         <h3 className="panel-title">Perfil</h3>
 
-        {isCredentials ? (
-          <>
-            <AvatarUpload
-              current={profile?.avatar}
-              initial={(profile?.name ?? user?.name ?? "?")
-                .charAt(0)
-                .toUpperCase()}
-            />
-            <ProfileForm
-              name={profile?.name ?? user?.name ?? ""}
-              email={profile?.email ?? user?.email ?? ""}
-              phone={profile?.phone}
-              role={profile?.role}
-            />
-            <EmailChange
-              currentEmail={profile?.email ?? user?.email ?? ""}
-              pendingNewEmail={
-                typeof sp.ec === "string" && sp.ec ? sp.ec : undefined
-              }
-              error={typeof sp.ecerr === "string" ? sp.ecerr : undefined}
-              sent={sp.ecsent === "1"}
-            />
-          </>
-        ) : (
-          <>
-            <div className="flex items-center gap-4">
-              {user?.image ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={user.image}
-                  alt={user.name ?? "Avatar"}
-                  className="size-12 rounded-full"
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                <span className="flex size-12 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">
-                  {(user?.name ?? "?").charAt(0).toUpperCase()}
-                </span>
-              )}
-              <div className="flex flex-col">
-                <span className="text-sm font-semibold text-foreground">
-                  {user?.name ?? "—"}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  {user?.email ?? "—"}
-                </span>
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Identidade gerenciada pelo Google. Acesso restrito ao domínio
-              @mettabrasil.com.br.
-            </p>
-          </>
+        <AvatarUpload
+          current={pf.avatar}
+          initial={(pf.name || email || "?").charAt(0).toUpperCase()}
+          note={
+            isCredentials
+              ? "Conta de e-mail e senha. Acesso restrito ao domínio @mettabrasil.com.br."
+              : "Conta Google — nome e foto vêm do Google e podem ser sobrescritos aqui. Acesso restrito a @mettabrasil.com.br."
+          }
+        />
+        <ProfileForm
+          name={pf.name}
+          email={pf.email}
+          phone={pf.phone}
+          role={pf.role}
+          emailNote={
+            isCredentials
+              ? 'Para trocar o e-mail use "Alterar e-mail" abaixo — exige confirmar um código no novo endereço.'
+              : "E-mail gerenciado pelo Google — não pode ser alterado aqui."
+          }
+        />
+        {isCredentials && (
+          <EmailChange
+            currentEmail={pf.email}
+            pendingNewEmail={
+              typeof sp.ec === "string" && sp.ec ? sp.ec : undefined
+            }
+            error={typeof sp.ecerr === "string" ? sp.ecerr : undefined}
+            sent={sp.ecsent === "1"}
+          />
         )}
       </div>
 

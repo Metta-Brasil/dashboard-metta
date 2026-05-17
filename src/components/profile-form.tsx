@@ -17,11 +17,13 @@ export function ProfileForm({
   email,
   phone,
   role,
+  emailNote = 'Para trocar o e-mail use "Alterar e-mail" abaixo — exige confirmar um código no novo endereço.',
 }: {
   name: string;
   email: string;
   phone?: string;
   role?: string;
+  emailNote?: string;
 }) {
   const [state, formAction, pending] = useActionState(
     updateProfileAction,
@@ -55,10 +57,7 @@ export function ProfileForm({
           disabled
           className={inputCls}
         />
-        <span className="text-[11px] text-muted-foreground">
-          Para trocar o e-mail use &ldquo;Alterar e-mail&rdquo; abaixo —
-          exige confirmar um código no novo endereço.
-        </span>
+        <span className="text-[11px] text-muted-foreground">{emailNote}</span>
       </div>
 
       <div className="grid grid-cols-2 gap-3">

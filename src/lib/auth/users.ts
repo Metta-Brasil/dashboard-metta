@@ -461,3 +461,78 @@ export async function confirmEmailChange(
   await redis(["DEL", emailChangeKey(cur)]);
   return { ok: true, newEmail: p.newEmail };
 }
+
+/* ──────────── Overlay de perfil p/ conta Google ────────────
+ * Conta Google não tem registro auth:user (não tem senha). Os campos
+ * editáveis (nome/telefone/cargo/foto) ficam num overlay próprio,
+ * keyed pelo e-mail. Nome/foto: se vazio, o app cai no dado do Google.
+ */
+type OverlayProfile = {
+  name?: string;
+  phone?: string;
+  role?: string;
+  avatar?: string;
+};
+
+function profileKey(email: string): string {
+  return `auth:profile:${email.trim().toLowerCase()}`;
+}
+
+export async function getGoogleProfile(
+  email: string
+): Promise<OverlayProfile | null> {
+  const raw = await redis<string>(["GET", profileKey(email)]);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as OverlayProfile;
+  } catch {
+    return null;
+  }
+}
+
+export async function updateGoogleProfile(
+  email: string,
+  data: { name: string; phone: string; role: string }
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const e = email.trim().toLowerCase();
+  if (!isAllowedDomain(e))
+    return { ok: false, error: "Conta inválida." };
+  const cur = (await getGoogleProfile(e)) ?? {};
+  const next: OverlayProfile = {
+    ...cur,
+    name: data.name.trim() || undefined,
+    phone: data.phone.trim() || undefined,
+    role: data.role.trim() || undefined,
+  };
+  const saved = await redis(["SET", profileKey(e), JSON.stringify(next)]);
+  if (saved === null)
+    return { ok: false, error: "Falha ao salvar. Tente de novo." };
+  return { ok: true };
+}
+
+export async function updateGoogleAvatar(
+  email: string,
+  dataUrl: string | null
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const e = email.trim().toLowerCase();
+  if (!isAllowedDomain(e))
+    return { ok: false, error: "Conta inválida." };
+  const cur = (await getGoogleProfile(e)) ?? {};
+  if (dataUrl === null) {
+    const next = { ...cur };
+    delete next.avatar;
+    const s = await redis(["SET", profileKey(e), JSON.stringify(next)]);
+    return s === null
+      ? { ok: false, error: "Falha ao salvar. Tente de novo." }
+      : { ok: true };
+  }
+  if (!/^data:image\/(png|jpeg|webp);base64,/.test(dataUrl))
+    return { ok: false, error: "Formato de imagem inválido." };
+  if (dataUrl.length > 200000)
+    return { ok: false, error: "Imagem muito grande (máx ~150KB)." };
+  const next: OverlayProfile = { ...cur, avatar: dataUrl };
+  const s = await redis(["SET", profileKey(e), JSON.stringify(next)]);
+  return s === null
+    ? { ok: false, error: "Falha ao salvar. Tente de novo." }
+    : { ok: true };
+}

@@ -1,27 +1,28 @@
 import { Suspense } from "react";
 
 import { auth } from "@/auth";
-import { getProfile } from "@/lib/auth/users";
+import { getGoogleProfile, getProfile } from "@/lib/auth/users";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 async function UserSidebar() {
   const session = await auth();
   const email = session?.user?.email ?? "";
+  let name = session?.user?.name ?? "Usuário";
   let avatar = session?.user?.image ?? "";
-  if (session?.provider === "credentials" && email) {
-    const profile = await getProfile(email);
-    avatar = profile?.avatar ?? "";
+  if (email) {
+    if (session?.provider === "credentials") {
+      const p = await getProfile(email);
+      if (p?.name) name = p.name;
+      avatar = p?.avatar ?? "";
+    } else {
+      const o = await getGoogleProfile(email);
+      if (o?.name) name = o.name;
+      avatar = o?.avatar ?? avatar;
+    }
   }
   return (
-    <AppSidebar
-      variant="inset"
-      user={{
-        name: session?.user?.name ?? "Usuário",
-        email,
-        avatar,
-      }}
-    />
+    <AppSidebar variant="inset" user={{ name, email, avatar }} />
   );
 }
 

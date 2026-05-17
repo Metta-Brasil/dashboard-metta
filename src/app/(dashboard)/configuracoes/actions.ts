@@ -10,6 +10,8 @@ import {
   requestEmailChange,
   resendEmailChange,
   updateAvatar,
+  updateGoogleAvatar,
+  updateGoogleProfile,
   updateProfile,
 } from "@/lib/auth/users";
 import { sendEmailChangeCode } from "@/lib/email/brevo";
@@ -52,14 +54,16 @@ export async function updateProfileAction(
 ): Promise<ProfileState> {
   const session = await auth();
   const email = session?.user?.email;
-  if (!email || session?.provider !== "credentials") {
-    return { error: "Indisponível para esta conta." };
-  }
-  const res = await updateProfile(email, {
+  if (!email) return { error: "Sessão inválida." };
+  const data = {
     name: String(formData.get("name") ?? ""),
     phone: String(formData.get("phone") ?? ""),
     role: String(formData.get("role") ?? ""),
-  });
+  };
+  const res =
+    session?.provider === "credentials"
+      ? await updateProfile(email, data)
+      : await updateGoogleProfile(email, data);
   return res.ok ? { ok: true } : { error: res.error };
 }
 
@@ -74,17 +78,20 @@ export async function updateAvatarAction(
 ): Promise<AvatarState> {
   const session = await auth();
   const email = session?.user?.email;
-  if (!email || session?.provider !== "credentials") {
-    return { error: "Indisponível para esta conta." };
-  }
+  if (!email) return { error: "Sessão inválida." };
+  const isCred = session?.provider === "credentials";
   const remove = String(formData.get("remove") ?? "") === "1";
   if (remove) {
-    const res = await updateAvatar(email, null);
+    const res = isCred
+      ? await updateAvatar(email, null)
+      : await updateGoogleAvatar(email, null);
     return res.ok ? { ok: true } : { error: res.error };
   }
   const dataUrl = String(formData.get("avatar") ?? "");
   if (!dataUrl) return { error: "Nenhuma imagem selecionada." };
-  const res = await updateAvatar(email, dataUrl);
+  const res = isCred
+    ? await updateAvatar(email, dataUrl)
+    : await updateGoogleAvatar(email, dataUrl);
   return res.ok ? { ok: true } : { error: res.error };
 }
 
