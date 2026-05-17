@@ -1,7 +1,14 @@
 "use client";
 
+import { ChevronDownIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 const FUNIS = [
@@ -22,6 +29,17 @@ function parseSelected(raw: string | null): Set<FunilId> {
     .map((t) => t.trim().toLowerCase())
     .filter((t): t is FunilId => FUNIS.some((f) => f.id === t));
   return tokens.length ? new Set(tokens) : new Set(["todos"]);
+}
+
+function describe(selected: Set<FunilId>): string {
+  if (selected.has("todos")) return "Todos os funis";
+  const labels = FUNIS.filter(
+    (f) => f.id !== "todos" && selected.has(f.id)
+  ).map((f) => f.label);
+  if (labels.length === 0) return "Todos os funis";
+  if (labels.length === 1) return labels[0];
+  if (labels.length === 2) return labels.join(", ");
+  return `${labels.length} funis`;
 }
 
 export function FunilChips() {
@@ -47,25 +65,27 @@ export function FunilChips() {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      {FUNIS.map((f) => {
-        const active = selected.has(f.id);
-        return (
-          <button
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        className={cn(
+          "flex h-8 items-center gap-2 rounded-full border border-border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:bg-accent",
+          "outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        )}
+      >
+        {describe(selected)}
+        <ChevronDownIcon className="size-3.5 text-muted-foreground" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="min-w-44">
+        {FUNIS.map((f) => (
+          <DropdownMenuCheckboxItem
             key={f.id}
-            type="button"
-            onClick={() => toggle(f.id)}
-            className={cn(
-              "h-8 rounded-full border px-3 text-xs font-medium transition-colors",
-              active
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border bg-card text-foreground hover:bg-accent"
-            )}
+            checked={selected.has(f.id)}
+            onCheckedChange={() => toggle(f.id)}
           >
             {f.label}
-          </button>
-        );
-      })}
-    </div>
+          </DropdownMenuCheckboxItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
