@@ -316,6 +316,7 @@ export function DonutChart({
   data.forEach((d, i) => {
     config[d.name] = { label: d.name, color: PALETTE[i % PALETTE.length] };
   });
+  const total = data.reduce((acc, d) => acc + d.value, 0);
 
   return (
     <ChartCard title={title} description={description} className={className}>
@@ -328,7 +329,33 @@ export function DonutChart({
           className="absolute inset-0 aspect-auto h-full w-full"
         >
           <PieChart>
-            <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
+            <ChartTooltip
+              content={
+                <ChartTooltipContent
+                  nameKey="name"
+                  formatter={(value, name, item) => {
+                    const v = Number(value);
+                    const pct = total > 0 ? (v / total) * 100 : 0;
+                    const fill =
+                      (item?.payload?.fill as string | undefined) ?? undefined;
+                    return (
+                      <div className="flex w-full items-center gap-2">
+                        <span
+                          className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                          style={{ background: fill }}
+                        />
+                        <span className="flex-1 text-muted-foreground">
+                          {name}
+                        </span>
+                        <span className="font-mono font-medium tabular-nums text-foreground">
+                          {v.toLocaleString("pt-BR")} · {pct.toFixed(1)}%
+                        </span>
+                      </div>
+                    );
+                  }}
+                />
+              }
+            />
             <Pie
               data={data}
               dataKey="value"
