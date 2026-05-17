@@ -20,14 +20,20 @@ export function parseFilters(
   const toStr = typeof searchParams.to === "string" ? searchParams.to : undefined;
   const funisStr = typeof searchParams.funis === "string" ? searchParams.funis : undefined;
 
-  // Filtro string opcional: vazio/"todos"/"todas" → undefined (sem filtro).
-  const str = (k: string): string | undefined => {
+  // Filtro multiselect: "a,b,c" → ["a","b","c"]. Vazio/"todos"/"todas"
+  // → undefined (sem corte). Mantém paridade com o serializer do
+  // MultiSelectFilter (valores juntados por vírgula).
+  const list = (k: string): string[] | undefined => {
     const v = searchParams[k];
     if (typeof v !== "string") return undefined;
-    const t = v.trim();
-    const low = t.toLowerCase();
-    if (t === "" || low === "todos" || low === "todas") return undefined;
-    return t;
+    const items = v
+      .split(",")
+      .map((t) => t.trim())
+      .filter((t) => {
+        const low = t.toLowerCase();
+        return t !== "" && low !== "todos" && low !== "todas";
+      });
+    return items.length ? items : undefined;
   };
 
   // "YYYY-MM-DD" do date picker é interpretado pelo JS como UTC meia-noite;
@@ -50,7 +56,7 @@ export function parseFilters(
     from: Number.isFinite(from.getTime()) ? from : defaultFrom,
     to: Number.isFinite(to.getTime()) ? to : now,
     funis: funis.length ? funis : (["todos"] as Funil[]),
-    sdr: str("sdr"),
-    status: str("status"),
+    sdr: list("sdr"),
+    status: list("status"),
   };
 }

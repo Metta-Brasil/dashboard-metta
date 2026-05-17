@@ -12,7 +12,7 @@ type ToolbarProps = {
 
 export function Toolbar({ from, to, funil = true, extras }: ToolbarProps) {
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+    <div className="flex flex-wrap gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
       <div className="flex flex-wrap items-center gap-2">
         {funil && <FunilChips />}
       </div>

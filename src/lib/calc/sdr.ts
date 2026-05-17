@@ -45,8 +45,10 @@ export function calcSdr(
   // 1c. Filtro SDR / Status (aditivo). Default (undefined) = sem corte →
   //     comportamento idêntico ao anterior (zero regressão). Aplicado em
   //     sdrF pra propagar consistente a agend./reuniões/funil/heatmap/tabela.
-  if (filters.sdr) sdrF = sdrF.filter((s) => s.quemAgendou === filters.sdr);
-  if (filters.status) sdrF = sdrF.filter((s) => s.status === filters.status);
+  if (filters.sdr?.length)
+    sdrF = sdrF.filter((s) => filters.sdr!.includes(s.quemAgendou));
+  if (filters.status?.length)
+    sdrF = sdrF.filter((s) => filters.status!.includes(s.status));
 
   // 2. Janelas temporais separadas conforme PRD §5.1.2:
   //    - Leads recebidos / qualificação    → leads.dataInscricao

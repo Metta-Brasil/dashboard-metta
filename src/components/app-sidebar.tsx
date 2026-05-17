@@ -18,6 +18,7 @@ import {
   LayoutDashboardIcon,
   TargetIcon,
   MegaphoneIcon,
+  NewspaperIcon,
   ImageIcon,
   UserCheckIcon,
   HandshakeIcon,
@@ -27,7 +28,12 @@ import {
 const navMain = [
   { title: "Visão Geral", url: "/", icon: LayoutDashboardIcon },
   { title: "Metas vs Realizado", url: "/metas", icon: TargetIcon },
-  { title: "Tráfego Pago", url: "/trafego", icon: MegaphoneIcon },
+  { title: "TP Aquisição", url: "/trafego", icon: MegaphoneIcon },
+  {
+    title: "TP Distribuição de conteúdo",
+    url: "/tp-distribuicao",
+    icon: NewspaperIcon,
+  },
   { title: "Anúncios", url: "/anuncios", icon: ImageIcon },
   { title: "Comercial SDR", url: "/sdr", icon: UserCheckIcon },
   { title: "Comercial Closer", url: "/closer", icon: HandshakeIcon },

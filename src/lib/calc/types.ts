@@ -28,10 +28,10 @@ export type FilterState = {
   temperatura?: "todas" | "frio" | "quente" | "adv";
   /** Toggle ranking — campanha ou adset (Tráfego). */
   rankingBy?: "campanha" | "adset";
-  /** Nome do SDR (Comercial SDR). */
-  sdr?: string;
-  /** Status de reunião (Comercial SDR). */
-  status?: string;
+  /** Nomes de SDR selecionados (Comercial SDR). Vazio/undefined = todos. */
+  sdr?: string[];
+  /** Status de reunião selecionados (Comercial SDR). Vazio/undefined = todos. */
+  status?: string[];
   /** Busca client-side ou server (Tráfego/Anúncios). */
   busca?: string;
 };

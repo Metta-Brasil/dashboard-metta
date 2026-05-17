@@ -44,7 +44,7 @@ function formatDayBr(d: Date): string {
 export default function TrafegoPage({ searchParams }: PageProps) {
   return (
     <PageShell
-      title="Tráfego Pago"
+      title="TP Aquisição"
       description="Investimento, MQL, custo por funil e ranking de campanhas Meta."
       toolbar={
         <Suspense fallback={null}>
