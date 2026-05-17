@@ -218,6 +218,11 @@ export type TrafegoMqlCmqlPorFunil = {
   investimento: number;
 };
 
+export type TrafegoMqlPorTemperatura = {
+  temperatura: "Advantage" | "Quente" | "Frio";
+  mql: number;
+};
+
 export type TrafegoRankingRow = {
   nome: string;
   agrupamento: "campanha" | "adset";
@@ -238,6 +243,7 @@ export type TrafegoResult = {
   kpis: TrafegoKPIs;
   serieCombo: TrafegoComboPoint[];
   mqlCmqlPorFunil: TrafegoMqlCmqlPorFunil[];
+  mqlPorTemperatura: TrafegoMqlPorTemperatura[];
   funilTrafego: FunnelStep[];
   funilTrafegoResumo: TrafegoFunilResumo;
   ranking: TrafegoRankingRow[];

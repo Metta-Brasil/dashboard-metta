@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import {
   ComboBarLineChart,
+  DonutChart,
   GroupedBarChart,
 } from "@/components/dashboard/charts";
 import { FunnelVertical } from "@/components/dashboard/funnel-vertical";
@@ -55,22 +56,23 @@ export default function TrafegoPage({ searchParams }: PageProps) {
         <TrafegoKpis searchParams={searchParams} />
       </Suspense>
 
-      {/* g-2-1 do #p2: esquerda = combo + barras por funil empilhados;
-          direita = funil de tráfego */}
-      <div className="grid items-stretch gap-6 lg:grid-cols-3">
-        <div className="flex flex-col gap-6 lg:col-span-2">
-          <Suspense fallback={<TableFallback rows={6} />}>
-            <EvolucaoDiaria searchParams={searchParams} />
-          </Suspense>
-          <Suspense fallback={<TableFallback rows={5} />}>
-            <MqlPorFunil searchParams={searchParams} />
-          </Suspense>
-        </div>
-        <div className="flex lg:col-span-1">
-          <Suspense fallback={<FunilFallback />}>
-            <FunilTrafego searchParams={searchParams} />
-          </Suspense>
-        </div>
+      {/* Grid 2x2: A | B em cima, NOVO (MQL por temperatura) | C embaixo */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <Suspense fallback={<TableFallback rows={6} />}>
+          <EvolucaoDiaria searchParams={searchParams} />
+        </Suspense>
+
+        <Suspense fallback={<FunilFallback />}>
+          <FunilTrafego searchParams={searchParams} />
+        </Suspense>
+
+        <Suspense fallback={<TableFallback rows={5} />}>
+          <MqlPorTemperatura searchParams={searchParams} />
+        </Suspense>
+
+        <Suspense fallback={<TableFallback rows={5} />}>
+          <MqlPorFunil searchParams={searchParams} />
+        </Suspense>
       </div>
 
       <Suspense fallback={<TableFallback rows={6} />}>
@@ -180,6 +182,30 @@ async function MqlPorFunil({ searchParams }: PageProps) {
         { key: "mql", label: "MQL" },
         { key: "cmql", label: "CMQL", axis: "right" },
       ]}
+    />
+  );
+}
+
+// ---------------------------------------------------------------------------
+// MQL por temperatura (donut) — Advantage / Quente / Frio via utm_source
+// ---------------------------------------------------------------------------
+
+async function MqlPorTemperatura({ searchParams }: PageProps) {
+  const result = await getTrafego(searchParams);
+
+  const data = result.mqlPorTemperatura.map((r) => ({
+    name: r.temperatura,
+    value: r.mql,
+  }));
+  const totalMql = data.reduce((acc, d) => acc + d.value, 0);
+
+  return (
+    <DonutChart
+      title="MQL por temperatura"
+      description="Distribuição de MQL por temperatura (utm_source)"
+      data={data}
+      centerValue={formatInt(totalMql)}
+      centerLabel="MQL"
     />
   );
 }
