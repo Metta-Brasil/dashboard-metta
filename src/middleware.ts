@@ -25,8 +25,9 @@ export default auth((req) => {
 });
 
 export const config = {
-  // Tudo, exceto API de auth, estáticos do Next e os assets públicos.
+  // Tudo, exceto API de auth, cron/revalidate (que se autenticam via
+  // secret próprio), estáticos do Next e os assets públicos.
   matcher: [
-    "/((?!api/auth|_next/static|_next/image|favicon.ico|fonts/|brand/).*)",
+    "/((?!api/auth|api/cron|api/revalidate|_next/static|_next/image|favicon.ico|fonts/|brand/).*)",
   ],
 };

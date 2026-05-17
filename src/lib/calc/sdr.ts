@@ -146,28 +146,37 @@ export function calcSdr(
   // 9. Heatmap 7 (dia da semana) × 24 (hora) — PRD §5.2.3 diz especificamente
   // que a intensidade vem de `sdr.dataReuniao` ("reuniões marcadas", não agendamentos).
   // Geramos a matriz completa (incl. células vazias) para o front montar a grade.
+  // Dia da semana vem de `dataReuniao` (BRT); a HORA vem da coluna
+  // "Horário da reunião" (s.horarioReuniao) — a data não tem hora.
+  const weekdayMap: Record<string, number> = {
+    Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6,
+  };
+  const parseHora = (raw: unknown): number | null => {
+    const str = String(raw ?? "").trim();
+    if (!str) return null;
+    const hm = str.match(/^(\d{1,2}):(\d{2})/); // "HH:MM[:SS]"
+    if (hm) {
+      const h = parseInt(hm[1], 10);
+      return h >= 0 && h <= 23 ? h : null;
+    }
+    const num = parseFloat(str.replace(",", ".")); // serial Sheets ou hora pura
+    if (!Number.isFinite(num)) return null;
+    if (num > 0 && num < 1) return Math.floor(num * 24); // fração de dia
+    if (num >= 0 && num <= 23) return Math.floor(num);
+    return null;
+  };
   const heatCounts = new Map<string, number>();
   for (const s of sdrReuniaoInRange) {
     const d = s.dataReuniao;
     if (!d) continue;
-    // getDay/getHours usam timezone local. No server (Node Vercel) costuma ser UTC.
-    // Para ter dia/hora em BRT, derivamos via Intl.DateTimeFormat.
-    const parts = new Intl.DateTimeFormat("en-US", {
+    const wd = new Intl.DateTimeFormat("en-US", {
       timeZone: "America/Sao_Paulo",
       weekday: "short",
-      hour: "2-digit",
-      hour12: false,
-    }).formatToParts(d);
-    const wd = parts.find((p) => p.type === "weekday")?.value ?? "";
-    const hourStr = parts.find((p) => p.type === "hour")?.value ?? "0";
-    const weekdayMap: Record<string, number> = {
-      Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6,
-    };
+    }).format(d);
     const dia = weekdayMap[wd];
     if (dia == null) continue;
-    let hora = parseInt(hourStr, 10);
-    if (!Number.isFinite(hora)) hora = 0;
-    if (hora === 24) hora = 0; // Intl pode devolver "24" pra meia-noite
+    const hora = parseHora(s.horarioReuniao);
+    if (hora == null) continue;
     const key = `${dia}|${hora}`;
     heatCounts.set(key, (heatCounts.get(key) ?? 0) + 1);
   }
