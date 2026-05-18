@@ -170,6 +170,7 @@ export function MultiLineChart({
   lines,
   height = 280,
   className,
+  valueFormat = "number",
 }: {
   title: string;
   description?: string;
@@ -178,9 +179,12 @@ export function MultiLineChart({
   lines: SeriesDef[];
   height?: number;
   className?: string;
+  /** Formatação do eixo Y esquerdo e do tooltip. Default "number". */
+  valueFormat?: ValueFormat;
 }) {
   const config = buildConfig(lines);
   const hasRight = lines.some((s) => s.axis === "right");
+  const fmt = makeValueFormatter(valueFormat);
 
   return (
     <ChartCard title={title} description={description} className={className}>
@@ -194,7 +198,15 @@ export function MultiLineChart({
             tickMargin={8}
             minTickGap={24}
           />
-          <YAxis yAxisId="left" tickLine={false} axisLine={false} width={48} />
+          <YAxis
+            yAxisId="left"
+            tickLine={false}
+            axisLine={false}
+            width={valueFormat === "number" ? 48 : 56}
+            tickFormatter={
+              valueFormat === "number" ? undefined : (v) => fmt(v as number)
+            }
+          />
           {hasRight && (
             <YAxis
               yAxisId="right"
@@ -204,7 +216,26 @@ export function MultiLineChart({
               width={48}
             />
           )}
-          <ChartTooltip content={<ChartTooltipContent />} />
+          <ChartTooltip
+            content={
+              valueFormat === "number" ? (
+                <ChartTooltipContent />
+              ) : (
+                <ChartTooltipContent
+                  formatter={(value, name) => (
+                    <div className="flex w-full items-center justify-between gap-2">
+                      <span className="text-muted-foreground">
+                        {config[name as string]?.label ?? name}
+                      </span>
+                      <span className="font-mono font-medium text-foreground tabular-nums">
+                        {fmt(value as number)}
+                      </span>
+                    </div>
+                  )}
+                />
+              )
+            }
+          />
           <ChartLegend content={<ChartLegendContent />} />
           {lines.map((l) => (
             <Line

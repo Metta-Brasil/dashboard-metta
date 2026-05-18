@@ -235,6 +235,24 @@ export type TrafegoCustoEtapa = {
   valor: number;
 };
 
+/** Conversões diárias (taxas em fração 0..1) — série de linhas. */
+export type TrafegoConversaoDiaPoint = {
+  dia: Date;
+  ctr: number;
+  conexaoLp: number;
+  conversaoLp: number;
+  conversaoCliques: number;
+};
+
+/** Custos diários (R$) — série de linhas. */
+export type TrafegoCustoDiaPoint = {
+  dia: Date;
+  cpc: number;
+  cpm: number;
+  cpl: number;
+  cmql: number | null;
+};
+
 export type TrafegoRankingRow = {
   nome: string;
   agrupamento: "campanha" | "adset";
@@ -260,6 +278,8 @@ export type TrafegoResult = {
   funilTrafegoResumo: TrafegoFunilResumo;
   conversoesTrafego: TrafegoConversaoTaxa[];
   custosTrafego: TrafegoCustoEtapa[];
+  serieConversoesDia: TrafegoConversaoDiaPoint[];
+  serieCustosDia: TrafegoCustoDiaPoint[];
   ranking: TrafegoRankingRow[];
 };
 

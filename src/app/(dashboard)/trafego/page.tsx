@@ -4,6 +4,7 @@ import {
   ComboBarLineChart,
   DonutChart,
   GroupedBarChart,
+  MultiLineChart,
 } from "@/components/dashboard/charts";
 import { FunnelVertical } from "@/components/dashboard/funnel-vertical";
 import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
@@ -244,18 +245,26 @@ async function MqlPorTemperatura({ searchParams }: PageProps) {
 async function ConversoesTrafego({ searchParams }: PageProps) {
   const result = await getTrafego(searchParams);
 
-  const data = result.conversoesTrafego.map((r) => ({
-    metrica: r.metrica,
-    taxa: r.valor,
+  const data = result.serieConversoesDia.map((r) => ({
+    dia: formatDayBr(r.dia),
+    ctr: r.ctr,
+    conexaoLp: r.conexaoLp,
+    conversaoLp: r.conversaoLp,
+    conversaoCliques: r.conversaoCliques,
   }));
 
   return (
-    <GroupedBarChart
+    <MultiLineChart
       title="Conversões"
-      description="Taxas do funil de tráfego"
+      description="Taxas do funil de tráfego · diário"
       data={data}
-      xKey="metrica"
-      bars={[{ key: "taxa", label: "Taxa" }]}
+      xKey="dia"
+      lines={[
+        { key: "ctr", label: "CTR" },
+        { key: "conexaoLp", label: "Conexão LP" },
+        { key: "conversaoLp", label: "Conversão LP" },
+        { key: "conversaoCliques", label: "Conversão cliques" },
+      ]}
       valueFormat="percent"
       className="h-full"
     />
@@ -269,18 +278,26 @@ async function ConversoesTrafego({ searchParams }: PageProps) {
 async function CustosTrafego({ searchParams }: PageProps) {
   const result = await getTrafego(searchParams);
 
-  const data = result.custosTrafego.map((r) => ({
-    metrica: r.metrica,
-    custo: Math.round(r.valor),
+  const data = result.serieCustosDia.map((r) => ({
+    dia: formatDayBr(r.dia),
+    cpc: Math.round(r.cpc),
+    cpm: Math.round(r.cpm),
+    cpl: Math.round(r.cpl),
+    cmql: r.cmql == null ? null : Math.round(r.cmql),
   }));
 
   return (
-    <GroupedBarChart
+    <MultiLineChart
       title="Custos"
-      description="Custo por etapa"
+      description="Custo por etapa · diário"
       data={data}
-      xKey="metrica"
-      bars={[{ key: "custo", label: "Custo" }]}
+      xKey="dia"
+      lines={[
+        { key: "cpc", label: "CPC" },
+        { key: "cpm", label: "CPM" },
+        { key: "cpl", label: "CPL" },
+        { key: "cmql", label: "CMQL" },
+      ]}
       valueFormat="currency"
       className="h-full"
     />

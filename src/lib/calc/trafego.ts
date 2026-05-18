@@ -16,7 +16,9 @@ import type {
   RawData,
   TrafegoComboPoint,
   TrafegoConversaoTaxa,
+  TrafegoConversaoDiaPoint,
   TrafegoCustoEtapa,
+  TrafegoCustoDiaPoint,
   TrafegoFunilResumo,
   TrafegoKPIs,
   TrafegoMqlCmqlPorFunil,
@@ -102,6 +104,44 @@ export function calcTrafego(
       cmql: mqlDay > 0 ? invDay / mqlDay : null,
     };
   });
+
+  // 3b. Séries diárias de Conversões (taxas %) e Custos (R$) — mesmas
+  // fórmulas dos agregados (itens 8/9), porém por dia.
+  const serieConversoesDia: TrafegoConversaoDiaPoint[] = [];
+  const serieCustosDia: TrafegoCustoDiaPoint[] = [];
+  for (const dia of days) {
+    const dayStart = startOfDayBrt(dia).getTime();
+    const dayEnd = dayStart + 24 * 60 * 60 * 1000;
+    const inDay = (d: Date | null) =>
+      d != null && d.getTime() >= dayStart && d.getTime() < dayEnd;
+
+    const fbDay = fbInRange.filter((r) => inDay(r.day));
+    const leadsDayUnicos = dedupeLeadsByEmail(
+      leadsInRange.filter((r) => inDay(r.dataInscricao))
+    );
+
+    const invDay = sumBy(fbDay, (r) => r.amountSpent);
+    const impDay = sumBy(fbDay, (r) => r.impressions);
+    const clkDay = sumBy(fbDay, (r) => r.linkClicks);
+    const lpvDay = sumBy(fbDay, (r) => r.landingPageViews);
+    const leadsDayCount = leadsDayUnicos.length;
+    const mqlDay = leadsDayUnicos.filter((l) => isMql(l.qualificacao)).length;
+
+    serieConversoesDia.push({
+      dia,
+      ctr: safeRate(clkDay, impDay),
+      conexaoLp: safeRate(lpvDay, clkDay),
+      conversaoLp: safeRate(leadsDayCount, lpvDay),
+      conversaoCliques: safeRate(leadsDayCount, clkDay),
+    });
+    serieCustosDia.push({
+      dia,
+      cpc: safeRate(invDay, clkDay),
+      cpm: impDay > 0 ? (invDay * 1000) / impDay : 0,
+      cpl: safeRate(invDay, leadsDayCount),
+      cmql: mqlDay > 0 ? invDay / mqlDay : null,
+    });
+  }
 
   // 4. MQL & CMQL por funil — 5 funis fixos.
   // Refiltra fb_todos + leads pelo funil específico, ignorando `funis` selecionado
@@ -283,6 +323,8 @@ export function calcTrafego(
     funilTrafegoResumo,
     conversoesTrafego,
     custosTrafego,
+    serieConversoesDia,
+    serieCustosDia,
     ranking,
   };
 }
