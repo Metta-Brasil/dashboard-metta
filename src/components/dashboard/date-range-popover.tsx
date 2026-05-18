@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 type Range = { from: Date; to: Date };
 
@@ -124,32 +125,16 @@ export function DateRangePopover({
       />
       <PopoverContent
         align={isMobile ? "center" : "end"}
-        className="flex w-auto max-w-[min(680px,calc(100vw-1.5rem))] max-h-[calc(100dvh-6rem)] flex-col gap-3 overflow-y-auto p-3 sm:max-h-none sm:flex-row sm:overflow-visible"
+        className="flex w-auto max-w-[min(680px,calc(100vw-1.5rem))] flex-col gap-3 p-3 sm:flex-row"
       >
         {isMobile ? (
-          // Mobile: seleção rápida vira um select nativo (picker do SO) —
-          // a fileira horizontal de presets não cabia na tela.
-          <select
-            aria-label="Seleção rápida de período"
-            defaultValue=""
-            onChange={(e) => {
-              const p = PRESETS[Number(e.target.value)];
-              if (!p) return;
+          <QuickPick
+            onPick={(p) => {
               const r = p.build();
               setRange(r);
               apply(r);
             }}
-            className="h-9 w-full rounded-md border border-input bg-card px-3 text-[13px] font-medium text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <option value="" disabled>
-              Seleção rápida
-            </option>
-            {PRESETS.map((p, i) => (
-              <option key={p.label} value={i}>
-                {p.label}
-              </option>
-            ))}
-          </select>
+          />
         ) : (
           <div className="flex flex-col gap-0.5">
             {PRESETS.map((p) => (
@@ -195,6 +180,99 @@ export function DateRangePopover({
         </div>
       </PopoverContent>
     </Popover>
+  );
+}
+
+/**
+ * Seleção rápida (mobile) — mesmo padrão visual dos demais filtros
+ * (trigger h-9 + caret + painel bg-card/shadow). Single-select:
+ * escolher um preset aplica o período na hora e fecha.
+ */
+function QuickPick({
+  onPick,
+}: {
+  onPick: (p: (typeof PRESETS)[number]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function onDown(e: PointerEvent) {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [open]);
+
+  return (
+    <div
+      ref={ref}
+      className="relative"
+      onKeyDown={(e) => {
+        if (e.key === "Escape" && open) {
+          e.stopPropagation();
+          setOpen(false);
+        }
+      }}
+    >
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className={cn(
+          "inline-flex h-9 w-full cursor-pointer items-center justify-between gap-2 rounded-md border px-3 text-[13px] font-medium text-foreground transition-colors",
+          "border-input bg-card hover:border-foreground",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+          open && "border-foreground bg-accent"
+        )}
+      >
+        <span>Seleção rápida</span>
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+          className={cn("transition-transform", open && "rotate-180")}
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+
+      <div
+        role="listbox"
+        className={cn(
+          "absolute left-0 top-[calc(100%+6px)] z-50 w-full min-w-[200px] rounded-md border border-border bg-card shadow-lg",
+          "transition-[opacity,transform] duration-150",
+          open
+            ? "pointer-events-auto translate-y-0 opacity-100"
+            : "pointer-events-none -translate-y-1 opacity-0"
+        )}
+      >
+        <div className="max-h-[260px] overflow-y-auto p-1.5">
+          {PRESETS.map((p) => (
+            <button
+              key={p.label}
+              type="button"
+              role="option"
+              onClick={() => {
+                setOpen(false);
+                onPick(p);
+              }}
+              className="flex w-full cursor-pointer items-center rounded-md px-2.5 py-2 text-left text-[13px] hover:bg-accent"
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
