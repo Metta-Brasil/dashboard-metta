@@ -13,6 +13,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboardIcon,
@@ -47,7 +48,7 @@ export function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar> & { user: SidebarUser }) {
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
+    <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -59,9 +60,9 @@ export function AppSidebar({
               <img
                 src="/brand/metta-symbol.svg"
                 alt="Metta"
-                className="size-7"
+                className="size-7 shrink-0 group-data-[collapsible=icon]:size-6"
               />
-              <div className="flex flex-col leading-none">
+              <div className="flex flex-col leading-none group-data-[collapsible=icon]:hidden">
                 <span className="text-sm font-semibold tracking-tight">
                   Metta
                 </span>
@@ -79,6 +80,7 @@ export function AppSidebar({
       <SidebarFooter>
         <NavUser user={user} />
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   );
 }
