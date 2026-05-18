@@ -9,6 +9,7 @@ import { ProfileForm } from "@/components/profile-form";
 import { EmailChange } from "@/components/email-change";
 import { AvatarUpload } from "@/components/avatar-upload";
 import { DeleteAccountButton } from "@/components/delete-account-button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export const metadata: Metadata = { title: "Configurações · Dashboard Metta" };
 
@@ -72,6 +73,18 @@ async function ConfiguracoesContent({
 
   return (
     <>
+      {/* Aparência */}
+      <div className="surface-card flex flex-col gap-4 p-5 lg:p-6">
+        <div className="flex flex-col gap-1">
+          <h3 className="panel-title">Aparência</h3>
+          <span className="panel-desc">
+            Tema da interface. &quot;Sistema&quot; acompanha o ajuste do seu
+            computador.
+          </span>
+        </div>
+        <ThemeToggle />
+      </div>
+
       {/* Perfil */}
       <div className="surface-card flex flex-col gap-4 p-5 lg:p-6">
         <h3 className="panel-title">Perfil</h3>
