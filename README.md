@@ -1,108 +1,60 @@
 # Dashboard Metta
 
-Dashboard interno de gestão de tráfego pago + funil de vendas high-ticket (mentoria). Lê os dados direto da planilha Google Sheets operacional, sem DB próprio.
+Dashboard interno de gestão de **tráfego pago + funil de vendas high-ticket** (mentoria). Lê os dados **direto da planilha Google Sheets operacional** — sem banco de dados próprio — e renderiza KPIs, funis, séries temporais, heatmaps e rankings das 7 áreas do negócio.
 
-**Produção:** https://dashboard-metta-perpetuo.vercel.app
+- **Produção:** https://dashboard-metta-perpetuo.vercel.app — também em `https://dashboard.mettabrasil.com.br`
+- **Acesso:** restrito ao domínio `@mettabrasil.com.br` (Google OAuth ou e-mail/senha).
+
+> Documento técnico detalhado (front + back, para replicar a arquitetura em outros projetos): [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md).
 
 ---
 
-## Stack
+## Stack e como cada ferramenta é usada
 
-| Camada | Tecnologia |
+| Ferramenta | Para quê / como é usada |
 |---|---|
-| Framework | Next.js 16 (App Router, Cache Components/PPR) |
-| Linguagem | TypeScript |
-| UI | Tailwind CSS 4 + shadcn/ui |
-| Fonte de dados | Google Sheets API (Service Account, read-only) |
-| Validação | Zod (schema por aba) |
-| Cache | Upstash Redis (cache aplicacional manual) |
-| Cron | GitHub Actions schedule (horário) |
-| Hospedagem | Vercel (Hobby) |
+| **Next.js 16** (App Router) | Framework. `cacheComponents: true` (PPR) — cada página é uma casca estática + ilhas dinâmicas em `<Suspense>`. Server Components fazem o data-fetch; Client Components só os filtros/gráficos interativos. |
+| **React 19** | `React.cache()` deduplica o carregamento de dados por request (uma página tem N seções em Suspense; o loader roda 1× e todas compartilham). |
+| **TypeScript** | Tipagem ponta a ponta. Tipos de domínio em `src/lib/calc/types.ts`. |
+| **Tailwind CSS 4** | Estilo. Tokens de design (paleta Metta, claro/escuro) em `src/app/globals.css` via `@theme`/CSS vars. Mobile-first. |
+| **shadcn/ui + Base UI** | Primitivos de UI (`src/components/ui/*`): sidebar, popover, dropdown, calendar, table, etc. |
+| **Recharts** | Gráficos (combo barra+linha, multi-linha, donut, barras agrupadas, funil, projeção) em `src/components/dashboard/charts.tsx`. |
+| **Google Sheets API v4** (`googleapis`) | Fonte de dados. Service Account (JWT, read-only) lê 6 abas via `batchGet`. |
+| **Zod** | Valida e parseia cada linha da planilha contra um schema por aba (`log-and-drop`: linha inválida é logada e descartada, não derruba o build). |
+| **Upstash Redis** | Cache aplicacional manual (REST). Snapshot de cada aba gravado com gzip. É o que torna o dashboard viável (a aba `fb_todos` tem ~51k linhas). |
+| **Auth.js v5** (`next-auth` beta) | Autenticação. Google OAuth + Credentials (e-mail/senha). Sessão JWT, sem banco — usuários de e-mail/senha ficam no Upstash com hash bcrypt. Domínio restrito a `@mettabrasil.com.br`. |
+| **bcryptjs** | Hash das senhas das contas de e-mail/senha. |
+| **Brevo** (API) | Envio do e-mail de verificação no cadastro (single-sender, sem precisar de DNS). |
+| **next-themes** | Tema claro / escuro / sistema (classe no `<html>`, persistente). Card seletor em `/configuracoes`. |
+| **GitHub Actions** | Cron horário que mantém o cache Upstash quente (POST `/api/revalidate`). |
+| **Vercel** | Hospedagem (Fluid Compute). Deploy via `vercel deploy --prod`. Cron nativo (1×/dia, backup do GitHub Actions). |
 
 ---
 
-## Arquitetura de dados
+## Arquitetura de dados (o ponto-chave)
 
 ```
-Google Sheets (planilha BASE DE DADOS - PALIATIVO)
-        │  Sheets API v4 (Service Account JWT, read-only)
+Google Sheets (planilha operacional, ~51k linhas em fb_todos)
+        │  Sheets API v4 — Service Account JWT, read-only, batchGet
         ▼
-refreshAllSheets()  ──grava──►  Upstash Redis  (gzip, key raw:<aba>, TTL 6h)
-        ▲                              │
-   cron horário                        │ readSheet / readAllSheets (GET)
-   (GitHub Actions)                    ▼
-                          React.cache() por request (dedup intra-request)
-                                       ▼
-                          calc<Page>(dados, filtros)  — funções puras
-                                       ▼
-                          Server Components + Suspense (PPR)
+refreshAllSheets()  ── grava ──►  Upstash Redis  (gzip, chave raw:<aba>, TTL 6h)
+        ▲                                │
+   cron horário                          │  readAllSheets() — GET no Upstash
+   (GitHub Actions → POST /api/revalidate)
+                                         ▼
+                       React.cache() — dedup por request (1 fetch / N seções)
+                                         ▼
+                       calc<Página>(dados, filtros)  — funções TS puras
+                                         ▼
+                       Server Components + <Suspense> (PPR)
+                                         ▼
+                       Filtros (período/funil/SDR/status) via URL searchParams
+                       → recalcula sobre o cache, SEM refazer o fetch
 ```
 
-**Por que cache manual no Upstash (e não `'use cache'` do Next):**
-o snapshot parseado das abas é ~31MB (`fb_todos` tem 51k linhas). O Vercel Data Cache nativo rejeita silenciosamente entradas > ~2MB e **ignora `cacheHandlers` custom** (só vale self-hosting). A solução é cache aplicacional explícito no Upstash com gzip (comprime ~13×, ~2,4MB) — fora do mecanismo do Next/Vercel. Detalhes e medições em `docs/audit-performance.md`.
+**Por que cache manual no Upstash (e não `'use cache'` do Next):** o snapshot parseado é grande (`fb_todos` ~21MB cru). O Vercel Data Cache nativo rejeita entradas grandes e ignora `cacheHandlers` custom em serverless. A solução é cache aplicacional explícito no Upstash com gzip. Diagnóstico e medições em [`docs/audit-performance.md`](docs/audit-performance.md).
 
-**Frescor dos dados:** o cron horário (`.github/workflows/refresh-cache.yml`) chama `POST /api/revalidate`, que roda `refreshAllSheets()` e sobrescreve o Upstash. Dados nunca ficam > 1h velhos e o usuário final sempre pega cache quente (~0,7-2,5s) em vez do fetch frio (~6s+).
-
----
-
-## Estrutura
-
-```
-dashboard-metta/
-├── src/
-│   ├── app/
-│   │   ├── (dashboard)/            # route group — layout + 7 páginas
-│   │   │   ├── layout.tsx          # SidebarProvider + AppSidebar + SiteHeader
-│   │   │   ├── page.tsx            # Visão Geral (/)
-│   │   │   ├── metas/page.tsx      # Metas vs Realizado
-│   │   │   ├── trafego/page.tsx    # Tráfego Pago
-│   │   │   ├── anuncios/page.tsx   # Anúncios
-│   │   │   ├── sdr/page.tsx        # Comercial SDR
-│   │   │   ├── closer/page.tsx     # Comercial Closer
-│   │   │   └── origem/page.tsx     # Origem
-│   │   ├── api/
-│   │   │   ├── cron/route.ts       # GET — refresh do cache (Vercel Cron compat)
-│   │   │   └── revalidate/route.ts # POST — refresh manual (cron externo)
-│   │   ├── layout.tsx              # root: Inter + tokens Metta
-│   │   └── globals.css             # tokens shadcn customizados (paleta Metta)
-│   ├── components/
-│   │   ├── ui/                     # shadcn primitives
-│   │   ├── dashboard/              # shared do app
-│   │   │   ├── toolbar.tsx         # DateRangePopover + FunilChips
-│   │   │   ├── date-range-popover.tsx
-│   │   │   ├── funil-chips.tsx
-│   │   │   ├── kpi-grid.tsx
-│   │   │   ├── funnel-vertical.tsx
-│   │   │   ├── sdr-heatmap.tsx
-│   │   │   └── metric-table.tsx
-│   │   ├── app-sidebar.tsx · nav-main.tsx · nav-user.tsx
-│   │   ├── site-header.tsx · page-shell.tsx
-│   └── lib/
-│       ├── sheets/
-│       │   ├── client.ts           # Service Account JWT singleton
-│       │   ├── schemas.ts          # Zod schemas das 6 abas + COLUMN_MAPs
-│       │   ├── parse.ts            # parseSheetData genérico (log-and-drop)
-│       │   └── read.ts             # readSheet/readAllSheets/refreshAllSheets
-│       ├── cache/
-│       │   └── upstash.ts          # cacheGet/cacheSet (gzip + reviver de Date)
-│       ├── calc/
-│       │   ├── types.ts            # FilterState, RawData, Result types
-│       │   ├── shared.ts           # filtros, dedup, joins, formatters
-│       │   ├── visao-geral.ts · trafego.ts · sdr.ts · closer.ts
-│       │   ├── anuncios.ts · origem.ts · metas.ts
-│       ├── page-data.ts            # loaders memoizados (React.cache) por página
-│       ├── filters.ts              # parseFilters dos searchParams
-│       └── utils.ts
-├── scripts/
-│   └── sanity-check-visao-geral.ts # valida calc vs aba Análise Geral (ao vivo)
-├── .github/workflows/
-│   └── refresh-cache.yml           # cron horário → POST /api/revalidate
-├── docs/
-│   ├── audit-performance.md        # diagnóstico + resultado da otimização
-│   ├── inventario-completude.md    # mapeamento wireframe ↔ calc/types
-│   └── STATUS-2026-05-15.md        # snapshot de progresso
-└── next.config.ts                  # cacheComponents: true
-```
+**Frescor:** o cron horário (`.github/workflows/refresh-cache.yml`) repopula o Upstash a cada hora. O usuário final sempre pega cache quente (~0,7–2,5s) em vez do fetch frio (~6s+). Dados nunca ficam > 1h velhos.
 
 ---
 
@@ -112,31 +64,51 @@ dashboard-metta/
 |---|---|---|
 | `/` | Visão Geral | fb_todos, leads, sdr, vendas |
 | `/metas` | Metas vs Realizado | + Metas |
-| `/trafego` | Tráfego Pago | fb_todos, leads |
+| `/trafego` | TP Aquisição | fb_todos, leads |
+| `/tp-distribuicao` | TP Distribuição de conteúdo | — (placeholder "Em breve") |
 | `/anuncios` | Anúncios | fb_todos, leads, sdr, vendas, ads_links |
 | `/sdr` | Comercial SDR | leads, sdr, vendas |
 | `/closer` | Comercial Closer | fb_todos, leads, sdr, vendas, Metas |
 | `/origem` | Origem | leads, sdr, vendas |
+| `/configuracoes` | Configurações (perfil, segurança, tema) | — |
 
-Filtros (período + funil) sincronizam via URL search params (`?from=...&to=...&funis=sala,sessao`) e recalculam em TypeScript sobre o cache, sem refazer o fetch.
+Filtros sincronizam via URL (`?from=…&to=…&funis=sala,sessao&sdr=Ana,Bia&status=…`) e recalculam em TypeScript sobre o cache. Todos os filtros usam um componente multiselect único (`MultiSelectFilter`) no mesmo padrão visual; o seletor de período usa o mesmo trigger.
+
+---
+
+## Autenticação
+
+- **Auth.js v5**, sessão **JWT** (sem banco). `src/middleware.ts` protege tudo (sem sessão → `/login`).
+- **Google OAuth** e **Credentials (e-mail/senha)**. Ambos restritos a `@mettabrasil.com.br`.
+- Contas de e-mail/senha: cadastro em `/signup` → e-mail de verificação via **Brevo** → conta gravada no **Upstash** com **bcrypt**. Chaves: `auth:user:<email>`, `auth:pending:<email>`, `auth:profile:<email>`, `auth:emailchange:<email>`.
+
+---
+
+## Tema (claro / escuro / sistema)
+
+`next-themes` no root layout (`attribute="class"`, `defaultTheme="system"`). Tokens claro e escuro definidos em `globals.css` (`:root` e `.dark`). Card seletor em `/configuracoes`. No escuro o fundo da página é levemente mais claro que a sidebar para manter a separação visual do tema claro.
 
 ---
 
 ## Variáveis de ambiente
 
-Configuradas no Vercel (Production). Para rodar local, `vercel env pull .env.local`.
+Configuradas no Vercel (Production). Local: `vercel env pull .env.local`. Template em `.env.example`.
 
 | Var | Uso |
 |---|---|
 | `GOOGLE_SHEETS_CLIENT_EMAIL` | Service Account (leitura Sheets) |
-| `GOOGLE_SHEETS_PRIVATE_KEY` | Service Account |
+| `GOOGLE_SHEETS_PRIVATE_KEY` | Service Account (chave privada) |
 | `GOOGLE_SHEETS_ID` | ID da planilha fonte |
-| `UPSTASH_REDIS_REST_URL` | Cache Redis |
-| `UPSTASH_REDIS_REST_TOKEN` | Cache Redis |
-| `REVALIDATE_SECRET` | Auth do `/api/revalidate` (cron externo) |
-| `CRON_SECRET` | Auth do `/api/cron` (opcional, Vercel Cron) |
+| `UPSTASH_REDIS_REST_URL` | Cache Redis (REST) |
+| `UPSTASH_REDIS_REST_TOKEN` | Cache Redis (REST) |
+| `AUTH_SECRET` | Assinatura da sessão JWT (Auth.js) |
+| `AUTH_GOOGLE_ID` | Google OAuth client id |
+| `AUTH_GOOGLE_SECRET` | Google OAuth client secret |
+| `BREVO_API_KEY` | Envio do e-mail de verificação (cadastro) |
+| `REVALIDATE_SECRET` | Auth do `POST /api/revalidate` (cron) |
+| `CRON_SECRET` | Auth do `GET /api/cron` (Vercel Cron) |
 
-GitHub Actions secret: `REVALIDATE_SECRET` (usado pelo workflow do cron).
+Secret no GitHub Actions: `REVALIDATE_SECRET` (usado pelo workflow do cron).
 
 ---
 
@@ -145,31 +117,68 @@ GitHub Actions secret: `REVALIDATE_SECRET` (usado pelo workflow do cron).
 ```bash
 npm install
 vercel env pull .env.local   # puxa as envs do Vercel
-npm run dev                  # dev (cache sempre revalida)
+npm run dev                  # dev
 # ou produção local:
 npm run build && npm start
 ```
 
-Validar números da Visão Geral contra a planilha:
+Validar números da Visão Geral contra a planilha (lê a aba "Análise Geral" ao vivo e compara com `calcVisaoGeral`):
 
 ```bash
 npx tsx scripts/sanity-check-visao-geral.ts
 ```
 
-(Lê a aba "Análise Geral" ao vivo e compara com `calcVisaoGeral` — auto-atualizável.)
+---
+
+## Deploy
+
+```bash
+vercel deploy --prod --yes
+```
+
+Auto-aliasa para `dashboard-metta-perpetuo.vercel.app` e `dashboard.mettabrasil.com.br`. Confirmar `readyState: READY`. O cron de cache é independente (GitHub Actions horário + Vercel Cron diário de backup).
 
 ---
 
-## Estado atual
+## Estrutura
 
-**Pronto:**
-- 7 páginas implementadas com todos os campos do wireframe/PRD (visual cru).
-- Camada de dados (Sheets + cache Upstash + cron horário). Performance: 0,7-2,5s, dados ≤1h.
-- Visão Geral validada 100% contra a planilha (sanity ao vivo).
+```
+src/
+├── app/
+│   ├── (auth)/                 # login, signup, confirmação de código
+│   ├── (dashboard)/            # layout (sidebar+header) + as páginas
+│   ├── api/
+│   │   ├── auth/[...nextauth]/ # handlers Auth.js
+│   │   ├── cron/route.ts       # GET — refresh do cache (Vercel Cron compat)
+│   │   └── revalidate/route.ts # POST — refresh (cron GitHub Actions)
+│   ├── layout.tsx              # root: ThemeProvider + tokens
+│   └── globals.css             # tokens claro/escuro (paleta Metta) + SF Pro
+├── components/
+│   ├── ui/                     # primitivos shadcn/Base UI
+│   ├── dashboard/              # charts, toolbar, filtros, tabelas, heatmap
+│   ├── app-sidebar.tsx · nav-main.tsx · nav-user.tsx · page-shell.tsx
+│   └── theme-provider.tsx · theme-toggle.tsx
+├── lib/
+│   ├── sheets/                 # client (JWT) · schemas (Zod+COLUMN_MAP) · parse · read
+│   ├── cache/upstash.ts        # cacheGet/cacheSet (gzip + reviver de Date)
+│   ├── calc/                   # types + shared + 1 função pura por página
+│   ├── auth/users.ts           # store de usuários no Upstash (bcrypt)
+│   ├── email/brevo.ts          # envio do e-mail de verificação
+│   ├── page-data.ts            # loaders memoizados (React.cache) por página
+│   └── filters.ts              # parseFilters dos searchParams
+├── middleware.ts               # proteção de rotas (Auth.js)
+└── auth.ts                     # config Auth.js v5
+.github/workflows/refresh-cache.yml   # cron horário → POST /api/revalidate
+vercel.json                           # Vercel Cron diário (backup)
+next.config.ts                        # cacheComponents: true
+docs/                                 # ARQUITETURA, auditorias, status
+```
 
-**Pendente:**
-- **Fidelidade visual ao wireframe:** gráficos que deviam ser combo barra+linha, donut, área etc. estão como tabela. Próxima frente.
-- **Refino de performance:** 5/7 páginas (as que usam `fb_todos` 51k) ficam ~2s; meta é < 1s. Otimização de baixo risco identificada (desserialização) — ainda não aplicada.
-- **Validação de números das outras 6 páginas:** só Visão Geral tem baseline automático na planilha.
+---
 
-Deploy: push na `main` + `vercel deploy --prod`. O cron de cache é independente (GitHub Actions).
+## Gotchas conhecidos (importantes ao mexer nos dados)
+
+- **Column-map com offset +1:** a aba `vendas` tem uma coluna de e-mail extra no snapshot que não existe no cabeçalho (idx 17, range `A:AE`); a aba `sdr` ganhou "Horário da reunião" (idx 13, range `A:AB`). Os `COLUMN_MAP` em `src/lib/sheets/schemas.ts` já compensam — **não reverter para o cabeçalho**.
+- **Datas em BRT:** `parseFilters` e `eachDay` ancoram em meia-noite `-03:00`. Datas `YYYY-MM-DD` interpretadas como UTC perdem o último dia do período.
+- **Cron:** Vercel Hobby só permite 1 cron/dia; por isso o frescor real vem do **GitHub Actions horário**. Não remover o workflow.
+- **Segredos:** `.env*` e `.claude/` estão no `.gitignore`. Nunca commitar credenciais. As envs vivem no Vercel + secret do GitHub Actions.
