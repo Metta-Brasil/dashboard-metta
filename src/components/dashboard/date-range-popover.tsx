@@ -126,23 +126,49 @@ export function DateRangePopover({
         align={isMobile ? "center" : "end"}
         className="flex w-auto max-w-[min(680px,calc(100vw-1.5rem))] max-h-[calc(100dvh-6rem)] flex-col gap-3 overflow-y-auto p-3 sm:max-h-none sm:flex-row sm:overflow-visible"
       >
-        <div className="flex flex-row gap-1 sm:flex-col sm:gap-0.5 overflow-x-auto sm:overflow-visible">
-          {PRESETS.map((p) => (
-            <Button
-              key={p.label}
-              variant="ghost"
-              size="sm"
-              className="justify-start text-xs"
-              onClick={() => {
-                const r = p.build();
-                setRange(r);
-                apply(r);
-              }}
-            >
-              {p.label}
-            </Button>
-          ))}
-        </div>
+        {isMobile ? (
+          // Mobile: seleção rápida vira um select nativo (picker do SO) —
+          // a fileira horizontal de presets não cabia na tela.
+          <select
+            aria-label="Seleção rápida de período"
+            defaultValue=""
+            onChange={(e) => {
+              const p = PRESETS[Number(e.target.value)];
+              if (!p) return;
+              const r = p.build();
+              setRange(r);
+              apply(r);
+            }}
+            className="h-9 w-full rounded-md border border-input bg-card px-3 text-[13px] font-medium text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <option value="" disabled>
+              Seleção rápida
+            </option>
+            {PRESETS.map((p, i) => (
+              <option key={p.label} value={i}>
+                {p.label}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <div className="flex flex-col gap-0.5">
+            {PRESETS.map((p) => (
+              <Button
+                key={p.label}
+                variant="ghost"
+                size="sm"
+                className="justify-start text-xs"
+                onClick={() => {
+                  const r = p.build();
+                  setRange(r);
+                  apply(r);
+                }}
+              >
+                {p.label}
+              </Button>
+            ))}
+          </div>
+        )}
         <Separator orientation="vertical" className="hidden sm:block" />
         <div className="flex flex-col gap-2">
           <Calendar
