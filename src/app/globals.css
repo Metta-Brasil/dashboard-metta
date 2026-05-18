@@ -127,7 +127,10 @@
 }
 
 .dark {
-  --background: #0c161b;
+  /* Fundo da página levemente mais claro que o sidebar (#0c161b) pra
+     dar o mesmo efeito de separação do tema claro. Ladder de elevação:
+     sidebar (mais escuro) < background < card (mais claro, "salta"). */
+  --background: #131f26;
   --foreground: #fafcfd;
 
   --card: #16242b;
