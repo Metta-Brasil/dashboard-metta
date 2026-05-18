@@ -11,6 +11,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type Range = { from: Date; to: Date };
 
@@ -98,6 +99,7 @@ export function DateRangePopover({
   const sp = useSearchParams();
   const [open, setOpen] = useState(false);
   const [range, setRange] = useState<Range>({ from, to });
+  const isMobile = useIsMobile();
 
   function apply(next: Range) {
     const params = new URLSearchParams(sp?.toString() ?? "");
@@ -121,8 +123,8 @@ export function DateRangePopover({
         }
       />
       <PopoverContent
-        align="end"
-        className="flex w-auto max-w-[min(680px,calc(100vw-2rem))] flex-col gap-3 p-3 sm:flex-row"
+        align={isMobile ? "center" : "end"}
+        className="flex w-auto max-w-[min(680px,calc(100vw-1.5rem))] max-h-[calc(100dvh-6rem)] flex-col gap-3 overflow-y-auto p-3 sm:max-h-none sm:flex-row sm:overflow-visible"
       >
         <div className="flex flex-row gap-1 sm:flex-col sm:gap-0.5 overflow-x-auto sm:overflow-visible">
           {PRESETS.map((p) => (
@@ -149,7 +151,7 @@ export function DateRangePopover({
             onSelect={(r) => {
               if (r?.from && r?.to) setRange({ from: r.from, to: r.to });
             }}
-            numberOfMonths={2}
+            numberOfMonths={isMobile ? 1 : 2}
             defaultMonth={range.from}
           />
           <div className="flex items-center justify-end gap-2">

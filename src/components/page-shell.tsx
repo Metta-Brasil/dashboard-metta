@@ -33,7 +33,7 @@ export function PageShell({
           </div>
           <div className="hidden flex-1 sm:block" />
           {toolbar && (
-            <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap sm:shrink-0 sm:overflow-x-auto">
+            <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap sm:shrink-0">
               {toolbar}
             </div>
           )}
