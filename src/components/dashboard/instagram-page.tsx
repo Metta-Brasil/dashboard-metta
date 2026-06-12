@@ -6,6 +6,7 @@ import {
   ComboBarLineChart,
   GroupedBarChart,
   DonutChart,
+  MultiLineChart,
 } from "@/components/dashboard/charts";
 import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
 import { MetricTable, type Column } from "@/components/dashboard/metric-table";
@@ -130,6 +131,10 @@ export function InstagramPage({
         <IgHistoricoSection getData={getData} sp={sp} />
       </Suspense>
 
+      <Suspense fallback={<ChartFallback />}>
+        <IgMetricasDiariasSection getData={getData} sp={sp} />
+      </Suspense>
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Suspense fallback={<ChartFallback />}>
           <IgComposicaoSection getData={getData} sp={sp} />
@@ -189,7 +194,10 @@ async function IgKpisSection({
     {
       label: kpis.viewsPeriodo.label,
       value: formatInt(kpis.viewsPeriodo.value),
-      hint: "Posts no período selecionado",
+      hint:
+        kpis.viewsPeriodo.source === "conta"
+          ? "Soma diária da conta"
+          : "Soma dos posts do período",
       delta:
         kpis.viewsPeriodo.delta != null
           ? {
@@ -201,7 +209,17 @@ async function IgKpisSection({
     {
       label: kpis.interacoes28d.label,
       value: formatInt(kpis.interacoes28d.value),
-      hint: "Últimos 28 dias",
+      hint:
+        kpis.interacoes28d.source === "conta"
+          ? "Soma diária da conta"
+          : "Soma dos posts do período",
+      delta:
+        kpis.interacoes28d.delta != null
+          ? {
+              value: fmtDelta(kpis.interacoes28d.delta)!,
+              direction: deltaDir(kpis.interacoes28d.delta),
+            }
+          : undefined,
     },
     {
       label: kpis.postsPeriodo.label,
@@ -254,6 +272,51 @@ async function IgHistoricoSection({
       bars={[{ key: "ganho", label: "Novos seguidores" }]}
       lines={[
         { key: "seguidores", label: "Total seguidores", axis: "right" },
+      ]}
+    />
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Métricas diárias da conta — multi-linha (alcance/views esq. + engajamento dir.)
+// ---------------------------------------------------------------------------
+
+async function IgMetricasDiariasSection({
+  getData,
+  sp,
+}: {
+  getData: InstagramPageProps["getData"];
+  sp: SP;
+}) {
+  const result = await getData(sp);
+  const { metricasDiarias, hasDailyMetrics } = result;
+
+  if (!hasDailyMetrics || metricasDiarias.length === 0) {
+    return (
+      <EmptyCard
+        title="Métricas diárias da conta"
+        message="Sem dados diários da conta no período."
+      />
+    );
+  }
+
+  return (
+    <MultiLineChart
+      title="Métricas diárias da conta"
+      description="Alcance e views (esq.) · contas engajadas e interações (dir.)"
+      data={metricasDiarias.map((p) => ({
+        data: p.data,
+        Alcance: p.alcanceDia,
+        Views: p.viewsDia,
+        "Contas engajadas": p.contasEngajadas28d,
+        Interações: p.interacoesTotais28d,
+      }))}
+      xKey="data"
+      lines={[
+        { key: "Alcance", label: "Alcance" },
+        { key: "Views", label: "Views" },
+        { key: "Contas engajadas", label: "Contas engajadas", axis: "right" },
+        { key: "Interações", label: "Interações", axis: "right" },
       ]}
     />
   );

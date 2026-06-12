@@ -376,9 +376,12 @@ const zFloat = z
 
 /**
  * Snapshot diário de perfil Instagram.
- * Colunas A-E: Data, Seguidores, Seguindo, Posts, Alcance28d
- * Colunas F-H (adicionadas 2026-06): Alcance Dia, Contas Engajadas 28d, Interações 28d
- * Linhas antigas (só A-E) parsearão F-H como 0 — comportamento correto.
+ * Colunas A-E: Data, Seguidores, Seguindo, Posts, Alcance 28d
+ * Colunas F-I são métricas DIÁRIAS da conta (não 28d, apesar dos nomes de campo
+ * legados contasEngajadas28d/interacoesTotais28d):
+ *   F: Alcance Dia · G: Contas Engajadas · H: Interações · I: Views
+ * Linhas históricas (só A-E, ou A-H sem Views) parsearão as colunas ausentes
+ * como 0 — comportamento correto.
  */
 export const IgProfileRowSchema = z.object({
   data: zDate,
@@ -389,6 +392,7 @@ export const IgProfileRowSchema = z.object({
   alcanceDia: zInt,
   contasEngajadas28d: zInt,
   interacoesTotais28d: zInt,
+  viewsDia: zInt,
 });
 export type IgProfileRow = z.infer<typeof IgProfileRowSchema>;
 
@@ -401,6 +405,7 @@ export const IG_METTA_PERFIL_COLUMN_MAP = {
   alcanceDia: 5,
   contasEngajadas28d: 6,
   interacoesTotais28d: 7,
+  viewsDia: 8,
 } as const;
 
 export const IG_TIAGO_PERFIL_COLUMN_MAP = IG_METTA_PERFIL_COLUMN_MAP;

@@ -16,6 +16,8 @@ export type IgKpi = {
   label: string;
   value: number;
   delta?: number | null;
+  // "conta" = soma diária da conta (account-level); "posts" = soma dos posts.
+  source?: "conta" | "posts";
 };
 
 export type IgKpis = {
@@ -35,6 +37,7 @@ export type IgHistoricoPoint = {
 export type IgMetricasDiariasPoint = {
   data: string;
   alcanceDia: number;
+  viewsDia: number;
   contasEngajadas28d: number;
   interacoesTotais28d: number;
 };
@@ -151,9 +154,8 @@ export function calcInstagram(
 
   // Alcance 28d: most recent snapshot
   const alcance28dVal = last?.alcance28d ?? 0;
-  const interacoes28dVal = last?.interacoesTotais28d ?? 0;
 
-  // Views no período: soma dos posts publicados no período
+  // Posts publicados no período (base de várias seções abaixo)
   const postsFiltrados = filterByDate(
     posts.filter((p) => p.postId !== ""),
     (p) => p.data as Date | null,
@@ -162,13 +164,57 @@ export function calcInstagram(
   ).filter((p) => !tiposFiltro?.length || tiposFiltro.includes(p.tipo.toUpperCase()));
 
   const enrichedFiltered = postsFiltrados.map(enrichPost);
-  const viewsPeriodoVal = enrichedFiltered.reduce((s, p) => s + p.views, 0);
   const postsPeriodoVal = enrichedFiltered.length;
 
-  // Delta de posts: compara com período anterior de mesma duração
+  // Soma a nível de POST (fallback quando a conta não tem cobertura diária)
+  const viewsPostVal = enrichedFiltered.reduce((s, p) => s + p.views, 0);
+  const interacoesPostVal = enrichedFiltered.reduce(
+    (s, p) => s + p.curtidas + p.comentarios + p.salvamentos + p.compartilhamentos,
+    0
+  );
+
+  // Soma a nível de CONTA (métrica diária real da conta no range), com cobertura.
+  // Cache do Upstash pode trazer linhas do schema antigo sem viewsDia → (?? 0).
+  const accountSum = (
+    fromKey: string,
+    toKey: string,
+    key: "viewsDia" | "interacoesTotais28d"
+  ): { sum: number; withData: number } => {
+    let sum = 0;
+    let withData = 0;
+    for (const [k, r] of byDay.entries()) {
+      if (k >= fromKey && k <= toKey) {
+        const v = (r[key] ?? 0) as number;
+        sum += v;
+        if (v > 0) withData++;
+      }
+    }
+    return { sum, withData };
+  };
+
+  const cappedTo = to.getTime() < now.getTime() ? to : now;
+  const rangeDayCount = Math.max(1, eachDay(from, cappedTo).length);
+  const fromK = dayKey(from);
+  const toK = dayKey(to);
+
+  const viewsConta = accountSum(fromK, toK, "viewsDia");
+  const interConta = accountSum(fromK, toK, "interacoesTotais28d");
+  const COVERAGE_MIN = 0.8;
+  const useContaViews = viewsConta.withData / rangeDayCount >= COVERAGE_MIN;
+  const useContaInter = interConta.withData / rangeDayCount >= COVERAGE_MIN;
+
+  const viewsPeriodoVal = useContaViews ? viewsConta.sum : viewsPostVal;
+  const interacoesPeriodoVal = useContaInter ? interConta.sum : interacoesPostVal;
+
+  // Período anterior de mesma duração (para deltas)
   const durationMs = to.getTime() - from.getTime();
   const prevFrom = new Date(from.getTime() - durationMs);
   const prevTo = new Date(from.getTime() - 1);
+  const prevFromK = dayKey(prevFrom);
+  const prevToK = dayKey(prevTo);
+  const prevCappedTo = prevTo.getTime() < now.getTime() ? prevTo : now;
+  const prevRangeDayCount = Math.max(1, eachDay(prevFrom, prevCappedTo).length);
+
   const postsPrev = filterByDate(
     posts.filter((p) => p.postId !== ""),
     (p) => p.data as Date | null,
@@ -176,14 +222,47 @@ export function calcInstagram(
     prevTo
   );
   const postsDelta = postsPrev.length > 0 ? postsPeriodoVal - postsPrev.length : null;
-  const viewsPrev = postsPrev.reduce((s, p) => s + p.views, 0);
-  const viewsDelta = viewsPrev > 0 ? viewsPeriodoVal - viewsPrev : null;
+
+  // Delta só quando os DOIS períodos usam a mesma fonte (conta/conta ou posts/posts).
+  const viewsContaPrev = accountSum(prevFromK, prevToK, "viewsDia");
+  const interContaPrev = accountSum(prevFromK, prevToK, "interacoesTotais28d");
+  const useContaViewsPrev = viewsContaPrev.withData / prevRangeDayCount >= COVERAGE_MIN;
+  const useContaInterPrev = interContaPrev.withData / prevRangeDayCount >= COVERAGE_MIN;
+
+  let viewsDelta: number | null = null;
+  if (useContaViews && useContaViewsPrev) {
+    viewsDelta = viewsConta.sum - viewsContaPrev.sum;
+  } else if (!useContaViews && !useContaViewsPrev) {
+    const viewsPostPrev = postsPrev.reduce((s, p) => s + p.views, 0);
+    viewsDelta = viewsPostPrev > 0 ? viewsPostVal - viewsPostPrev : null;
+  }
+
+  let interacoesDelta: number | null = null;
+  if (useContaInter && useContaInterPrev) {
+    interacoesDelta = interConta.sum - interContaPrev.sum;
+  } else if (!useContaInter && !useContaInterPrev) {
+    const interPostPrev = postsPrev.reduce(
+      (s, p) => s + (p.curtidas || 0) + (p.comentarios || 0) + (p.salvamentos || 0) + (p.compartilhamentos || 0),
+      0
+    );
+    interacoesDelta = interPostPrev > 0 ? interacoesPostVal - interPostPrev : null;
+  }
 
   const kpis: IgKpis = {
     seguidores: { label: "Seguidores", value: seguidoresVal, delta: seguidoresDelta },
     alcance28d: { label: "Alcance 28d", value: alcance28dVal },
-    viewsPeriodo: { label: "Views no período", value: viewsPeriodoVal, delta: viewsDelta },
-    interacoes28d: { label: "Interações 28d", value: interacoes28dVal },
+    viewsPeriodo: {
+      label: "Views no período",
+      value: viewsPeriodoVal,
+      delta: viewsDelta,
+      source: useContaViews ? "conta" : "posts",
+    },
+    interacoes28d: {
+      label: "Interações no período",
+      value: interacoesPeriodoVal,
+      delta: interacoesDelta,
+      source: useContaInter ? "conta" : "posts",
+    },
     postsPeriodo: { label: "Posts no período", value: postsPeriodoVal, delta: postsDelta },
   };
 
@@ -197,8 +276,12 @@ export function calcInstagram(
     const prevK = dayKey(new Date(d.getTime() - 86400000));
     const prevSnap = byDay.get(prevK);
     const seguidores = snap?.seguidores ?? null;
+    // Ganho só quando ambos os dias têm seguidores reais (>0). Linhas históricas
+    // de backfill não têm seguidores, então não geram ganho espúrio.
     const ganho =
-      snap && prevSnap ? snap.seguidores - prevSnap.seguidores : null;
+      snap && prevSnap && snap.seguidores > 0 && prevSnap.seguidores > 0
+        ? snap.seguidores - prevSnap.seguidores
+        : null;
     return {
       data: new Intl.DateTimeFormat("pt-BR", {
         day: "2-digit",
@@ -208,7 +291,7 @@ export function calcInstagram(
       seguidores: seguidores ?? 0,
       ganho,
     };
-  }).filter((p) => p.seguidores > 0 || p.ganho != null);
+  }).filter((p) => p.seguidores > 0);
 
   // ---------------------------------------------------------------------------
   // Métricas diárias da conta
@@ -225,11 +308,16 @@ export function calcInstagram(
           timeZone: "America/Sao_Paulo",
         }).format(d),
         alcanceDia: snap.alcanceDia,
+        viewsDia: snap.viewsDia ?? 0,
         contasEngajadas28d: snap.contasEngajadas28d,
         interacoesTotais28d: snap.interacoesTotais28d,
       };
     })
-    .filter((p): p is IgMetricasDiariasPoint => p !== null && p.alcanceDia > 0);
+    .filter(
+      (p): p is IgMetricasDiariasPoint =>
+        p !== null &&
+        (p.alcanceDia > 0 || p.viewsDia > 0 || p.interacoesTotais28d > 0 || p.contasEngajadas28d > 0)
+    );
 
   // ---------------------------------------------------------------------------
   // Por tipo de mídia
