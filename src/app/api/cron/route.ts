@@ -30,13 +30,22 @@ export async function GET(req: NextRequest) {
     );
   }
   try {
-    const { refreshed, durationMs } = await refreshAllSheets();
-    return NextResponse.json({
-      ok: true,
-      refreshed,
-      durationMs,
-      at: new Date().toISOString(),
-    });
+    const { refreshed, persisted, durationMs } = await refreshAllSheets();
+    // fb_todos é a aba crítica (todo custo/tráfego depende dela). Se
+    // não persistiu, devolve 500 pro cron externo alarmar — em vez de
+    // “ok” mentiroso enquanto o cache fica velho silenciosamente.
+    const fb = persisted["fb_todos"];
+    const fbOk = Boolean(fb && (fb.ok || fb.skipped));
+    return NextResponse.json(
+      {
+        ok: fbOk,
+        refreshed,
+        persisted,
+        durationMs,
+        at: new Date().toISOString(),
+      },
+      { status: fbOk ? 200 : 500 }
+    );
   } catch (err) {
     return NextResponse.json(
       { ok: false, error: String(err) },

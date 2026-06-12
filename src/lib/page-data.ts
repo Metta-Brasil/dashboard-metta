@@ -2,9 +2,11 @@ import { cache } from "react";
 
 import { calcAnuncios } from "@/lib/calc/anuncios";
 import { calcCloser } from "@/lib/calc/closer";
+import { calcInstagram } from "@/lib/calc/instagram";
 import { calcMetas } from "@/lib/calc/metas";
 import { calcOrigem } from "@/lib/calc/origem";
 import { calcSdr } from "@/lib/calc/sdr";
+import { calcTpDistribuicao } from "@/lib/calc/tp-distribuicao";
 import { calcTrafego } from "@/lib/calc/trafego";
 import { calcVisaoGeral } from "@/lib/calc/visao-geral";
 import { parseFilters } from "@/lib/filters";
@@ -66,6 +68,11 @@ export const getAnuncios = cache(async (sp: SP) => {
     "sdr",
     "vendas",
     "ads_links",
+    "fb_at",
+    "at_ap",
+    "at_sala",
+    "at_se",
+    "at_aph",
   ]);
   return calcAnuncios(data, filters);
 });
@@ -88,5 +95,31 @@ export const getMetas = cache(async (sp: SP) => {
   return calcMetas(data, filters);
 });
 
+export const getTpDistribuicao = cache(async (sp: SP) => {
+  const f = parseFilters(await sp);
+  const spv = await sp;
+  const contas =
+    typeof spv.conta === "string"
+      ? spv.conta
+          .split(",")
+          .map((s) => s.trim().toLowerCase())
+          .filter((x) => x === "metta" || x === "tiago")
+      : [];
+  const modo =
+    typeof spv.modo === "string" && spv.modo === "video" ? "video" : "seguidores";
+  const data = await readAllSheets(["fb_todos"]);
+  return calcTpDistribuicao(data, { from: f.from, to: f.to, contas, modo });
+});
+
 /** Filtros parseados (memoizado) — pro toolbar não re-parsear. */
 export const getFilters = cache(async (sp: SP) => parseFilters(await sp));
+
+export const getInstagramMetta = cache(async () => {
+  const data = await readAllSheets(["ig_metta_perfil", "ig_metta_posts"]);
+  return calcInstagram({ profile: data.ig_metta_perfil, posts: data.ig_metta_posts });
+});
+
+export const getInstagramTiago = cache(async () => {
+  const data = await readAllSheets(["ig_tiago_perfil", "ig_tiago_posts"]);
+  return calcInstagram({ profile: data.ig_tiago_perfil, posts: data.ig_tiago_posts });
+});

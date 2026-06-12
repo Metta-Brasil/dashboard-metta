@@ -304,3 +304,140 @@ export const ADS_LINKS_COLUMN_MAP = {
   instagramPermalink: 1,
   imageUrl: 2,
 } as const;
+
+// ----- Análise Tráfego (relatório per-anúncio da planilha) -------------------
+// Fonte de verdade do relatório que o usuário compara (aba "Análise Tráfego").
+// Spend/impr/cliques vêm da aba `fb`; leads/MQL das abas ap/sala/se/
+// 'aplicação hubspot', cruzadas por NOME DO ANÚNCIO.
+
+/** Aba `fb`: Day | Campaign | AdSet | Ad | Impr | Clicks | LPViews | Leads | Spent */
+export const FbAtRowSchema = z.object({
+  day: zDate,
+  campaignName: zString,
+  adName: zString,
+  impressions: zInt,
+  linkClicks: zInt,
+  landingPageViews: zInt,
+  amountSpent: zCurrency,
+});
+export type FbAtRow = z.infer<typeof FbAtRowSchema>;
+export const FB_AT_COLUMN_MAP = {
+  day: 0,
+  campaignName: 1,
+  adName: 3,
+  impressions: 4,
+  linkClicks: 5,
+  landingPageViews: 6,
+  amountSpent: 8,
+} as const;
+
+/** Linha de lead normalizada (abas ap/sala/se/'aplicação hubspot'). */
+export const AtLeadRowSchema = z.object({
+  data: zDate,
+  campaignName: zString,
+  adName: zString,
+  qualificacao: zString,
+});
+export type AtLeadRow = z.infer<typeof AtLeadRowSchema>;
+
+// ap/sala: L=camp(11) N=ad(13) P=data(15) H=qualif(7)
+export const AT_AP_COLUMN_MAP = {
+  data: 15,
+  campaignName: 11,
+  adName: 13,
+  qualificacao: 7,
+} as const;
+export const AT_SALA_COLUMN_MAP = AT_AP_COLUMN_MAP;
+// se: L=camp(11) N=ad(13) P=data(15) Q=qualif(16)
+export const AT_SE_COLUMN_MAP = {
+  data: 15,
+  campaignName: 11,
+  adName: 13,
+  qualificacao: 16,
+} as const;
+// 'aplicação hubspot': G=data(6) K=camp(10) L=ad(11) N=qualif(13)
+export const AT_APH_COLUMN_MAP = {
+  data: 6,
+  campaignName: 10,
+  adName: 11,
+  qualificacao: 13,
+} as const;
+
+// ----- Instagram (perfil + posts) --------------------------------------------
+
+/** Converte decimal string ou number → number. Vazio → 0. */
+const zFloat = z
+  .union([z.string(), z.number(), z.null()])
+  .transform((v) => {
+    if (v == null || v === "") return 0;
+    const n = typeof v === "number" ? v : parseFloat(String(v).replace(",", "."));
+    return Number.isFinite(n) ? n : 0;
+  });
+
+/**
+ * Snapshot diário de perfil Instagram.
+ * Colunas A-E: Data, Seguidores, Seguindo, Posts, Alcance28d
+ */
+export const IgProfileRowSchema = z.object({
+  data: zDate,
+  seguidores: zInt,
+  seguindo: zInt,
+  posts: zInt,
+  alcance28d: zInt,
+});
+export type IgProfileRow = z.infer<typeof IgProfileRowSchema>;
+
+export const IG_METTA_PERFIL_COLUMN_MAP = {
+  data: 0,
+  seguidores: 1,
+  seguindo: 2,
+  posts: 3,
+  alcance28d: 4,
+} as const;
+
+export const IG_TIAGO_PERFIL_COLUMN_MAP = IG_METTA_PERFIL_COLUMN_MAP;
+
+/**
+ * Post Instagram (overwrite horário).
+ * Colunas A-O: Post ID, Data, Tipo, Legenda, Permalink, Thumbnail URL,
+ * Curtidas, Comentários, Views, Alcance, Salvamentos, Compartilhamentos,
+ * Repostagens, Skip Rate %, Taxa Engajamento %
+ */
+export const IgPostsRowSchema = z.object({
+  postId: zString,
+  data: zDate,
+  tipo: zString,
+  legenda: zString,
+  permalink: zString,
+  thumbnailUrl: zString,
+  curtidas: zInt,
+  comentarios: zInt,
+  views: zInt,
+  alcance: zInt,
+  salvamentos: zInt,
+  compartilhamentos: zInt,
+  repostagens: zInt,
+  skipRate: zFloat,
+  taxaEngajamento: zFloat,
+});
+export type IgPostsRow = z.infer<typeof IgPostsRowSchema>;
+
+export const IG_METTA_POSTS_COLUMN_MAP = {
+  postId: 0,
+  data: 1,
+  tipo: 2,
+  legenda: 3,
+  permalink: 4,
+  thumbnailUrl: 5,
+  curtidas: 6,
+  comentarios: 7,
+  views: 8,
+  alcance: 9,
+  salvamentos: 10,
+  compartilhamentos: 11,
+  repostagens: 12,
+  skipRate: 13,
+  taxaEngajamento: 14,
+} as const;
+
+export const IG_TIAGO_POSTS_COLUMN_MAP = IG_METTA_POSTS_COLUMN_MAP;

@@ -4,9 +4,26 @@ import {
   ADS_LINKS_COLUMN_MAP,
   AdsLinkRow,
   AdsLinkRowSchema,
+  AT_AP_COLUMN_MAP,
+  AT_APH_COLUMN_MAP,
+  AT_SALA_COLUMN_MAP,
+  AT_SE_COLUMN_MAP,
+  AtLeadRow,
+  AtLeadRowSchema,
+  FB_AT_COLUMN_MAP,
   FB_TODOS_COLUMN_MAP,
+  FbAtRow,
+  FbAtRowSchema,
   FbTodosRow,
   FbTodosRowSchema,
+  IG_METTA_PERFIL_COLUMN_MAP,
+  IG_METTA_POSTS_COLUMN_MAP,
+  IG_TIAGO_PERFIL_COLUMN_MAP,
+  IG_TIAGO_POSTS_COLUMN_MAP,
+  IgPostsRow,
+  IgPostsRowSchema,
+  IgProfileRow,
+  IgProfileRowSchema,
   LEADS_COLUMN_MAP,
   LeadRow,
   LeadRowSchema,
@@ -33,7 +50,18 @@ export type SheetTab =
   | "sdr"
   | "vendas"
   | "Metas"
-  | "ads_links";
+  | "ads_links"
+  // Análise Tráfego (relatório per-anúncio): aba fb + abas de lead
+  | "fb_at"
+  | "at_ap"
+  | "at_sala"
+  | "at_se"
+  | "at_aph"
+  // Instagram
+  | "ig_metta_perfil"
+  | "ig_tiago_perfil"
+  | "ig_metta_posts"
+  | "ig_tiago_posts";
 
 /**
  * Cache aplicacional manual no Upstash (NÃO `'use cache'`).
@@ -57,6 +85,15 @@ const RANGES: Record<SheetTab, string> = {
   vendas: "vendas!A:AE",
   Metas: "Metas!A:D",
   ads_links: "'ads links'!A:C",
+  fb_at: "fb!A:I",
+  at_ap: "ap!A:P",
+  at_sala: "sala!A:P",
+  at_se: "se!A:Q",
+  at_aph: "'aplicação hubspot'!A:N",
+  ig_metta_perfil: "ig_metta_perfil!A:E",
+  ig_tiago_perfil: "ig_tiago_perfil!A:E",
+  ig_metta_posts: "ig_metta_posts!A:O",
+  ig_tiago_posts: "ig_tiago_posts!A:O",
 };
 
 type TabRowMap = {
@@ -66,6 +103,15 @@ type TabRowMap = {
   vendas: VendaRow;
   Metas: MetaRow;
   ads_links: AdsLinkRow;
+  fb_at: FbAtRow;
+  at_ap: AtLeadRow;
+  at_sala: AtLeadRow;
+  at_se: AtLeadRow;
+  at_aph: AtLeadRow;
+  ig_metta_perfil: IgProfileRow;
+  ig_tiago_perfil: IgProfileRow;
+  ig_metta_posts: IgPostsRow;
+  ig_tiago_posts: IgPostsRow;
 };
 
 /** TTL do snapshot cru. Maior que o intervalo do cron (1h) — assim o
@@ -108,6 +154,42 @@ function parseTab<T extends SheetTab>(
       return parseSheetData(AdsLinkRowSchema, values, ADS_LINKS_COLUMN_MAP, {
         tab,
       }) as TabRowMap[T][];
+    case "fb_at":
+      return parseSheetData(FbAtRowSchema, values, FB_AT_COLUMN_MAP, {
+        tab,
+      }) as TabRowMap[T][];
+    case "at_ap":
+      return parseSheetData(AtLeadRowSchema, values, AT_AP_COLUMN_MAP, {
+        tab,
+      }) as TabRowMap[T][];
+    case "at_sala":
+      return parseSheetData(AtLeadRowSchema, values, AT_SALA_COLUMN_MAP, {
+        tab,
+      }) as TabRowMap[T][];
+    case "at_se":
+      return parseSheetData(AtLeadRowSchema, values, AT_SE_COLUMN_MAP, {
+        tab,
+      }) as TabRowMap[T][];
+    case "at_aph":
+      return parseSheetData(AtLeadRowSchema, values, AT_APH_COLUMN_MAP, {
+        tab,
+      }) as TabRowMap[T][];
+    case "ig_metta_perfil":
+      return parseSheetData(IgProfileRowSchema, values, IG_METTA_PERFIL_COLUMN_MAP, {
+        tab,
+      }) as TabRowMap[T][];
+    case "ig_tiago_perfil":
+      return parseSheetData(IgProfileRowSchema, values, IG_TIAGO_PERFIL_COLUMN_MAP, {
+        tab,
+      }) as TabRowMap[T][];
+    case "ig_metta_posts":
+      return parseSheetData(IgPostsRowSchema, values, IG_METTA_POSTS_COLUMN_MAP, {
+        tab,
+      }) as TabRowMap[T][];
+    case "ig_tiago_posts":
+      return parseSheetData(IgPostsRowSchema, values, IG_TIAGO_POSTS_COLUMN_MAP, {
+        tab,
+      }) as TabRowMap[T][];
     default:
       throw new Error(`Aba desconhecida: ${tab}`);
   }
@@ -125,25 +207,67 @@ async function fetchTab<T extends SheetTab>(tab: T): Promise<TabRowMap[T][]> {
   return parseTab(tab, data.values as unknown[][] | undefined);
 }
 
-/** Busca várias abas em 1 request HTTP (batchGet). */
+/**
+ * Busca várias abas. `fb_todos` é gigante (~22MB / 51k linhas): juntá-la
+ * num batchGet com as demais gerava uma resposta combinada enorme que,
+ * em runtime com memória limitada (cron da Vercel), voltava TRUNCADA —
+ * foi exatamente o que travou o histórico de março. Por isso ela é
+ * buscada SOZINHA via `values.get`; o resto vai num único batchGet.
+ */
 async function fetchTabs<T extends SheetTab>(
   tabs: T[]
 ): Promise<{ [K in T]: TabRowMap[K][] }> {
   assertSheetsEnv();
-  const { data } = await sheetsClient.spreadsheets.values.batchGet({
-    spreadsheetId: SPREADSHEET_ID,
-    ranges: tabs.map((t) => RANGES[t]),
-    valueRenderOption: "UNFORMATTED_VALUE",
-    dateTimeRenderOption: "FORMATTED_STRING",
-  });
   const result = {} as { [K in T]: TabRowMap[K][] };
-  data.valueRanges?.forEach((vr, i) => {
-    const tab = tabs[i];
-    result[tab] = parseTab(
-      tab,
-      vr.values as unknown[][] | undefined
-    ) as TabRowMap[typeof tab][];
-  });
+
+  // fb_todos e fb_at são gigantes (~51k linhas): cada uma sozinha via
+  // values.get (resposta combinada enorme volta truncada em runtime).
+  const BIG: SheetTab[] = ["fb_todos", "fb_at"];
+  const big = tabs.filter((t) => BIG.includes(t));
+  const rest = tabs.filter((t) => !BIG.includes(t));
+
+  const jobs: Promise<void>[] = [];
+
+  for (const tab of big) {
+    jobs.push(
+      sheetsClient.spreadsheets.values
+        .get({
+          spreadsheetId: SPREADSHEET_ID,
+          range: RANGES[tab],
+          valueRenderOption: "UNFORMATTED_VALUE",
+          dateTimeRenderOption: "FORMATTED_STRING",
+        })
+        .then(({ data }) => {
+          result[tab] = parseTab(
+            tab,
+            data.values as unknown[][] | undefined
+          ) as TabRowMap[typeof tab][];
+        })
+    );
+  }
+
+  if (rest.length > 0) {
+    jobs.push(
+      sheetsClient.spreadsheets.values
+        .batchGet({
+          spreadsheetId: SPREADSHEET_ID,
+          ranges: rest.map((t) => RANGES[t]),
+          valueRenderOption: "UNFORMATTED_VALUE",
+          dateTimeRenderOption: "FORMATTED_STRING",
+        })
+        .then(({ data }) => {
+          data.valueRanges?.forEach((vr, i) => {
+            const tab = rest[i];
+            result[tab] = parseTab(
+              tab,
+              vr.values as unknown[][] | undefined
+            ) as TabRowMap[typeof tab][];
+          });
+        })
+    );
+  }
+
+  await Promise.all(jobs);
   return result;
 }
 
@@ -200,6 +324,7 @@ export async function readAllSheets<T extends SheetTab>(
  */
 export async function refreshAllSheets(): Promise<{
   refreshed: SheetTab[];
+  persisted: Record<string, { rows: number; ok: boolean; skipped?: boolean }>;
   durationMs: number;
 }> {
   const start = Date.now();
@@ -210,11 +335,50 @@ export async function refreshAllSheets(): Promise<{
     "vendas",
     "Metas",
     "ads_links",
+    "fb_at",
+    "at_ap",
+    "at_sala",
+    "at_se",
+    "at_aph",
+    "ig_metta_perfil",
+    "ig_tiago_perfil",
+    "ig_metta_posts",
+    "ig_tiago_posts",
   ];
   const fetched = await fetchTabs(tabs);
-  await Promise.all(
-    tabs.map((tab) => cacheSet(cacheKey(tab), fetched[tab], RAW_TTL_SECONDS))
-  );
+
+  const persisted: Record<
+    string,
+    { rows: number; ok: boolean; skipped?: boolean }
+  > = {};
+
+  // Escritas SEQUENCIAIS (não Promise.all): POSTs de vários MB em
+  // paralelo no Upstash sob carga da função estouravam o timeout e a
+  // escrita do fb_todos era engolida — cache travava num snapshot velho.
+  for (const tab of tabs) {
+    const rows = fetched[tab];
+
+    // Anti-clobber: nunca sobrescrever um cache saudável com um fetch
+    // drasticamente menor (sinal de resposta truncada). Protege o dado
+    // bom até o fetch voltar íntegro.
+    const current = await cacheGet<unknown[]>(cacheKey(tab));
+    if (
+      Array.isArray(current) &&
+      current.length > 100 &&
+      rows.length < current.length * 0.5
+    ) {
+      console.warn(
+        `[refresh] ${tab}: fetch=${rows.length} << cache=${current.length} ` +
+          `(provável truncamento) — overwrite ABORTADO, mantendo cache`
+      );
+      persisted[tab] = { rows: current.length, ok: false, skipped: true };
+      continue;
+    }
+
+    const ok = await cacheSet(cacheKey(tab), rows, RAW_TTL_SECONDS);
+    persisted[tab] = { rows: rows.length, ok };
+  }
+
   await cacheStampNow(STAMP_KEY);
-  return { refreshed: tabs, durationMs: Date.now() - start };
+  return { refreshed: tabs, persisted, durationMs: Date.now() - start };
 }
