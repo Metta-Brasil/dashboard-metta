@@ -8,6 +8,8 @@ import {
   formatBRLCompact,
   formatInt,
   formatPercent,
+  safeRate,
+  sumBy,
 } from "@/lib/calc/shared";
 import type { AnuncioCard, AnunciosResult } from "@/lib/calc/types";
 import { getAnuncios, getFilters } from "@/lib/page-data";
@@ -315,18 +317,27 @@ const RANKING_COLUMNS: Column<AnuncioCard>[] = [
     header: "CTR",
     align: "right",
     render: (r) => formatPercent(r.ctr),
+    // Planilha (Análise Tráfego G5): MÉDIA do CTR por anúncio.
+    total: (rs) =>
+      formatPercent(rs.length ? sumBy(rs, (r) => r.ctr) / rs.length : 0),
   },
   {
     key: "cpc",
     header: "CPC",
     align: "right",
     render: (r) => formatBRL(r.cpc),
+    // Planilha (Análise Tráfego H5): MÉDIA do CPC por anúncio.
+    total: (rs) =>
+      formatBRL(rs.length ? sumBy(rs, (r) => r.cpc) / rs.length : 0),
   },
   {
     key: "cpm",
     header: "CPM",
     align: "right",
     render: (r) => formatBRL(r.cpm),
+    // Planilha (Análise Tráfego I5): MÉDIA do CPM por anúncio.
+    total: (rs) =>
+      formatBRL(rs.length ? sumBy(rs, (r) => r.cpm) / rs.length : 0),
   },
   {
     key: "lpViews",
@@ -345,6 +356,13 @@ const RANKING_COLUMNS: Column<AnuncioCard>[] = [
     header: "CPL",
     align: "right",
     render: (r) => formatBRL(r.cpl),
+    total: (rs) =>
+      formatBRL(
+        safeRate(
+          sumBy(rs, (r) => r.investimento),
+          sumBy(rs, (r) => r.leads)
+        )
+      ),
   },
   {
     key: "mql",
@@ -357,6 +375,13 @@ const RANKING_COLUMNS: Column<AnuncioCard>[] = [
     header: "CMQL",
     align: "right",
     render: (r) => formatBRL(r.cmql),
+    total: (rs) =>
+      formatBRL(
+        safeRate(
+          sumBy(rs, (r) => r.investimento),
+          sumBy(rs, (r) => r.mql)
+        )
+      ),
   },
   {
     key: "agendamentos",

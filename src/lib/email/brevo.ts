@@ -72,6 +72,24 @@ export function sendVerificationCode(
   );
 }
 
+/** Código para redefinir a senha (recuperação de conta). */
+export function sendPasswordResetCode(
+  toEmail: string,
+  toName: string,
+  code: string
+) {
+  return dispatch(
+    toEmail,
+    toName,
+    "Redefina sua senha — Dashboard Metta",
+    codeHtml(
+      "Redefina sua senha",
+      "Use o código abaixo para criar uma nova senha da sua conta.",
+      code
+    )
+  );
+}
+
 /** Código para confirmar a troca de e-mail (vai para o novo e-mail). */
 export function sendEmailChangeCode(
   toEmail: string,

@@ -16,6 +16,15 @@ export type Column<T> = {
   render: (row: T) => React.ReactNode;
   align?: "left" | "right" | "center";
   className?: string;
+  /**
+   * Como agregar a coluna na linha TOTAL automática:
+   * - `"sum"`: força a soma (inteiros/moeda absoluta — leads, investimento…);
+   * - `"none"`: sem total (`—`) — rótulos, datas, dimensões;
+   * - função: total derivado, calculado pela página sobre todas as linhas.
+   *   Usar para custos (CPM = Σvalor/Σimpr·1000) e taxas (CTR = Σcliques/Σimpr).
+   * Ausente → heurística automática (compat: soma se a coluna for aditiva).
+   */
+  total?: "sum" | "none" | ((rows: T[]) => React.ReactNode);
 };
 
 type MetricTableProps<T> = {
@@ -140,39 +149,54 @@ export function MetricTable<T>({
       })),
     };
   } else if (autoTotal) {
+    // Soma uma coluna e formata seguindo o estilo (moeda/compacto/inteiro)
+    // inferido de uma amostra renderizada da própria coluna.
+    const sumCell = (c: Column<T>, ci: number): InteractiveCell => {
+      const sum = rows.reduce((acc, r) => {
+        const raw = rawValue(r, c.key);
+        return typeof raw === "number" && Number.isFinite(raw)
+          ? acc + raw
+          : acc;
+      }, 0);
+      let sample = "";
+      for (let ri = 0; ri < rows.length; ri += 1) {
+        const raw = rawValue(rows[ri], c.key);
+        if (typeof raw === "number" && Number.isFinite(raw)) {
+          sample = nodeText(renderedNodes[ri][ci]);
+          if (sample) break;
+        }
+      }
+      const isCurrency = /R\$/.test(sample);
+      const isCompact = isCurrency && /k\b/i.test(sample);
+      const totalText = isCompact
+        ? formatBRLCompact(sum)
+        : isCurrency
+          ? formatBRL(sum)
+          : formatInt(sum);
+      return { node: totalText, sortValue: null };
+    };
+
     totalRow = {
       cells: columns.map((c, ci): InteractiveCell => {
         if (ci === 0) {
           return { node: "Total", sortValue: null };
         }
+        const spec = c.total;
+        if (typeof spec === "function") {
+          // Total derivado (custo/taxa) computado pela página sobre as linhas.
+          return { node: spec(rows), sortValue: null };
+        }
+        if (spec === "none") {
+          return { node: "—", sortValue: null };
+        }
+        if (spec === "sum") {
+          return sumCell(c, ci);
+        }
+        // Heurística (compat): só soma se a coluna for aditiva.
         if (!additive[ci]) {
           return { node: "—", sortValue: null };
         }
-        const sum = rows.reduce((acc, r) => {
-          const raw = rawValue(r, c.key);
-          return typeof raw === "number" && Number.isFinite(raw)
-            ? acc + raw
-            : acc;
-        }, 0);
-        // Detecta o estilo de formatação a partir de uma amostra renderizada
-        // da própria coluna (não re-invoca o render da página, que pode
-        // depender de outros campos da row).
-        let sample = "";
-        for (let ri = 0; ri < rows.length; ri += 1) {
-          const raw = rawValue(rows[ri], c.key);
-          if (typeof raw === "number" && Number.isFinite(raw)) {
-            sample = nodeText(renderedNodes[ri][ci]);
-            if (sample) break;
-          }
-        }
-        const isCurrency = /R\$/.test(sample);
-        const isCompact = isCurrency && /k\b/i.test(sample);
-        const totalText = isCompact
-          ? formatBRLCompact(sum)
-          : isCurrency
-            ? formatBRL(sum)
-            : formatInt(sum);
-        return { node: totalText, sortValue: null };
+        return sumCell(c, ci);
       }),
     };
   }

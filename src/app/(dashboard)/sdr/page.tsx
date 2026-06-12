@@ -5,6 +5,8 @@ import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
 import { FilterSelect } from "@/components/dashboard/filter-select";
 import { MetricTable, type Column } from "@/components/dashboard/metric-table";
 import { SDRHeatmap } from "@/components/dashboard/sdr-heatmap";
+import { SdrDataToggle } from "@/components/dashboard/sdr-data-toggle";
+import { TimeInStage } from "@/components/dashboard/time-in-stage";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
 import {
@@ -12,13 +14,24 @@ import {
   formatBRLCompact,
   formatInt,
   formatPercent,
+  safeRate,
+  sumBy,
 } from "@/lib/calc/shared";
-import type { SDRRow } from "@/lib/calc/types";
+import type { SDRPorDataRow, SDRRow } from "@/lib/calc/types";
 import { getSdr, getFilters } from "@/lib/page-data";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
+
+function formatDayBr(d: Date): string {
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+    timeZone: "America/Sao_Paulo",
+  }).format(d);
+}
 
 export default function SdrPage({ searchParams }: PageProps) {
   return (
@@ -48,16 +61,7 @@ async function SdrToolbar({ searchParams }: PageProps) {
       from={filters.from}
       to={filters.to}
       funil
-      extras={
-        <>
-          <FilterSelect param="sdr" label="SDR" options={result.sdrNames} />
-          <FilterSelect
-            param="status"
-            label="Status"
-            options={result.statusValues}
-          />
-        </>
-      }
+      extras={<FilterSelect param="sdr" label="SDR" options={result.sdrNames} />}
     />
   );
 }
@@ -105,10 +109,77 @@ async function SdrContent({ searchParams }: PageProps) {
   ];
 
   const columns: Column<SDRRow>[] = [
+    { key: "sdr", header: "SDR", render: (r) => r.sdr, align: "left" },
     {
-      key: "sdr",
-      header: "SDR",
-      render: (r) => r.sdr,
+      key: "agendou",
+      header: "Agendou",
+      render: (r) => formatInt(r.agendou),
+      align: "right",
+    },
+    {
+      key: "realizou",
+      header: "Realizou",
+      render: (r) => formatInt(r.realizou),
+      align: "right",
+    },
+    {
+      key: "show",
+      header: "Show %",
+      render: (r) => formatPercent(r.show),
+      align: "right",
+      total: () => formatPercent(k.taxaShow),
+    },
+    {
+      key: "propostas",
+      header: "Propostas",
+      render: (r) => formatInt(r.propostas),
+      align: "right",
+    },
+    {
+      key: "txProposta",
+      header: "Tx prop. %",
+      render: (r) => formatPercent(r.txProposta),
+      align: "right",
+      total: (rs) =>
+        formatPercent(
+          safeRate(
+            sumBy(rs, (r) => r.propostas),
+            sumBy(rs, (r) => r.realizou)
+          )
+        ),
+    },
+    {
+      key: "valorProp",
+      header: "Valor prop. (R$)",
+      render: (r) => formatBRL(r.valorProp),
+      align: "right",
+    },
+    {
+      key: "vendas",
+      header: "Vendas",
+      render: (r) => formatInt(r.vendas),
+      align: "right",
+    },
+    {
+      key: "close",
+      header: "Close %",
+      render: (r) => formatPercent(r.close),
+      align: "right",
+      total: (rs) =>
+        formatPercent(
+          safeRate(
+            sumBy(rs, (r) => r.vendas),
+            sumBy(rs, (r) => r.propostas)
+          )
+        ),
+    },
+  ];
+
+  const porDataColumns: Column<SDRPorDataRow>[] = [
+    {
+      key: "dia",
+      header: "Data",
+      render: (r) => formatDayBr(r.dia),
       align: "left",
     },
     {
@@ -128,6 +199,13 @@ async function SdrContent({ searchParams }: PageProps) {
       header: "Show %",
       render: (r) => formatPercent(r.show),
       align: "right",
+      total: (rs) =>
+        formatPercent(
+          safeRate(
+            sumBy(rs, (r) => r.realizou),
+            sumBy(rs, (r) => r.agendou)
+          )
+        ),
     },
     {
       key: "propostas",
@@ -140,6 +218,13 @@ async function SdrContent({ searchParams }: PageProps) {
       header: "Tx prop. %",
       render: (r) => formatPercent(r.txProposta),
       align: "right",
+      total: (rs) =>
+        formatPercent(
+          safeRate(
+            sumBy(rs, (r) => r.propostas),
+            sumBy(rs, (r) => r.realizou)
+          )
+        ),
     },
     {
       key: "valorProp",
@@ -158,6 +243,13 @@ async function SdrContent({ searchParams }: PageProps) {
       header: "Close %",
       render: (r) => formatPercent(r.close),
       align: "right",
+      total: (rs) =>
+        formatPercent(
+          safeRate(
+            sumBy(rs, (r) => r.vendas),
+            sumBy(rs, (r) => r.realizou)
+          )
+        ),
     },
   ];
 
@@ -165,13 +257,36 @@ async function SdrContent({ searchParams }: PageProps) {
     <>
       <KpiGrid kpis={kpis} />
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <FunnelVertical
           title="Funil SDR"
           steps={result.funilSdr}
           monetaryEtapas={[]}
         />
-        <SDRHeatmap cells={result.heatmap} hourFrom={7} hourTo={20} />
+        <TimeInStage points={result.timeInStage} />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <SDRHeatmap
+          cells={result.heatmapAgendadas}
+          orientation="hora-y"
+          title="Reuniões agendadas"
+        />
+        <SDRHeatmap
+          cells={result.heatmapRealizadas}
+          orientation="hora-y"
+          title="Reuniões realizadas"
+        />
+        <SDRHeatmap
+          cells={result.heatmapPropostas}
+          orientation="hora-y"
+          title="Propostas"
+        />
+        <SDRHeatmap
+          cells={result.heatmapVendas}
+          orientation="hora-y"
+          title="Vendas"
+        />
       </div>
 
       <MetricTable
@@ -179,6 +294,14 @@ async function SdrContent({ searchParams }: PageProps) {
         description="Ordenado por agendamentos (desc)"
         columns={columns}
         rows={result.porSdr}
+      />
+
+      <MetricTable
+        title="Performance por data"
+        description="Métricas diárias agrupadas pela data selecionada."
+        columns={porDataColumns}
+        rows={result.porData}
+        toolbar={<SdrDataToggle />}
       />
     </>
   );
@@ -199,10 +322,19 @@ function SdrSkeleton() {
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="h-72 animate-pulse rounded-xl border border-border bg-card" />
         <div className="h-72 animate-pulse rounded-xl border border-border bg-card" />
       </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-64 animate-pulse rounded-xl border border-border bg-card"
+          />
+        ))}
+      </div>
+      <div className="h-64 animate-pulse rounded-xl border border-border bg-card" />
       <div className="h-64 animate-pulse rounded-xl border border-border bg-card" />
     </div>
   );

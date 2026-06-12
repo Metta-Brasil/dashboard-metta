@@ -25,20 +25,27 @@ export const FUNIL_LEAD_PATTERNS: Record<Funil, RegExp> = {
   sessao: /sess[ãa]o|diagn/i,
   isca: /isca/i,
   reality: /real/i,
-  todos: /sala|aplica|sess[ãa]o|diagn|isca|real/i,
+  // "Todos" = a definição de Total da planilha (aba Report): soma
+  // Aplicação + Sessão Estratégica + Diagnóstico. Sala/Isca/Reality
+  // NÃO entram no consolidado da planilha (não há fórmula p/ eles).
+  todos: /aplica|sess[ãa]o|diagn/i,
 };
 
 export function filterFbTodosByFunil(
   rows: FbTodosRow[],
   funis: Funil[]
 ): FbTodosRow[] {
+  // Case-INSENSITIVE: a planilha usa SUMIFS com "*PERP*"/"*CAPT*"/… que
+  // ignora caixa. `.includes` case-sensitive perdia campanhas.
+  const has = (name: string, m: string) =>
+    name.toUpperCase().includes(m);
   if (!funis.length || funis.includes("todos")) {
     return rows.filter((r) =>
-      FUNIL_CAMPAIGN_MARKERS.todos.every((m) => r.campaignName.includes(m))
+      FUNIL_CAMPAIGN_MARKERS.todos.every((m) => has(r.campaignName, m))
     );
   }
   return rows.filter((r) =>
-    funis.some((f) => FUNIL_CAMPAIGN_MARKERS[f].every((m) => r.campaignName.includes(m)))
+    funis.some((f) => FUNIL_CAMPAIGN_MARKERS[f].every((m) => has(r.campaignName, m)))
   );
 }
 
@@ -63,7 +70,9 @@ export function filterVendasByFunil(rows: VendaRow[], funis: Funil[]): VendaRow[
 
 // ----- Qualificação -----------------------------------------------------------
 
-const MQL_PATTERN = /mql|inter|enterprise/i;
+// Planilha conta MQL como qualificação contendo "MQL" OU "Inter"
+// (COUNTIFS "*MQL*" / "*Inter*"). "Interprise" casa via "inter".
+const MQL_PATTERN = /mql|inter/i;
 
 export function isMql(qualificacao: string): boolean {
   return MQL_PATTERN.test(qualificacao);
@@ -153,22 +162,18 @@ export function dayKey(d: Date): string {
 
 // ----- Dedup / Index ----------------------------------------------------------
 
-/** Dedupe por email mantendo a entrada mais recente (data de inscrição). */
+/**
+ * NÃO deduplica — passthrough proposital.
+ *
+ * A fonte de verdade é a planilha (aba Report), cujos COUNTIFS/SUMIFS
+ * contam TODAS as linhas de `leads` no período, sem deduplicar por
+ * email. Além disso, ~87% dos leads têm email vazio; a dedupe antiga
+ * (que pulava `!lead.email`) descartava esses ~16k linhas e zerava o
+ * MQL. Mantida como identidade pra não tocar os 6 call sites e garantir
+ * contagem idêntica à planilha em todas as páginas.
+ */
 export function dedupeLeadsByEmail(leads: LeadRow[]): LeadRow[] {
-  const map = new Map<string, LeadRow>();
-  for (const lead of leads) {
-    if (!lead.email) continue;
-    const existing = map.get(lead.email);
-    if (
-      !existing ||
-      (lead.dataInscricao &&
-        existing.dataInscricao &&
-        lead.dataInscricao > existing.dataInscricao)
-    ) {
-      map.set(lead.email, lead);
-    }
-  }
-  return Array.from(map.values());
+  return leads;
 }
 
 export function indexLeadsByEmail(leads: LeadRow[]): Map<string, LeadRow> {
@@ -223,6 +228,30 @@ export function isAgendamento(status: string): boolean {
 
 export function isPropostaEnviada(envioProposta: string): boolean {
   return /sim|fechada|recusada/i.test(envioProposta);
+}
+
+/**
+ * Mapeia os ~7 valores possíveis de `sdr.status` para 3 categorias
+ * canônicas usadas pela página Comercial SDR:
+ *   - "agendada" — reunião marcada/reagendada/remarcada
+ *   - "realizada" — reunião realizada (mesma sinalização que isReuniaoRealizada)
+ *   - "no_show" — não compareceu
+ * Strings sem match (ex.: "PIC consultoria", "sem retorno...") retornam null
+ * e devem ser desconsideradas pelo consumidor.
+ */
+export type SdrStatusCanonical = "agendada" | "realizada" | "no_show";
+
+export function canonicalSdrStatus(raw: string): SdrStatusCanonical | null {
+  const s = (raw ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .trim();
+  if (!s) return null;
+  if (/realiz/.test(s)) return "realizada";
+  if (/no[-\s]?show/.test(s)) return "no_show";
+  if (/reagend|remarc|agend/.test(s)) return "agendada";
+  return null;
 }
 
 // ----- Formatação -------------------------------------------------------------

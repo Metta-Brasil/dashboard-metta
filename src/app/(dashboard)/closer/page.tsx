@@ -10,6 +10,8 @@ import {
   formatBRLCompact,
   formatInt,
   formatPercent,
+  safeRate,
+  sumBy,
 } from "@/lib/calc/shared";
 import type { CloserRow, CloserVendaRow } from "@/lib/calc/types";
 import { getCloser, getFilters } from "@/lib/page-data";
@@ -58,6 +60,14 @@ async function CloserContent({ searchParams }: PageProps) {
       label: "Ciclo médio",
       value: k.cicloMedio !== null ? `${formatInt(k.cicloMedio)} dias` : "—",
       hint: "Inscrição → compra",
+    },
+    {
+      label: "Ciclo R→V",
+      value:
+        k.cicloMedioReuniaoVenda !== null
+          ? `${formatInt(k.cicloMedioReuniaoVenda)} dias`
+          : "—",
+      hint: "Reunião realizada → venda",
     },
   ];
 
@@ -118,6 +128,15 @@ async function CloserContent({ searchParams }: PageProps) {
       header: "Ciclo (dias)",
       align: "right",
       render: (r) => (r.ciclo !== null ? formatInt(r.ciclo) : "—"),
+      // Ciclo médio: média das vendas com ciclo conhecido (não somar dias).
+      total: (rs) => {
+        const v = rs
+          .map((r) => r.ciclo)
+          .filter((c): c is number => c !== null && Number.isFinite(c));
+        return v.length
+          ? formatInt(v.reduce((a, b) => a + b, 0) / v.length)
+          : "—";
+      },
     },
   ];
 
@@ -144,6 +163,11 @@ async function CloserContent({ searchParams }: PageProps) {
       header: "Show%",
       align: "right",
       render: (r) => formatPercent(r.show),
+      // Denominador (reuniões marcadas) não vive na linha → média da coluna.
+      total: (rs) =>
+        formatPercent(
+          rs.length ? sumBy(rs, (r) => r.show) / rs.length : 0
+        ),
     },
     {
       key: "propostas",
@@ -156,6 +180,13 @@ async function CloserContent({ searchParams }: PageProps) {
       header: "Tx prop.",
       align: "right",
       render: (r) => formatPercent(r.txProposta),
+      total: (rs) =>
+        formatPercent(
+          safeRate(
+            sumBy(rs, (r) => r.propostas),
+            sumBy(rs, (r) => r.realizou)
+          )
+        ),
     },
     {
       key: "valorProp",
@@ -174,6 +205,13 @@ async function CloserContent({ searchParams }: PageProps) {
       header: "Close%",
       align: "right",
       render: (r) => formatPercent(r.close),
+      total: (rs) =>
+        formatPercent(
+          safeRate(
+            sumBy(rs, (r) => r.vendas),
+            sumBy(rs, (r) => r.propostas)
+          )
+        ),
     },
     {
       key: "faturamento",
@@ -186,6 +224,13 @@ async function CloserContent({ searchParams }: PageProps) {
       header: "Ticket médio",
       align: "right",
       render: (r) => formatBRL(r.ticketMedio),
+      total: (rs) =>
+        formatBRL(
+          safeRate(
+            sumBy(rs, (r) => r.faturamento),
+            sumBy(rs, (r) => r.vendas)
+          )
+        ),
     },
   ];
 
@@ -195,7 +240,7 @@ async function CloserContent({ searchParams }: PageProps) {
       description="Reuniões realizadas, taxa de fechamento e ticket médio por Closer."
       toolbar={<Toolbar from={filters.from} to={filters.to} funil />}
     >
-      <KpiGrid kpis={kpis} />
+      <KpiGrid kpis={kpis} cols="grid-cols-2 lg:grid-cols-3 xl:grid-cols-6" />
 
       {/* g-2 do #p4: Receita por funil (donut) + Evolução de receita */}
       <div className="grid items-stretch gap-6 lg:grid-cols-2">

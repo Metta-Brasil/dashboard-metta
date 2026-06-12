@@ -1,5 +1,7 @@
 import type {
   AdsLinkRow,
+  AtLeadRow,
+  FbAtRow,
   FbTodosRow,
   LeadRow,
   MetaRow,
@@ -32,6 +34,8 @@ export type FilterState = {
   sdr?: string[];
   /** Status de reunião selecionados (Comercial SDR). Vazio/undefined = todos. */
   status?: string[];
+  /** Modo de agrupamento da tabela "Performance por data" (Comercial SDR). */
+  sdrDate?: "agendamento" | "reuniao";
   /** Busca client-side ou server (Tráfego/Anúncios). */
   busca?: string;
 };
@@ -46,6 +50,12 @@ export type RawData = {
   vendas: VendaRow[];
   Metas?: MetaRow[];
   ads_links?: AdsLinkRow[];
+  // Análise Tráfego (relatório per-anúncio)
+  fb_at?: FbAtRow[];
+  at_ap?: AtLeadRow[];
+  at_sala?: AtLeadRow[];
+  at_se?: AtLeadRow[];
+  at_aph?: AtLeadRow[];
 };
 
 export type RawSubset<K extends keyof RawData> = Pick<RawData, K>;
@@ -53,6 +63,8 @@ export type RawSubset<K extends keyof RawData> = Pick<RawData, K>;
 // Re-exporta tipos das abas pra consumo conveniente
 export type {
   AdsLinkRow,
+  AtLeadRow,
+  FbAtRow,
   FbTodosRow,
   LeadRow,
   SdrRow,
@@ -284,6 +296,45 @@ export type TrafegoResult = {
 };
 
 // ---------------------------------------------------------------------------
+// Página — TP Distribuição de conteúdo (2-em-1: Vídeo | Seguidores)
+// ---------------------------------------------------------------------------
+
+export type TpDistKpi = {
+  label: string;
+  value: number;
+  format: "brl" | "int" | "percent";
+};
+
+/** Superset com todos os campos numéricos usados pelas duas tabelas. */
+export type TpDistTableRow = {
+  adName: string;
+  investimento: number;
+  cliques: number;
+  cpc: number;
+  ctr: number;
+  cpm: number;
+  visitasPerfil: number;
+  custoVisita: number;
+  seguidores: number;
+  custoSeguidor: number;
+  visitasSeguidores: number;
+  hookRate: number;
+  video3s: number;
+  video25: number;
+  cpv25: number;
+  video95: number;
+  cpv95: number;
+};
+
+export type TpDistribuicaoResult = {
+  modo: "video" | "seguidores";
+  kpis: TpDistKpi[];
+  serie: { dia: Date; [k: string]: Date | number | null }[];
+  funil: FunnelStep[];
+  tabela: TpDistTableRow[];
+};
+
+// ---------------------------------------------------------------------------
 // Página 3 — Comercial SDR
 // ---------------------------------------------------------------------------
 
@@ -332,11 +383,16 @@ export type SDRResult = {
   kpis: SDRKpis;
   /** Agendamentos → Reuniões marcadas → Realizadas → Propostas → Vendas */
   funilSdr: FunnelStep[];
-  heatmap: SDRHeatmapCell[];
   porSdr: SDRRow[];
-  /** Opções pros selects (todas no recorte de funil, pré filtro SDR/Status). */
+  /** Opções pro select de SDR (no recorte de funil, pré filtro SDR). */
   sdrNames: string[];
-  statusValues: string[];
+  // ---------- SDR extensões (nova reforma) ----------
+  timeInStage: TimeInStagePoint[];
+  heatmapAgendadas: SDRHeatmapCell[];
+  heatmapRealizadas: SDRHeatmapCell[];
+  heatmapPropostas: SDRHeatmapCell[];
+  heatmapVendas: SDRHeatmapCell[];
+  porData: SDRPorDataRow[];
 };
 
 // ---------------------------------------------------------------------------
@@ -351,6 +407,8 @@ export type CloserKpis = {
   roas: number | null;
   /** Média de dias entre inscrição do lead e dataCompra. Null se não puder calcular. */
   cicloMedio: number | null;
+  /** Média de dias entre última reunião realizada (sdr) e dataCompra (vendas). Null se não puder calcular. */
+  cicloMedioReuniaoVenda: number | null;
   // Manter pra Performance closers
   reunioes: number;
   propostas: number;
@@ -572,4 +630,24 @@ export type OrigemResult = {
     rows: OrigemRow[];
     total: OrigemRow;
   }>;
+};
+
+// ---------- SDR extensões (nova reforma) ----------
+export type TimeInStagePoint = {
+  label: string;
+  mediaDias: number;
+  medianaDias: number;
+  n: number;
+};
+
+export type SDRPorDataRow = {
+  dia: Date;
+  agendou: number;
+  realizou: number;
+  show: number;
+  propostas: number;
+  txProposta: number;
+  valorProp: number;
+  vendas: number;
+  close: number;
 };

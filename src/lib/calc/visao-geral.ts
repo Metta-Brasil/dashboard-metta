@@ -210,14 +210,15 @@ export function calcVisaoGeral(
     faturamento,
   };
 
-  // ----- Funil consolidado — 5 etapas do wireframe #p1 -----
-  // Leads → MQL → Agendamentos → Reuniões realizadas → Vendas.
+  // ----- Funil consolidado — 6 etapas -----
+  // Leads → MQL → Agendamentos → Reuniões agendadas → Reuniões realizadas → Vendas.
   // conversaoEtapa = taxa sobre a etapa anterior (queda exibida entre barras).
   const funilConsolidado: FunnelStep[] = [
     { etapa: "Leads", valor: leadsCount, conversaoEtapa: 1 },
     { etapa: "MQL", valor: mql, conversaoEtapa: safeRate(mql, leadsCount) },
-    { etapa: "Agendamentos", valor: agendamentos, conversaoEtapa: safeRate(agendamentos, mql) },
-    { etapa: "Reuniões realizadas", valor: reunioes, conversaoEtapa: safeRate(reunioes, agendamentos) },
+    { etapa: "Reuniões previstas (Agendamento)", valor: agendamentos, conversaoEtapa: safeRate(agendamentos, mql) },
+    { etapa: "Reuniões marcadas (R. Agendadas)", valor: reunioesAgendadas, conversaoEtapa: safeRate(reunioesAgendadas, agendamentos) },
+    { etapa: "Reuniões realizadas", valor: reunioes, conversaoEtapa: safeRate(reunioes, reunioesAgendadas) },
     { etapa: "Vendas", valor: vendasCount, conversaoEtapa: safeRate(vendasCount, reunioes) },
   ];
 

@@ -377,6 +377,8 @@ const zFloat = z
 /**
  * Snapshot diário de perfil Instagram.
  * Colunas A-E: Data, Seguidores, Seguindo, Posts, Alcance28d
+ * Colunas F-H (adicionadas 2026-06): Alcance Dia, Contas Engajadas 28d, Interações 28d
+ * Linhas antigas (só A-E) parsearão F-H como 0 — comportamento correto.
  */
 export const IgProfileRowSchema = z.object({
   data: zDate,
@@ -384,6 +386,9 @@ export const IgProfileRowSchema = z.object({
   seguindo: zInt,
   posts: zInt,
   alcance28d: zInt,
+  alcanceDia: zInt,
+  contasEngajadas28d: zInt,
+  interacoesTotais28d: zInt,
 });
 export type IgProfileRow = z.infer<typeof IgProfileRowSchema>;
 
@@ -393,6 +398,9 @@ export const IG_METTA_PERFIL_COLUMN_MAP = {
   seguindo: 2,
   posts: 3,
   alcance28d: 4,
+  alcanceDia: 5,
+  contasEngajadas28d: 6,
+  interacoesTotais28d: 7,
 } as const;
 
 export const IG_TIAGO_PERFIL_COLUMN_MAP = IG_METTA_PERFIL_COLUMN_MAP;
@@ -402,6 +410,7 @@ export const IG_TIAGO_PERFIL_COLUMN_MAP = IG_METTA_PERFIL_COLUMN_MAP;
  * Colunas A-O: Post ID, Data, Tipo, Legenda, Permalink, Thumbnail URL,
  * Curtidas, Comentários, Views, Alcance, Salvamentos, Compartilhamentos,
  * Repostagens, Skip Rate %, Taxa Engajamento %
+ * Coluna P (adicionada 2026-06): Hora (HH:mm BRT)
  */
 export const IgPostsRowSchema = z.object({
   postId: zString,
@@ -419,6 +428,7 @@ export const IgPostsRowSchema = z.object({
   repostagens: zInt,
   skipRate: zFloat,
   taxaEngajamento: zFloat,
+  hora: zString,
 });
 export type IgPostsRow = z.infer<typeof IgPostsRowSchema>;
 
@@ -438,6 +448,7 @@ export const IG_METTA_POSTS_COLUMN_MAP = {
   repostagens: 12,
   skipRate: 13,
   taxaEngajamento: 14,
+  hora: 15,
 } as const;
 
 export const IG_TIAGO_POSTS_COLUMN_MAP = IG_METTA_POSTS_COLUMN_MAP;

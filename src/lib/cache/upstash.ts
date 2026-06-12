@@ -20,7 +20,7 @@ export const UPSTASH_ENABLED = Boolean(URL_BASE && TOKEN);
 
 async function redis<T = unknown>(
   command: (string | number)[],
-  timeoutMs = 15000
+  timeoutMs = 30000
 ): Promise<T | null> {
   if (!UPSTASH_ENABLED) return null;
   const ctrl = new AbortController();
@@ -61,28 +61,40 @@ export async function cacheGet<T>(key: string): Promise<T | null> {
 
 /**
  * Grava um valor JSON no cache (gzip + base64) com TTL em segundos.
- * Não lança — falha silenciosa (cache é best-effort).
+ * Não lança, mas retorna `true` só se o Upstash confirmou o SET — e
+ * loga quando falha. A falha silenciosa anterior escondeu por semanas
+ * o `raw:fb_todos` travado num snapshot velho (cron persistia o stamp
+ * mas não o valor): nunca mais sem observabilidade.
  */
 export async function cacheSet(
   key: string,
   value: unknown,
   ttlSeconds: number
-): Promise<void> {
+): Promise<boolean> {
   try {
     const json = JSON.stringify(value);
     const gz = gzipSync(Buffer.from(json, "utf8"), { level: 6 }).toString(
       "base64"
     );
-    if (Buffer.byteLength(gz, "utf8") > 9_000_000) return; // defensivo (>9MB)
-    await redis([
+    if (Buffer.byteLength(gz, "utf8") > 9_000_000) {
+      console.warn(`[cache] ${key}: payload > 9MB, SET pulado`);
+      return false;
+    }
+    const res = await redis<string>([
       "SET",
       key,
       gz,
       "EX",
       String(Math.max(60, Math.floor(ttlSeconds))),
     ]);
-  } catch {
-    // best-effort
+    if (res !== "OK") {
+      console.warn(`[cache] ${key}: SET não confirmado pelo Upstash`);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.warn(`[cache] ${key}: SET falhou — ${(e as Error).message}`);
+    return false;
   }
 }
 

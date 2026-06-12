@@ -8,14 +8,26 @@ type SDRHeatmapProps = {
   /** Faixa de horas mostrada — default 7h-20h (operação Metta) */
   hourFrom?: number;
   hourTo?: number;
+  /** Título do card. */
+  title?: string;
+  /**
+   * Orientação dos eixos:
+   *  - "hora-x" (default legacy): hora no topo (X), dia da semana na esquerda (Y).
+   *  - "hora-y": hora na esquerda (Y), dia da semana no topo (X) — usado pelos
+   *    4 heatmaps lado a lado da página SDR.
+   */
+  orientation?: "hora-x" | "hora-y";
+  className?: string;
 };
 
 export function SDRHeatmap({
   cells,
   hourFrom = 7,
   hourTo = 20,
+  title = "Heatmap de reuniões",
+  orientation = "hora-x",
+  className,
 }: SDRHeatmapProps) {
-  // Indexa por (dia, hora)
   const map = new Map<string, number>();
   let max = 0;
   for (const c of cells) {
@@ -38,57 +50,106 @@ export function SDRHeatmap({
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
-      <div className="mb-3 flex items-baseline justify-between">
-        <h3 className="text-base font-semibold tracking-tight text-foreground">
-          Heatmap de reuniões
-        </h3>
-        <span className="text-xs text-muted-foreground">
-          {hourFrom}h às {hourTo}h · BRT
+    <div
+      className={cn(
+        "rounded-xl border border-border bg-card p-5 shadow-xs",
+        className
+      )}
+    >
+      <div className="mb-3 flex items-baseline justify-between gap-2">
+        <h3 className="panel-title">{title}</h3>
+        <span className="shrink-0 text-xs text-muted-foreground">
+          {hourFrom}h–{hourTo}h
         </span>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-xs tabular-nums">
-          <thead>
-            <tr>
-              <th className="w-10" />
-              {hours.map((h) => (
-                <th
-                  key={h}
-                  className="px-1 py-1 text-center font-normal text-muted-foreground"
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {DIAS.map((label, di) => (
-              <tr key={label}>
-                <td className="pr-2 text-right text-muted-foreground">
-                  {label}
-                </td>
-                {hours.map((h) => {
-                  const v = map.get(`${di}|${h}`) ?? 0;
-                  return (
-                    <td key={h} className="p-0.5">
-                      <div
-                        className={cn(
-                          "flex h-7 w-full items-center justify-center rounded text-foreground",
-                          colorFor(v),
-                          v === 0 && "text-muted-foreground"
-                        )}
-                        title={`${label} ${h}h: ${v}`}
-                      >
-                        {v > 0 ? v : ""}
-                      </div>
+      <div className="w-full">
+        <table className="w-full table-fixed text-xs tabular-nums">
+          {orientation === "hora-x" ? (
+            <>
+              <thead>
+                <tr>
+                  <th className="w-10" />
+                  {hours.map((h) => (
+                    <th
+                      key={h}
+                      className="px-1 py-1 text-center font-normal text-muted-foreground"
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {DIAS.map((label, di) => (
+                  <tr key={label}>
+                    <td className="pr-2 text-right text-muted-foreground">
+                      {label}
                     </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
+                    {hours.map((h) => {
+                      const v = map.get(`${di}|${h}`) ?? 0;
+                      return (
+                        <td key={h} className="p-0.5">
+                          <div
+                            className={cn(
+                              "flex h-7 w-full items-center justify-center rounded text-foreground",
+                              colorFor(v),
+                              v === 0 && "text-muted-foreground"
+                            )}
+                            title={`${label} ${h}h: ${v}`}
+                          >
+                            {v > 0 ? v : ""}
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </>
+          ) : (
+            <>
+              <thead>
+                <tr>
+                  <th className="w-10" />
+                  {DIAS.map((label) => (
+                    <th
+                      key={label}
+                      className="px-1 py-1 text-center font-normal text-muted-foreground"
+                    >
+                      {label}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {hours.map((h) => (
+                  <tr key={h}>
+                    <td className="pr-2 text-right text-muted-foreground">
+                      {h}h
+                    </td>
+                    {DIAS.map((label, di) => {
+                      const v = map.get(`${di}|${h}`) ?? 0;
+                      return (
+                        <td key={label} className="p-0.5">
+                          <div
+                            className={cn(
+                              "flex h-6 w-full items-center justify-center rounded text-[10px] text-foreground",
+                              colorFor(v),
+                              v === 0 && "text-muted-foreground"
+                            )}
+                            title={`${label} ${h}h: ${v}`}
+                          >
+                            {v > 0 ? v : ""}
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </>
+          )}
         </table>
       </div>
     </div>

@@ -109,6 +109,10 @@ export function calcCloser(
   // Ignora negativos e nulls. Null se nenhum venda elegível.
   const leadIdx = indexLeadsByEmail(data.leads);
   const cicloMedio = computeCicloMedio(vendasInRange, leadIdx);
+  const cicloMedioReuniaoVenda = computeCicloReuniaoVenda(
+    vendasInRange,
+    data.sdr
+  );
 
   const kpis: CloserKpis = {
     vendas: vendasCount,
@@ -116,6 +120,7 @@ export function calcCloser(
     ticketMedio: safeRate(faturamento, vendasCount),
     roas,
     cicloMedio,
+    cicloMedioReuniaoVenda,
     reunioes,
     propostas,
     taxaProposta: safeRate(propostas, reunioes),
@@ -397,6 +402,47 @@ function computeCicloMedio(
       (1000 * 60 * 60 * 24);
     if (!Number.isFinite(diff) || diff < 0) continue;
     acc += diff;
+    count += 1;
+  }
+  if (count === 0) return null;
+  return acc / count;
+}
+
+/**
+ * Ciclo médio em dias entre a última reunião realizada (sdr.dataReuniao com
+ * status "Realizada") e a venda (vendas.dataCompra) do mesmo email.
+ * Pega a maior dataReuniao realizada com data ≤ dataCompra.
+ */
+function computeCicloReuniaoVenda(
+  vendas: VendaRow[],
+  sdrAll: SdrRow[]
+): number | null {
+  const byEmail = new Map<string, Date[]>();
+  for (const s of sdrAll) {
+    if (!isReuniaoRealizada(s.status)) continue;
+    if (!s.dataReuniao || !s.email) continue;
+    const key = s.email.toLowerCase().trim();
+    const arr = byEmail.get(key) ?? [];
+    arr.push(s.dataReuniao);
+    byEmail.set(key, arr);
+  }
+  let acc = 0;
+  let count = 0;
+  for (const v of vendas) {
+    if (!v.dataCompra || !v.email) continue;
+    const datas = byEmail.get(v.email.toLowerCase().trim());
+    if (!datas || datas.length === 0) continue;
+    let ultima: Date | null = null;
+    for (const d of datas) {
+      if (d.getTime() <= v.dataCompra.getTime() && (!ultima || d > ultima)) {
+        ultima = d;
+      }
+    }
+    if (!ultima) continue;
+    const dias =
+      (v.dataCompra.getTime() - ultima.getTime()) / (1000 * 60 * 60 * 24);
+    if (!Number.isFinite(dias) || dias < 0) continue;
+    acc += dias;
     count += 1;
   }
   if (count === 0) return null;

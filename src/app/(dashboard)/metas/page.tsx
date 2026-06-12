@@ -13,6 +13,8 @@ import {
   formatBRLCompact,
   formatInt,
   formatPercent,
+  safeRate,
+  sumBy,
 } from "@/lib/calc/shared";
 import type {
   MetasCardTaxa,
@@ -89,6 +91,13 @@ async function MetasContent({ searchParams }: PageProps) {
       header: "CMQL",
       align: "right",
       render: (r) => (r.cmql !== null ? formatBRL(r.cmql) : "—"),
+      total: (rs) =>
+        formatBRL(
+          safeRate(
+            sumBy(rs, (r) => r.investimento),
+            sumBy(rs, (r) => r.mql)
+          )
+        ),
     },
     {
       key: "agendamentos",
@@ -113,6 +122,13 @@ async function MetasContent({ searchParams }: PageProps) {
       header: "Conv.",
       align: "right",
       render: (r) => (r.conversao !== null ? formatPercent(r.conversao) : "—"),
+      total: (rs) =>
+        formatPercent(
+          safeRate(
+            sumBy(rs, (r) => r.vendas),
+            sumBy(rs, (r) => r.reunioesRealizadas)
+          )
+        ),
     },
     {
       key: "faturamento",
@@ -125,6 +141,15 @@ async function MetasContent({ searchParams }: PageProps) {
       header: "% meta",
       align: "right",
       render: (r) => (r.pctMeta !== null ? formatPercent(r.pctMeta) : "—"),
+      // Meta mensal não vive na linha → média dos meses com meta definida.
+      total: (rs) => {
+        const v = rs
+          .map((r) => r.pctMeta)
+          .filter((p): p is number => p !== null && Number.isFinite(p));
+        return v.length
+          ? formatPercent(v.reduce((a, b) => a + b, 0) / v.length)
+          : "—";
+      },
     },
   ];
 

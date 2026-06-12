@@ -1,7 +1,8 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 
 import {
@@ -20,9 +21,13 @@ type NavItem = {
   icon: LucideIcon;
 };
 
-export function NavMain({ items }: { items: NavItem[] }) {
+function NavLinks({ items, qs }: { items: NavItem[]; qs: string }) {
   const pathname = usePathname();
   const { isMobile, setOpenMobile } = useSidebar();
+  // Carrega os filtros atuais (data/funil/sdr/…) na navegação entre
+  // páginas, pra não resetarem ao trocar de aba. Reload de uma URL
+  // "limpa" volta ao default (comportamento esperado).
+  const withFilters = (url: string) => (qs ? `${url}?${qs}` : url);
 
   return (
     <SidebarGroup>
@@ -49,7 +54,7 @@ export function NavMain({ items }: { items: NavItem[] }) {
                   onClick={() => {
                     if (isMobile) setOpenMobile(false);
                   }}
-                  render={<Link href={item.url} />}
+                  render={<Link href={withFilters(item.url)} />}
                 >
                   <Icon
                     className={cn(
@@ -65,5 +70,19 @@ export function NavMain({ items }: { items: NavItem[] }) {
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
+  );
+}
+
+/** Lê os search params (precisa de Suspense sob Cache Components). */
+function NavLinksWithFilters({ items }: { items: NavItem[] }) {
+  const sp = useSearchParams();
+  return <NavLinks items={items} qs={sp?.toString() ?? ""} />;
+}
+
+export function NavMain({ items }: { items: NavItem[] }) {
+  return (
+    <Suspense fallback={<NavLinks items={items} qs="" />}>
+      <NavLinksWithFilters items={items} />
+    </Suspense>
   );
 }

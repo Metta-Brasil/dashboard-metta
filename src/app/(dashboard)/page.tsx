@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 
 import {
-  ComboBarLineChart,
   DonutChart,
   MultiLineChart,
 } from "@/components/dashboard/charts";
@@ -212,25 +211,26 @@ async function EvolucaoDiariaSection({ searchParams }: PageProps) {
   const data = result.serieDiaria.map((r) => ({
     dia: fmtDayShort(r.dia),
     mql: r.mql,
+    agendamentos: r.agendamentos,
+    reunioesAgendadas: r.reunioesAgendadas,
     reunioes: r.reunioes,
     vendas: r.vendas,
-    conv: r.convMqlVenda == null ? null : Number((r.convMqlVenda * 100).toFixed(1)),
   }));
 
   return (
-    <ComboBarLineChart
-      title="Evolução: MQL · Reuniões Realizadas · Vendas"
-      description="Barras (volumes) + linha de conversão acumulada Vendas/MQL"
+    <MultiLineChart
+      title="Evolução do funil diário"
+      description="Volumes diários por etapa do funil"
       data={data}
       xKey="dia"
-      bars={[
+      lines={[
         { key: "mql", label: "MQL" },
+        { key: "agendamentos", label: "Agendamentos" },
+        { key: "reunioesAgendadas", label: "Reuniões agendadas" },
         { key: "reunioes", label: "Reuniões realizadas" },
         { key: "vendas", label: "Vendas" },
       ]}
-      lines={[
-        { key: "conv", label: "% Conv. acumulada", axis: "right" },
-      ]}
+      height={420}
       className="h-full w-full"
     />
   );

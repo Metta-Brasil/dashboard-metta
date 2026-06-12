@@ -87,6 +87,21 @@ const PRESETS: Array<{ label: string; build: () => Range }> = [
       return { from, to };
     },
   },
+  {
+    label: "Este ano",
+    build: () => {
+      const to = new Date();
+      const from = new Date(to.getFullYear(), 0, 1);
+      return { from, to };
+    },
+  },
+  {
+    label: "Ano passado",
+    build: () => {
+      const y = new Date().getFullYear() - 1;
+      return { from: new Date(y, 0, 1), to: new Date(y, 11, 31) };
+    },
+  },
 ];
 
 export function DateRangePopover({
@@ -101,6 +116,18 @@ export function DateRangePopover({
   const [open, setOpen] = useState(false);
   const [range, setRange] = useState<Range>({ from, to });
   const isMobile = useIsMobile();
+
+  // Re-sincroniza com as props quando a URL muda (navegação, voltar,
+  // outro filtro). Sem isto o botão/calendário ficam presos no range
+  // inicial e o filtro PARECE não ter saído do mês atual, mesmo o
+  // servidor já tendo recalculado com o período novo. Ajuste de estado
+  // durante o render (padrão React, sem effect).
+  const propKey = `${from.getTime()}-${to.getTime()}`;
+  const [syncedKey, setSyncedKey] = useState(propKey);
+  if (propKey !== syncedKey) {
+    setSyncedKey(propKey);
+    setRange({ from, to });
+  }
 
   function apply(next: Range) {
     const params = new URLSearchParams(sp?.toString() ?? "");

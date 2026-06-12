@@ -8,7 +8,9 @@ export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
   const isAuthRoute =
-    nextUrl.pathname === "/login" || nextUrl.pathname === "/signup";
+    nextUrl.pathname === "/login" ||
+    nextUrl.pathname === "/signup" ||
+    nextUrl.pathname === "/recuperar";
 
   if (isAuthRoute) {
     if (isLoggedIn) {

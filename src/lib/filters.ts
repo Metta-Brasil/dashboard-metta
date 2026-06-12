@@ -52,11 +52,17 @@ export function parseFilters(
     ? funisStr.split(",").map((s) => s.trim().toLowerCase()).filter(isFunil)
     : (["todos"] as Funil[]);
 
+  const sdrDateRaw =
+    typeof searchParams.sdrDate === "string" ? searchParams.sdrDate : undefined;
+  const sdrDate: "agendamento" | "reuniao" =
+    sdrDateRaw === "reuniao" ? "reuniao" : "agendamento";
+
   return {
     from: Number.isFinite(from.getTime()) ? from : defaultFrom,
     to: Number.isFinite(to.getTime()) ? to : now,
     funis: funis.length ? funis : (["todos"] as Funil[]),
     sdr: list("sdr"),
     status: list("status"),
+    sdrDate,
   };
 }

@@ -90,10 +90,10 @@ const RANGES: Record<SheetTab, string> = {
   at_sala: "sala!A:P",
   at_se: "se!A:Q",
   at_aph: "'aplicação hubspot'!A:N",
-  ig_metta_perfil: "ig_metta_perfil!A:E",
-  ig_tiago_perfil: "ig_tiago_perfil!A:E",
-  ig_metta_posts: "ig_metta_posts!A:O",
-  ig_tiago_posts: "ig_tiago_posts!A:O",
+  ig_metta_perfil: "ig_metta_perfil!A:H",
+  ig_tiago_perfil: "ig_tiago_perfil!A:H",
+  ig_metta_posts: "ig_metta_posts!A:P",
+  ig_tiago_posts: "ig_tiago_posts!A:P",
 };
 
 type TabRowMap = {

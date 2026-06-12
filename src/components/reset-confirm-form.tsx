@@ -1,0 +1,177 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
+
+import { confirmPasswordReset, resendPasswordReset } from "@/lib/auth/users";
+import { sendPasswordResetCode } from "@/lib/email/brevo";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+
+async function confirmReset(formData: FormData) {
+  "use server";
+  const email = String(formData.get("email") ?? "");
+  const code = String(formData.get("code") ?? "");
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
+  const back = (msg: string) =>
+    redirect(
+      "/recuperar?verify=" +
+        encodeURIComponent(email) +
+        "&error=" +
+        encodeURIComponent(msg)
+    );
+  if (password !== confirm) back("As senhas não conferem.");
+  const res = await confirmPasswordReset(email, code, password);
+  if (!res.ok) back(res.error);
+  redirect(
+    "/login?ok=" +
+      encodeURIComponent("Senha redefinida. Entre com a nova senha.")
+  );
+}
+
+async function resendReset(formData: FormData) {
+  "use server";
+  const email = String(formData.get("email") ?? "");
+  const res = await resendPasswordReset(email);
+  if (!res.ok) {
+    redirect("/recuperar?error=" + encodeURIComponent(res.error));
+  }
+  const sent = await sendPasswordResetCode(res.email, res.name, res.code);
+  if (!sent.ok) {
+    redirect(
+      "/recuperar?verify=" +
+        encodeURIComponent(res.email) +
+        "&error=" +
+        encodeURIComponent("Não consegui reenviar o e-mail. Tente de novo.")
+    );
+  }
+  redirect("/recuperar?verify=" + encodeURIComponent(res.email) + "&sent=1");
+}
+
+export function ResetConfirmForm({
+  email,
+  error,
+  sent,
+  className,
+  ...props
+}: React.ComponentProps<"div"> & {
+  email: string;
+  error?: string;
+  sent?: boolean;
+}) {
+  return (
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <Card className="overflow-hidden p-0">
+        <CardContent className="grid p-0 md:grid-cols-2">
+          <div className="p-6 md:p-8">
+            <FieldGroup>
+              <div className="flex flex-col items-center gap-2 text-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/brand/metta-symbol.svg"
+                  alt="Metta"
+                  className="mb-1 size-10"
+                />
+                <h1 className="text-2xl font-bold">Redefinir senha</h1>
+                <p className="text-sm text-balance text-muted-foreground">
+                  Enviamos um código de 6 dígitos para{" "}
+                  <span className="font-medium text-foreground">{email}</span>.
+                  Ele expira em 15 minutos.
+                </p>
+              </div>
+
+              {error && (
+                <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
+                  {error}
+                </p>
+              )}
+              {sent && !error && (
+                <p className="rounded-md border border-primary/40 bg-primary/10 px-3 py-2 text-center text-sm text-foreground">
+                  Código reenviado.
+                </p>
+              )}
+
+              <form action={confirmReset}>
+                <input type="hidden" name="email" value={email} />
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel htmlFor="code">Código</FieldLabel>
+                    <Input
+                      id="code"
+                      name="code"
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      pattern="[0-9]*"
+                      maxLength={6}
+                      placeholder="000000"
+                      required
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="password">Nova senha</FieldLabel>
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      minLength={8}
+                      placeholder="mínimo 8 caracteres"
+                      required
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="confirm">
+                      Confirmar nova senha
+                    </FieldLabel>
+                    <Input
+                      id="confirm"
+                      name="confirm"
+                      type="password"
+                      minLength={8}
+                      required
+                    />
+                  </Field>
+                  <Field>
+                    <Button type="submit">Redefinir senha</Button>
+                  </Field>
+                </FieldGroup>
+              </form>
+
+              <form action={resendReset}>
+                <input type="hidden" name="email" value={email} />
+                <Button variant="outline" type="submit" className="w-full">
+                  Reenviar código
+                </Button>
+              </form>
+
+              <FieldDescription className="text-center">
+                <Link
+                  href="/login"
+                  className="underline underline-offset-4"
+                >
+                  Voltar pro login
+                </Link>
+              </FieldDescription>
+            </FieldGroup>
+          </div>
+
+          <div className="relative hidden items-center justify-center bg-muted p-10 md:flex">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/dashboard-illustration.svg"
+              alt=""
+              className="h-auto w-full max-w-[30rem]"
+            />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

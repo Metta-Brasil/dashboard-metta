@@ -114,12 +114,40 @@ export const getTpDistribuicao = cache(async (sp: SP) => {
 /** Filtros parseados (memoizado) — pro toolbar não re-parsear. */
 export const getFilters = cache(async (sp: SP) => parseFilters(await sp));
 
-export const getInstagramMetta = cache(async () => {
+export const getInstagramMetta = cache(async (sp?: SP) => {
+  const spv = sp ? await sp : {};
+  const filters = parseFilters(spv);
+  const tipos =
+    typeof spv.tipos === "string"
+      ? spv.tipos.split(",").map((t) => t.trim()).filter(Boolean)
+      : undefined;
+  const criterio =
+    typeof spv.criterio === "string" &&
+    ["views", "er", "alcance"].includes(spv.criterio)
+      ? (spv.criterio as "views" | "er" | "alcance")
+      : undefined;
   const data = await readAllSheets(["ig_metta_perfil", "ig_metta_posts"]);
-  return calcInstagram({ profile: data.ig_metta_perfil, posts: data.ig_metta_posts });
+  return calcInstagram(
+    { profile: data.ig_metta_perfil, posts: data.ig_metta_posts },
+    { from: filters.from, to: filters.to, tipos, criterio }
+  );
 });
 
-export const getInstagramTiago = cache(async () => {
+export const getInstagramTiago = cache(async (sp?: SP) => {
+  const spv = sp ? await sp : {};
+  const filters = parseFilters(spv);
+  const tipos =
+    typeof spv.tipos === "string"
+      ? spv.tipos.split(",").map((t) => t.trim()).filter(Boolean)
+      : undefined;
+  const criterio =
+    typeof spv.criterio === "string" &&
+    ["views", "er", "alcance"].includes(spv.criterio)
+      ? (spv.criterio as "views" | "er" | "alcance")
+      : undefined;
   const data = await readAllSheets(["ig_tiago_perfil", "ig_tiago_posts"]);
-  return calcInstagram({ profile: data.ig_tiago_perfil, posts: data.ig_tiago_posts });
+  return calcInstagram(
+    { profile: data.ig_tiago_perfil, posts: data.ig_tiago_posts },
+    { from: filters.from, to: filters.to, tipos, criterio }
+  );
 });

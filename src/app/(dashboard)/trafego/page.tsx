@@ -16,6 +16,8 @@ import {
   formatBRLCompact,
   formatInt,
   formatPercent,
+  safeRate,
+  sumBy,
 } from "@/lib/calc/shared";
 import type { Funil, TrafegoRankingRow } from "@/lib/calc/types";
 import { getFilters, getTrafego } from "@/lib/page-data";
@@ -362,18 +364,39 @@ async function RankingMidia({ searchParams }: PageProps) {
       header: "CTR",
       align: "right",
       render: (r) => formatPercent(r.ctr),
+      total: (rs) =>
+        formatPercent(
+          safeRate(
+            sumBy(rs, (r) => r.cliques),
+            sumBy(rs, (r) => r.impressoes)
+          )
+        ),
     },
     {
       key: "cpc",
       header: "CPC",
       align: "right",
       render: (r) => formatBRL(r.cpc),
+      total: (rs) =>
+        formatBRL(
+          safeRate(
+            sumBy(rs, (r) => r.investimento),
+            sumBy(rs, (r) => r.cliques)
+          )
+        ),
     },
     {
       key: "cpm",
       header: "CPM",
       align: "right",
       render: (r) => formatBRL(r.cpm),
+      total: (rs) =>
+        formatBRL(
+          safeRate(
+            sumBy(rs, (r) => r.investimento),
+            sumBy(rs, (r) => r.impressoes)
+          ) * 1000
+        ),
     },
     {
       key: "lpViews",
@@ -392,6 +415,13 @@ async function RankingMidia({ searchParams }: PageProps) {
       header: "CPL",
       align: "right",
       render: (r) => formatBRL(r.cpl),
+      total: (rs) =>
+        formatBRL(
+          safeRate(
+            sumBy(rs, (r) => r.investimento),
+            sumBy(rs, (r) => r.leads)
+          )
+        ),
     },
     {
       key: "mql",
@@ -404,6 +434,13 @@ async function RankingMidia({ searchParams }: PageProps) {
       header: "CMQL",
       align: "right",
       render: (r) => (Number.isFinite(r.cmql) ? formatBRL(r.cmql) : "—"),
+      total: (rs) =>
+        formatBRL(
+          safeRate(
+            sumBy(rs, (r) => r.investimento),
+            sumBy(rs, (r) => r.mql)
+          )
+        ),
     },
   ];
 
