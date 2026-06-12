@@ -160,7 +160,7 @@ const POST_COLUMNS: Column<IgPostRow>[] = [
     align: "right",
     render: (r) =>
       Number.isFinite(r.taxaEngajamento)
-        ? `${(r.taxaEngajamento * 100).toFixed(2)}%`
+        ? `${r.taxaEngajamento.toFixed(2)}%`
         : "—",
     total: "none",
   },
