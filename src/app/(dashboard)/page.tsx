@@ -104,7 +104,14 @@ export default function VisaoGeralPage({ searchParams }: PageProps) {
         </div>
       </div>
 
-      {/* Linha 3 — Tabela diária, largura total */}
+      {/* Linha 3 — 3 cards vazios (placeholder) */}
+      <div className="grid items-stretch gap-6 lg:grid-cols-3">
+        <div className="surface-card min-h-48" />
+        <div className="surface-card min-h-48" />
+        <div className="surface-card min-h-48" />
+      </div>
+
+      {/* Linha 4 — Tabela diária, largura total */}
       <Suspense fallback={<SectionFallback label="Carregando tabela diária…" />}>
         <TabelaDiariaSection searchParams={searchParams} />
       </Suspense>
