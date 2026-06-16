@@ -130,18 +130,18 @@ export function InstagramPage({
         <IgDemografiaSection getData={getData} sp={sp} />
       </Suspense>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {/* Composição + Média por tipo + Cadência semanal lado a lado (⅓ cada) */}
+      <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
         <Suspense fallback={<ChartFallback />}>
           <IgComposicaoSection getData={getData} sp={sp} />
         </Suspense>
         <Suspense fallback={<ChartFallback />}>
           <IgPorTipoSection getData={getData} sp={sp} />
         </Suspense>
+        <Suspense fallback={<ChartFallback />}>
+          <IgSemanalSection getData={getData} sp={sp} />
+        </Suspense>
       </div>
-
-      <Suspense fallback={<ChartFallback />}>
-        <IgSemanalSection getData={getData} sp={sp} />
-      </Suspense>
 
       <Suspense fallback={<GaleriaFallback />}>
         <IgGaleriaSection getData={getData} sp={sp} />
@@ -340,6 +340,7 @@ async function IgComposicaoSection({
       <EmptyCard
         title="Composição de interações"
         message="Nenhum dado no período."
+        className="h-full"
       />
     );
   }
@@ -349,6 +350,7 @@ async function IgComposicaoSection({
       title="Composição de interações"
       description="Posts publicados no período selecionado"
       data={composicao.map((c) => ({ name: c.nome, value: c.valor }))}
+      className="h-full w-full"
     />
   );
 }
@@ -369,7 +371,11 @@ async function IgPorTipoSection({
 
   if (porTipo.length === 0) {
     return (
-      <EmptyCard title="Média por tipo" message="Nenhum post encontrado." />
+      <EmptyCard
+        title="Média por tipo"
+        message="Nenhum post encontrado."
+        className="h-full"
+      />
     );
   }
 
@@ -387,6 +393,7 @@ async function IgPorTipoSection({
         { key: "Views", label: "Views (média)" },
         { key: "Alcance", label: "Alcance (média)" },
       ]}
+      className="h-full w-full"
     />
   );
 }
@@ -410,6 +417,7 @@ async function IgSemanalSection({
       <EmptyCard
         title="Cadência semanal"
         message="Nenhum post no período."
+        className="h-full"
       />
     );
   }
@@ -426,6 +434,7 @@ async function IgSemanalSection({
       xKey="semana"
       bars={[{ key: "Posts", label: "Posts" }]}
       lines={[{ key: "ER%", label: "ER% médio", axis: "right" }]}
+      className="h-full w-full"
     />
   );
 }
@@ -515,7 +524,7 @@ async function IgDemografiaSection({
   ];
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
       {idadeData.length > 0 && (
         <GroupedBarChart
           title="Faixa etária e gênero"
@@ -523,26 +532,25 @@ async function IgDemografiaSection({
           data={idadeData}
           xKey="faixa"
           bars={idadeBars}
+          className="h-full w-full"
         />
       )}
-      <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
-        {demografia.cidades.length > 0 && (
-          <HorizontalBars
-            title="Principais cidades"
-            description="% sobre o total de seguidores"
-            items={demografia.cidades}
-            total={demografia.totalSeguidores}
-          />
-        )}
-        {demografia.paises.length > 0 && (
-          <HorizontalBars
-            title="Principais países"
-            description="% sobre o total de seguidores"
-            items={demografia.paises}
-            total={demografia.totalSeguidores}
-          />
-        )}
-      </div>
+      {demografia.cidades.length > 0 && (
+        <HorizontalBars
+          title="Principais cidades"
+          description="% sobre o total de seguidores"
+          items={demografia.cidades}
+          total={demografia.totalSeguidores}
+        />
+      )}
+      {demografia.paises.length > 0 && (
+        <HorizontalBars
+          title="Principais países"
+          description="% sobre o total de seguidores"
+          items={demografia.paises}
+          total={demografia.totalSeguidores}
+        />
+      )}
     </div>
   );
 }
