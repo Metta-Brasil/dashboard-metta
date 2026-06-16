@@ -2,6 +2,7 @@ import type {
   IgDemograficosRow,
   IgPostsRow,
   IgProfileRow,
+  IgStoriesRow,
 } from "@/lib/sheets/schemas";
 import { dayKey, eachDay, filterByDate, startOfDayBrt } from "./shared";
 
@@ -84,6 +85,10 @@ export type IgPostRow = IgPostsRow & {
   tipoLabel: string;
 };
 
+export type IgStoryRow = IgStoriesRow & {
+  tipoLabel: string;
+};
+
 export type IgResult = {
   kpis: IgKpis;
   historico: IgHistoricoPoint[];
@@ -93,10 +98,12 @@ export type IgResult = {
   semanal: SemanalPoint[];
   topPosts: IgPostRow[];
   allPosts: IgPostRow[];
+  allStories: IgStoryRow[];
   demografia: Demografia;
   hasHistory: boolean;
   hasDailyMetrics: boolean;
   hasDemografia: boolean;
+  hasStories: boolean;
 };
 
 // ---------------------------------------------------------------------------
@@ -221,11 +228,13 @@ export function calcInstagram(
     profile: IgProfileRow[];
     posts: IgPostsRow[];
     demograficos?: IgDemograficosRow[];
+    stories?: IgStoriesRow[];
   },
   filters?: IgFilters
 ): IgResult {
   const { profile, posts } = data;
   const demograficosRows = data.demograficos ?? [];
+  const storiesRows = data.stories ?? [];
 
   const now = new Date();
   const defaultFrom = new Date(now);
@@ -535,6 +544,30 @@ export function calcInstagram(
     demografia.cidades.length > 0 ||
     demografia.paises.length > 0;
 
+  // ---------------------------------------------------------------------------
+  // Stories do período (mesmo filtro de data dos posts), ordenados por data DESC
+  // ---------------------------------------------------------------------------
+  const STORY_TIPO_LABEL: Record<string, string> = {
+    IMAGE: "Imagem",
+    VIDEO: "Vídeo",
+  };
+  const allStories: IgStoryRow[] = filterByDate(
+    storiesRows.filter((s) => s.storyId !== ""),
+    (s) => s.data as Date | null,
+    from,
+    to
+  )
+    .map((s) => ({
+      ...s,
+      tipoLabel: STORY_TIPO_LABEL[s.tipo.toUpperCase()] ?? s.tipo,
+    }))
+    .sort((a, b) => {
+      const ta = a.data ? (a.data as Date).getTime() : 0;
+      const tb = b.data ? (b.data as Date).getTime() : 0;
+      return tb - ta;
+    });
+  const hasStories = allStories.length > 0;
+
   return {
     kpis,
     historico,
@@ -544,9 +577,11 @@ export function calcInstagram(
     semanal,
     topPosts,
     allPosts: allPostsFinal,
+    allStories,
     demografia,
     hasHistory,
     hasDailyMetrics,
     hasDemografia,
+    hasStories,
   };
 }

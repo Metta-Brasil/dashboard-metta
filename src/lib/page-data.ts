@@ -126,12 +126,14 @@ export const getInstagramMetta = cache(async (sp?: SP) => {
     "ig_metta_perfil",
     "ig_metta_posts",
     "ig_metta_demograficos",
+    "ig_metta_stories",
   ]);
   return calcInstagram(
     {
       profile: data.ig_metta_perfil,
       posts: data.ig_metta_posts,
       demograficos: data.ig_metta_demograficos,
+      stories: data.ig_metta_stories,
     },
     { from: filters.from, to: filters.to, criterio }
   );
@@ -149,12 +151,14 @@ export const getInstagramTiago = cache(async (sp?: SP) => {
     "ig_tiago_perfil",
     "ig_tiago_posts",
     "ig_tiago_demograficos",
+    "ig_tiago_stories",
   ]);
   return calcInstagram(
     {
       profile: data.ig_tiago_perfil,
       posts: data.ig_tiago_posts,
       demograficos: data.ig_tiago_demograficos,
+      stories: data.ig_tiago_stories,
     },
     { from: filters.from, to: filters.to, criterio }
   );

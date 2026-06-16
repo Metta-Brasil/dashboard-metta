@@ -12,6 +12,10 @@ import {
   IgPostsTable,
   type IgPostTableRow,
 } from "@/components/dashboard/ig-posts-table";
+import {
+  IgStoriesTable,
+  type IgStoryTableRow,
+} from "@/components/dashboard/ig-stories-table";
 import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
 import { MultiSelectFilter } from "@/components/dashboard/multi-select-filter";
 import { Toolbar } from "@/components/dashboard/toolbar";
@@ -149,6 +153,10 @@ export function InstagramPage({
 
       <Suspense fallback={<TableFallback rows={10} />}>
         <IgPostsSection getData={getData} sp={sp} />
+      </Suspense>
+
+      <Suspense fallback={<TableFallback rows={6} />}>
+        <IgStoriesSection getData={getData} sp={sp} />
       </Suspense>
     </PageShell>
   );
@@ -680,6 +688,41 @@ async function IgPostsSection({
   }));
 
   return <IgPostsTable rows={rows} />;
+}
+
+// ---------------------------------------------------------------------------
+// Tabela de stories (abaixo da de posts). Append-only: histórico acumula a
+// partir da 1ª coleta (a API só devolve stories ativos das últimas 24h).
+// ---------------------------------------------------------------------------
+
+async function IgStoriesSection({
+  getData,
+  sp,
+}: {
+  getData: InstagramPageProps["getData"];
+  sp: SP;
+}) {
+  const result = await getData(sp);
+
+  const rows: IgStoryTableRow[] = result.allStories.map((s) => ({
+    storyId: s.storyId,
+    tipo: s.tipo,
+    tipoLabel: s.tipoLabel,
+    dataFmt: formatDateBr(s.data as Date | null),
+    dataTs: s.data ? (s.data as Date).getTime() : 0,
+    hora: s.hora,
+    views: s.views,
+    alcance: s.alcance,
+    navegacao: s.navegacao,
+    respostas: s.respostas,
+    compartilhamentos: s.compartilhamentos,
+    interacoes: s.interacoes,
+    seguidores: s.seguidores,
+    visitasPerfil: s.visitasPerfil,
+    permalink: s.permalink,
+  }));
+
+  return <IgStoriesTable rows={rows} />;
 }
 
 // ---------------------------------------------------------------------------

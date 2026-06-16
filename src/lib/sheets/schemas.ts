@@ -488,3 +488,49 @@ export const IG_METTA_DEMOGRAFICOS_COLUMN_MAP = {
 } as const;
 
 export const IG_TIAGO_DEMOGRAFICOS_COLUMN_MAP = IG_METTA_DEMOGRAFICOS_COLUMN_MAP;
+
+/**
+ * Story Instagram (aba ig_*_stories, APPEND-ONLY por Story ID).
+ * A API só devolve stories ativos (~24h); o sync acumula histórico via upsert.
+ * A: Story ID · B: Data · C: Hora · D: Tipo · E: Permalink · F: Thumbnail ·
+ * G: Views · H: Alcance · I: Navegação · J: Respostas · K: Compartilhamentos ·
+ * L: Interações · M: Seguidores (follows) · N: Visitas Perfil · O: Coletado Em
+ */
+export const IgStoriesRowSchema = z.object({
+  storyId: zString,
+  data: zDate,
+  hora: zString,
+  tipo: zString,
+  permalink: zString,
+  thumbnailUrl: zString,
+  views: zInt,
+  alcance: zInt,
+  navegacao: zInt,
+  respostas: zInt,
+  compartilhamentos: zInt,
+  interacoes: zInt,
+  seguidores: zInt,
+  visitasPerfil: zInt,
+  coletadoEm: zDate,
+});
+export type IgStoriesRow = z.infer<typeof IgStoriesRowSchema>;
+
+export const IG_METTA_STORIES_COLUMN_MAP = {
+  storyId: 0,
+  data: 1,
+  hora: 2,
+  tipo: 3,
+  permalink: 4,
+  thumbnailUrl: 5,
+  views: 6,
+  alcance: 7,
+  navegacao: 8,
+  respostas: 9,
+  compartilhamentos: 10,
+  interacoes: 11,
+  seguidores: 12,
+  visitasPerfil: 13,
+  coletadoEm: 14,
+} as const;
+
+export const IG_TIAGO_STORIES_COLUMN_MAP = IG_METTA_STORIES_COLUMN_MAP;

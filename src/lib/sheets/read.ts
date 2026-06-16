@@ -19,15 +19,19 @@ import {
   IG_METTA_DEMOGRAFICOS_COLUMN_MAP,
   IG_METTA_PERFIL_COLUMN_MAP,
   IG_METTA_POSTS_COLUMN_MAP,
+  IG_METTA_STORIES_COLUMN_MAP,
   IG_TIAGO_DEMOGRAFICOS_COLUMN_MAP,
   IG_TIAGO_PERFIL_COLUMN_MAP,
   IG_TIAGO_POSTS_COLUMN_MAP,
+  IG_TIAGO_STORIES_COLUMN_MAP,
   IgDemograficosRow,
   IgDemograficosRowSchema,
   IgPostsRow,
   IgPostsRowSchema,
   IgProfileRow,
   IgProfileRowSchema,
+  IgStoriesRow,
+  IgStoriesRowSchema,
   LEADS_COLUMN_MAP,
   LeadRow,
   LeadRowSchema,
@@ -67,7 +71,9 @@ export type SheetTab =
   | "ig_metta_posts"
   | "ig_tiago_posts"
   | "ig_metta_demograficos"
-  | "ig_tiago_demograficos";
+  | "ig_tiago_demograficos"
+  | "ig_metta_stories"
+  | "ig_tiago_stories";
 
 /**
  * Cache aplicacional manual no Upstash (NÃO `'use cache'`).
@@ -102,6 +108,8 @@ const RANGES: Record<SheetTab, string> = {
   ig_tiago_posts: "ig_tiago_posts!A:R",
   ig_metta_demograficos: "ig_metta_demograficos!A:D",
   ig_tiago_demograficos: "ig_tiago_demograficos!A:D",
+  ig_metta_stories: "ig_metta_stories!A:O",
+  ig_tiago_stories: "ig_tiago_stories!A:O",
 };
 
 type TabRowMap = {
@@ -122,6 +130,8 @@ type TabRowMap = {
   ig_tiago_posts: IgPostsRow;
   ig_metta_demograficos: IgDemograficosRow;
   ig_tiago_demograficos: IgDemograficosRow;
+  ig_metta_stories: IgStoriesRow;
+  ig_tiago_stories: IgStoriesRow;
 };
 
 /** TTL do snapshot cru. Maior que o intervalo do cron (1h) — assim o
@@ -208,6 +218,14 @@ function parseTab<T extends SheetTab>(
       return parseSheetData(IgDemograficosRowSchema, values, IG_TIAGO_DEMOGRAFICOS_COLUMN_MAP, {
         tab,
       }) as TabRowMap[T][];
+    case "ig_metta_stories":
+      return parseSheetData(IgStoriesRowSchema, values, IG_METTA_STORIES_COLUMN_MAP, {
+        tab,
+      }) as TabRowMap[T][];
+    case "ig_tiago_stories":
+      return parseSheetData(IgStoriesRowSchema, values, IG_TIAGO_STORIES_COLUMN_MAP, {
+        tab,
+      }) as TabRowMap[T][];
     default:
       throw new Error(`Aba desconhecida: ${tab}`);
   }
@@ -244,7 +262,12 @@ async function fetchTabs<T extends SheetTab>(
   // Abas OPCIONAIS: podem ainda não existir na planilha (criadas pelo sync na
   // primeira coleta). Um range pra sheet inexistente faz o batchGet inteiro
   // falhar (400) — por isso são buscadas isoladas e toleram erro → [].
-  const OPTIONAL: SheetTab[] = ["ig_metta_demograficos", "ig_tiago_demograficos"];
+  const OPTIONAL: SheetTab[] = [
+    "ig_metta_demograficos",
+    "ig_tiago_demograficos",
+    "ig_metta_stories",
+    "ig_tiago_stories",
+  ];
   const big = tabs.filter((t) => BIG.includes(t));
   const optional = tabs.filter((t) => OPTIONAL.includes(t));
   const rest = tabs.filter((t) => !BIG.includes(t) && !OPTIONAL.includes(t));
@@ -393,6 +416,8 @@ export async function refreshAllSheets(): Promise<{
     "ig_tiago_posts",
     "ig_metta_demograficos",
     "ig_tiago_demograficos",
+    "ig_metta_stories",
+    "ig_tiago_stories",
   ];
   const fetched = await fetchTabs(tabs);
 
