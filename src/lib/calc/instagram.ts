@@ -1,4 +1,8 @@
-import type { IgPostsRow, IgProfileRow } from "@/lib/sheets/schemas";
+import type {
+  IgDemograficosRow,
+  IgPostsRow,
+  IgProfileRow,
+} from "@/lib/sheets/schemas";
 import { dayKey, eachDay, filterByDate, startOfDayBrt } from "./shared";
 
 // ---------------------------------------------------------------------------
@@ -8,7 +12,6 @@ import { dayKey, eachDay, filterByDate, startOfDayBrt } from "./shared";
 export type IgFilters = {
   from: Date;
   to: Date;
-  tipos?: string[];
   criterio?: "views" | "er" | "alcance";
 };
 
@@ -61,6 +64,22 @@ export type SemanalPoint = {
   erMedio: number;
 };
 
+export type DemografiaIdadeGenero = {
+  faixa: string;
+  mulheres: number;
+  homens: number;
+  outros: number;
+};
+
+export type DemografiaItem = { nome: string; seguidores: number };
+
+export type Demografia = {
+  idadeGenero: DemografiaIdadeGenero[];
+  cidades: DemografiaItem[];
+  paises: DemografiaItem[];
+  totalSeguidores: number;
+};
+
 export type IgPostRow = IgPostsRow & {
   tipoLabel: string;
 };
@@ -74,8 +93,10 @@ export type IgResult = {
   semanal: SemanalPoint[];
   topPosts: IgPostRow[];
   allPosts: IgPostRow[];
+  demografia: Demografia;
   hasHistory: boolean;
   hasDailyMetrics: boolean;
+  hasDemografia: boolean;
 };
 
 // ---------------------------------------------------------------------------
@@ -96,15 +117,115 @@ function enrichPost(row: IgPostsRow): IgPostRow {
   return { ...row, tipoLabel: tipoLabel(row.tipo) };
 }
 
+// ----- Demografia -----------------------------------------------------------
+
+const AGE_ORDER = ["13-17", "18-24", "25-34", "35-44", "45-54", "55-64", "65+"];
+
+/** Códigos ISO de país → nome PT-BR (apenas os comuns; fallback = código). */
+const COUNTRY_NAMES: Record<string, string> = {
+  BR: "Brasil",
+  US: "Estados Unidos",
+  PT: "Portugal",
+  AO: "Angola",
+  MZ: "Moçambique",
+  AR: "Argentina",
+  ES: "Espanha",
+  GB: "Reino Unido",
+  FR: "França",
+  DE: "Alemanha",
+  IT: "Itália",
+  CA: "Canadá",
+  MX: "México",
+  CO: "Colômbia",
+  CL: "Chile",
+  PY: "Paraguai",
+  UY: "Uruguai",
+  JP: "Japão",
+  CH: "Suíça",
+  PE: "Peru",
+};
+
+function countryName(code: string): string {
+  const c = code.trim().toUpperCase();
+  return COUNTRY_NAMES[c] ?? code;
+}
+
+/** Quebra a chave "25-34|F" em [faixa, genero] de forma robusta à ordem
+ *  (a parte que casa um padrão de idade é a faixa; a outra é o gênero). */
+function splitIdadeGenero(chave: string): { faixa: string; genero: string } {
+  const parts = chave.split("|").map((p) => p.trim());
+  const isAge = (s: string) => /^\d|\+$/.test(s);
+  if (parts.length === 2) {
+    const [a, b] = parts;
+    if (isAge(a)) return { faixa: a, genero: b };
+    if (isAge(b)) return { faixa: b, genero: a };
+    return { faixa: a, genero: b };
+  }
+  return { faixa: parts[0] ?? "", genero: "" };
+}
+
+function buildDemografia(rows: IgDemograficosRow[]): Demografia {
+  const idadeMap = new Map<string, DemografiaIdadeGenero>();
+  const cidades: DemografiaItem[] = [];
+  const paises: DemografiaItem[] = [];
+
+  for (const r of rows) {
+    const dim = r.dimensao.toLowerCase();
+    if (dim === "idade_genero" || dim === "idade") {
+      const { faixa, genero } = splitIdadeGenero(r.chave);
+      if (!faixa) continue;
+      const cur =
+        idadeMap.get(faixa) ?? { faixa, mulheres: 0, homens: 0, outros: 0 };
+      const g = genero.toUpperCase();
+      if (g === "F") cur.mulheres += r.seguidores;
+      else if (g === "M") cur.homens += r.seguidores;
+      else cur.outros += r.seguidores;
+      idadeMap.set(faixa, cur);
+    } else if (dim === "cidade") {
+      // A API anexa " (state)" ao nome do estado (ex. "São Paulo, São Paulo
+      // (state)"). Remove pra ficar como no app do Instagram.
+      const nome = r.chave.replace(/\s*\(state\)/gi, "");
+      cidades.push({ nome, seguidores: r.seguidores });
+    } else if (dim === "pais") {
+      paises.push({ nome: countryName(r.chave), seguidores: r.seguidores });
+    }
+  }
+
+  const idadeGenero = Array.from(idadeMap.values()).sort((a, b) => {
+    const ia = AGE_ORDER.indexOf(a.faixa);
+    const ib = AGE_ORDER.indexOf(b.faixa);
+    return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+  });
+
+  cidades.sort((a, b) => b.seguidores - a.seguidores);
+  paises.sort((a, b) => b.seguidores - a.seguidores);
+
+  const totalSeguidores = rows
+    .filter((r) => r.dimensao.toLowerCase() === "pais")
+    .reduce((s, r) => s + r.seguidores, 0);
+
+  return {
+    idadeGenero,
+    cidades: cidades.slice(0, 10),
+    paises: paises.slice(0, 8),
+    totalSeguidores,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Main calc
 // ---------------------------------------------------------------------------
 
 export function calcInstagram(
-  data: { profile: IgProfileRow[]; posts: IgPostsRow[] },
+  data: {
+    profile: IgProfileRow[];
+    posts: IgPostsRow[];
+    demograficos?: IgDemograficosRow[];
+  },
   filters?: IgFilters
 ): IgResult {
   const { profile, posts } = data;
+  const demograficosRows = data.demograficos ?? [];
 
   const now = new Date();
   const defaultFrom = new Date(now);
@@ -112,7 +233,6 @@ export function calcInstagram(
   const from = filters?.from ?? defaultFrom;
   const to = filters?.to ?? now;
   const criterio = filters?.criterio ?? "views";
-  const tiposFiltro = filters?.tipos?.map((t) => t.toUpperCase());
 
   // ---------------------------------------------------------------------------
   // Profile: sort by date
@@ -155,13 +275,14 @@ export function calcInstagram(
   // Alcance 28d: most recent snapshot
   const alcance28dVal = last?.alcance28d ?? 0;
 
-  // Posts publicados no período (base de várias seções abaixo)
+  // Posts publicados no período (base de TODAS as seções de posts — filtro de
+  // data aplicado a tudo: KPIs, composição, semanal, por tipo, top e tabela).
   const postsFiltrados = filterByDate(
     posts.filter((p) => p.postId !== ""),
     (p) => p.data as Date | null,
     from,
     to
-  ).filter((p) => !tiposFiltro?.length || tiposFiltro.includes(p.tipo.toUpperCase()));
+  );
 
   const enrichedFiltered = postsFiltrados.map(enrichPost);
   const postsPeriodoVal = enrichedFiltered.length;
@@ -320,14 +441,10 @@ export function calcInstagram(
     );
 
   // ---------------------------------------------------------------------------
-  // Por tipo de mídia
+  // Por tipo de mídia (no período selecionado)
   // ---------------------------------------------------------------------------
-  const allEnriched = posts
-    .filter((p) => p.postId !== "")
-    .map(enrichPost);
-
   const tipoMap = new Map<string, { views: number[]; alcance: number[]; er: number[] }>();
-  for (const p of allEnriched) {
+  for (const p of enrichedFiltered) {
     const label = p.tipoLabel;
     if (!tipoMap.has(label)) tipoMap.set(label, { views: [], alcance: [], er: [] });
     const g = tipoMap.get(label)!;
@@ -395,20 +512,28 @@ export function calcInstagram(
   // Top 6 posts por critério
   // ---------------------------------------------------------------------------
   const sortKey = criterio === "er" ? "taxaEngajamento" : criterio === "alcance" ? "alcance" : "views";
-  const topPosts = [...allEnriched]
+  const topPosts = [...enrichedFiltered]
     .sort((a, b) => (b[sortKey] as number) - (a[sortKey] as number))
     .slice(0, 6);
 
   // ---------------------------------------------------------------------------
-  // All posts filtrados, ordenados por data DESC
+  // All posts do período, ordenados por data DESC (tabela). Filtro de tipo e
+  // busca por legenda são aplicados no client, dentro da própria tabela.
   // ---------------------------------------------------------------------------
-  const allPostsFinal = [...allEnriched]
-    .filter((p) => !tiposFiltro?.length || tiposFiltro.includes(p.tipo.toUpperCase()))
-    .sort((a, b) => {
-      const ta = a.data ? (a.data as Date).getTime() : 0;
-      const tb = b.data ? (b.data as Date).getTime() : 0;
-      return tb - ta;
-    });
+  const allPostsFinal = [...enrichedFiltered].sort((a, b) => {
+    const ta = a.data ? (a.data as Date).getTime() : 0;
+    const tb = b.data ? (b.data as Date).getTime() : 0;
+    return tb - ta;
+  });
+
+  // ---------------------------------------------------------------------------
+  // Demografia de seguidores (snapshot lifetime, independente do range)
+  // ---------------------------------------------------------------------------
+  const demografia = buildDemografia(demograficosRows);
+  const hasDemografia =
+    demografia.idadeGenero.length > 0 ||
+    demografia.cidades.length > 0 ||
+    demografia.paises.length > 0;
 
   return {
     kpis,
@@ -419,7 +544,9 @@ export function calcInstagram(
     semanal,
     topPosts,
     allPosts: allPostsFinal,
+    demografia,
     hasHistory,
     hasDailyMetrics,
+    hasDemografia,
   };
 }

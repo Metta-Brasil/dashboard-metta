@@ -16,10 +16,14 @@ import {
   FbAtRowSchema,
   FbTodosRow,
   FbTodosRowSchema,
+  IG_METTA_DEMOGRAFICOS_COLUMN_MAP,
   IG_METTA_PERFIL_COLUMN_MAP,
   IG_METTA_POSTS_COLUMN_MAP,
+  IG_TIAGO_DEMOGRAFICOS_COLUMN_MAP,
   IG_TIAGO_PERFIL_COLUMN_MAP,
   IG_TIAGO_POSTS_COLUMN_MAP,
+  IgDemograficosRow,
+  IgDemograficosRowSchema,
   IgPostsRow,
   IgPostsRowSchema,
   IgProfileRow,
@@ -61,7 +65,9 @@ export type SheetTab =
   | "ig_metta_perfil"
   | "ig_tiago_perfil"
   | "ig_metta_posts"
-  | "ig_tiago_posts";
+  | "ig_tiago_posts"
+  | "ig_metta_demograficos"
+  | "ig_tiago_demograficos";
 
 /**
  * Cache aplicacional manual no Upstash (NÃO `'use cache'`).
@@ -92,8 +98,10 @@ const RANGES: Record<SheetTab, string> = {
   at_aph: "'aplicação hubspot'!A:N",
   ig_metta_perfil: "ig_metta_perfil!A:I",
   ig_tiago_perfil: "ig_tiago_perfil!A:I",
-  ig_metta_posts: "ig_metta_posts!A:P",
-  ig_tiago_posts: "ig_tiago_posts!A:P",
+  ig_metta_posts: "ig_metta_posts!A:R",
+  ig_tiago_posts: "ig_tiago_posts!A:R",
+  ig_metta_demograficos: "ig_metta_demograficos!A:D",
+  ig_tiago_demograficos: "ig_tiago_demograficos!A:D",
 };
 
 type TabRowMap = {
@@ -112,6 +120,8 @@ type TabRowMap = {
   ig_tiago_perfil: IgProfileRow;
   ig_metta_posts: IgPostsRow;
   ig_tiago_posts: IgPostsRow;
+  ig_metta_demograficos: IgDemograficosRow;
+  ig_tiago_demograficos: IgDemograficosRow;
 };
 
 /** TTL do snapshot cru. Maior que o intervalo do cron (1h) — assim o
@@ -190,6 +200,14 @@ function parseTab<T extends SheetTab>(
       return parseSheetData(IgPostsRowSchema, values, IG_TIAGO_POSTS_COLUMN_MAP, {
         tab,
       }) as TabRowMap[T][];
+    case "ig_metta_demograficos":
+      return parseSheetData(IgDemograficosRowSchema, values, IG_METTA_DEMOGRAFICOS_COLUMN_MAP, {
+        tab,
+      }) as TabRowMap[T][];
+    case "ig_tiago_demograficos":
+      return parseSheetData(IgDemograficosRowSchema, values, IG_TIAGO_DEMOGRAFICOS_COLUMN_MAP, {
+        tab,
+      }) as TabRowMap[T][];
     default:
       throw new Error(`Aba desconhecida: ${tab}`);
   }
@@ -223,8 +241,13 @@ async function fetchTabs<T extends SheetTab>(
   // fb_todos e fb_at são gigantes (~51k linhas): cada uma sozinha via
   // values.get (resposta combinada enorme volta truncada em runtime).
   const BIG: SheetTab[] = ["fb_todos", "fb_at"];
+  // Abas OPCIONAIS: podem ainda não existir na planilha (criadas pelo sync na
+  // primeira coleta). Um range pra sheet inexistente faz o batchGet inteiro
+  // falhar (400) — por isso são buscadas isoladas e toleram erro → [].
+  const OPTIONAL: SheetTab[] = ["ig_metta_demograficos", "ig_tiago_demograficos"];
   const big = tabs.filter((t) => BIG.includes(t));
-  const rest = tabs.filter((t) => !BIG.includes(t));
+  const optional = tabs.filter((t) => OPTIONAL.includes(t));
+  const rest = tabs.filter((t) => !BIG.includes(t) && !OPTIONAL.includes(t));
 
   const jobs: Promise<void>[] = [];
 
@@ -242,6 +265,30 @@ async function fetchTabs<T extends SheetTab>(
             tab,
             data.values as unknown[][] | undefined
           ) as TabRowMap[typeof tab][];
+        })
+    );
+  }
+
+  for (const tab of optional) {
+    jobs.push(
+      sheetsClient.spreadsheets.values
+        .get({
+          spreadsheetId: SPREADSHEET_ID,
+          range: RANGES[tab],
+          valueRenderOption: "UNFORMATTED_VALUE",
+          dateTimeRenderOption: "FORMATTED_STRING",
+        })
+        .then(({ data }) => {
+          result[tab] = parseTab(
+            tab,
+            data.values as unknown[][] | undefined
+          ) as TabRowMap[typeof tab][];
+        })
+        .catch((err) => {
+          console.warn(
+            `[read] aba opcional '${tab}' indisponível (provável: ainda não criada) — usando []. ${err?.message ?? err}`
+          );
+          result[tab] = [] as TabRowMap[typeof tab][];
         })
     );
   }
@@ -344,6 +391,8 @@ export async function refreshAllSheets(): Promise<{
     "ig_tiago_perfil",
     "ig_metta_posts",
     "ig_tiago_posts",
+    "ig_metta_demograficos",
+    "ig_tiago_demograficos",
   ];
   const fetched = await fetchTabs(tabs);
 

@@ -8,13 +8,16 @@ import {
   DonutChart,
   MultiLineChart,
 } from "@/components/dashboard/charts";
+import {
+  IgPostsTable,
+  type IgPostTableRow,
+} from "@/components/dashboard/ig-posts-table";
 import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
-import { MetricTable, type Column } from "@/components/dashboard/metric-table";
 import { MultiSelectFilter } from "@/components/dashboard/multi-select-filter";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
 import { formatInt } from "@/lib/calc/shared";
-import type { IgPostRow, IgResult } from "@/lib/calc/instagram";
+import type { DemografiaItem, IgPostRow, IgResult } from "@/lib/calc/instagram";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -41,10 +44,6 @@ function formatDateBr(d: Date | null): string {
     year: "2-digit",
     timeZone: "America/Sao_Paulo",
   }).format(d);
-}
-
-function truncate(s: string, max: number): string {
-  return s.length <= max ? s : `${s.slice(0, max)}…`;
 }
 
 function fmtDelta(v: number | null | undefined): string | undefined {
@@ -75,29 +74,19 @@ async function IgToolbar({ sp }: { sp: SP }) {
       ? new Date(`${spv.to}T00:00:00-03:00`)
       : new Date();
 
+  // Filtro de tipo saiu do header — agora vive dentro da tabela "Todos os posts".
+  // O header mantém só período (sempre) + critério da galeria de top posts.
   const extras = (
-    <>
-      <MultiSelectFilter
-        param="tipos"
-        label="Tipo"
-        options={[
-          { value: "VIDEO", label: "Reels/Vídeo" },
-          { value: "CAROUSEL_ALBUM", label: "Carrossel" },
-          { value: "IMAGE", label: "Imagem" },
-        ]}
-        mode="todos"
-      />
-      <MultiSelectFilter
-        param="criterio"
-        label="Top por"
-        options={[
-          { value: "views", label: "Views" },
-          { value: "er", label: "Engajamento %" },
-          { value: "alcance", label: "Alcance" },
-        ]}
-        mode="todos"
-      />
-    </>
+    <MultiSelectFilter
+      param="criterio"
+      label="Top por"
+      options={[
+        { value: "views", label: "Views" },
+        { value: "er", label: "Engajamento %" },
+        { value: "alcance", label: "Alcance" },
+      ]}
+      mode="todos"
+    />
   );
 
   return <Toolbar from={from} to={to} funil={false} extras={extras} />;
@@ -127,12 +116,18 @@ export function InstagramPage({
         <IgKpisSection getData={getData} sp={sp} />
       </Suspense>
 
-      <Suspense fallback={<ChartFallback />}>
-        <IgHistoricoSection getData={getData} sp={sp} />
-      </Suspense>
+      {/* Evolução de seguidores + Métricas diárias lado a lado (½ cada) */}
+      <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
+        <Suspense fallback={<ChartFallback />}>
+          <IgHistoricoSection getData={getData} sp={sp} />
+        </Suspense>
+        <Suspense fallback={<ChartFallback />}>
+          <IgMetricasDiariasSection getData={getData} sp={sp} />
+        </Suspense>
+      </div>
 
       <Suspense fallback={<ChartFallback />}>
-        <IgMetricasDiariasSection getData={getData} sp={sp} />
+        <IgDemografiaSection getData={getData} sp={sp} />
       </Suspense>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -259,6 +254,7 @@ async function IgHistoricoSection({
       <EmptyCard
         title="Evolução de seguidores"
         message="Disponível a partir de 2 dias de coleta."
+        className="h-full"
       />
     );
   }
@@ -273,6 +269,7 @@ async function IgHistoricoSection({
       lines={[
         { key: "seguidores", label: "Total seguidores", axis: "right" },
       ]}
+      className="h-full w-full"
     />
   );
 }
@@ -296,6 +293,7 @@ async function IgMetricasDiariasSection({
       <EmptyCard
         title="Métricas diárias da conta"
         message="Sem dados diários da conta no período."
+        className="h-full"
       />
     );
   }
@@ -318,6 +316,7 @@ async function IgMetricasDiariasSection({
         { key: "Contas engajadas", label: "Contas engajadas", axis: "right" },
         { key: "Interações", label: "Interações", axis: "right" },
       ]}
+      className="h-full w-full"
     />
   );
 }
@@ -432,6 +431,123 @@ async function IgSemanalSection({
 }
 
 // ---------------------------------------------------------------------------
+// Demografia de seguidores — faixa×gênero + cidades + países
+// ---------------------------------------------------------------------------
+
+function HorizontalBars({
+  title,
+  description,
+  items,
+  total,
+}: {
+  title: string;
+  description: string;
+  items: DemografiaItem[];
+  total: number;
+}) {
+  const max = Math.max(...items.map((i) => i.seguidores), 1);
+  const base = total > 0 ? total : items.reduce((s, i) => s + i.seguidores, 0);
+
+  return (
+    <div className="surface-card flex h-full flex-col gap-4 p-5 lg:p-6">
+      <div className="flex flex-col gap-1">
+        <h3 className="panel-title">{title}</h3>
+        <span className="panel-desc">{description}</span>
+      </div>
+      <div className="flex flex-col gap-2.5">
+        {items.map((it) => {
+          const pct = base > 0 ? (it.seguidores / base) * 100 : 0;
+          const w = (it.seguidores / max) * 100;
+          return (
+            <div key={it.nome} className="flex flex-col gap-1">
+              <div className="flex items-baseline justify-between gap-2 text-xs">
+                <span className="truncate text-foreground/90" title={it.nome}>
+                  {it.nome}
+                </span>
+                <span className="shrink-0 tabular-nums text-muted-foreground">
+                  {pct.toFixed(1)}%
+                </span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded bg-muted">
+                <div
+                  className="h-full rounded bg-primary"
+                  style={{ width: `${w}%` }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+async function IgDemografiaSection({
+  getData,
+  sp,
+}: {
+  getData: InstagramPageProps["getData"];
+  sp: SP;
+}) {
+  const result = await getData(sp);
+  const { demografia, hasDemografia } = result;
+
+  if (!hasDemografia) {
+    return (
+      <EmptyCard
+        title="Demografia de seguidores"
+        message="Sem dados demográficos coletados ainda."
+      />
+    );
+  }
+
+  const temOutros = demografia.idadeGenero.some((d) => d.outros > 0);
+  const idadeData = demografia.idadeGenero.map((d) => ({
+    faixa: d.faixa,
+    Mulheres: d.mulheres,
+    Homens: d.homens,
+    ...(temOutros ? { Outros: d.outros } : {}),
+  }));
+  const idadeBars = [
+    { key: "Mulheres", label: "Mulheres" },
+    { key: "Homens", label: "Homens" },
+    ...(temOutros ? [{ key: "Outros", label: "Outros" }] : []),
+  ];
+
+  return (
+    <div className="flex flex-col gap-4">
+      {idadeData.length > 0 && (
+        <GroupedBarChart
+          title="Faixa etária e gênero"
+          description="Seguidores por faixa etária, separados por gênero"
+          data={idadeData}
+          xKey="faixa"
+          bars={idadeBars}
+        />
+      )}
+      <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
+        {demografia.cidades.length > 0 && (
+          <HorizontalBars
+            title="Principais cidades"
+            description="% sobre o total de seguidores"
+            items={demografia.cidades}
+            total={demografia.totalSeguidores}
+          />
+        )}
+        {demografia.paises.length > 0 && (
+          <HorizontalBars
+            title="Principais países"
+            description="% sobre o total de seguidores"
+            items={demografia.paises}
+            total={demografia.totalSeguidores}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Galeria top 6
 // ---------------------------------------------------------------------------
 
@@ -524,92 +640,8 @@ function IgPostCard({ post }: { post: IgPostRow }) {
 }
 
 // ---------------------------------------------------------------------------
-// Tabela completa de posts
+// Tabela completa de posts (filtro de tipo + busca por legenda dentro da tabela)
 // ---------------------------------------------------------------------------
-
-const POST_COLUMNS: Column<IgPostRow>[] = [
-  {
-    key: "tipoLabel",
-    header: "Tipo",
-    render: (r) => r.tipoLabel,
-    total: "none",
-  },
-  {
-    key: "legenda",
-    header: "Legenda",
-    render: (r) => (
-      <span className="block max-w-[280px] truncate" title={r.legenda}>
-        {truncate(r.legenda, 70)}
-      </span>
-    ),
-    total: "none",
-  },
-  {
-    key: "data",
-    header: "Data",
-    render: (r) => formatDateBr(r.data as Date | null),
-    total: "none",
-  },
-  {
-    key: "hora",
-    header: "Hora",
-    render: (r) => r.hora || "—",
-    total: "none",
-  },
-  {
-    key: "views",
-    header: "Views",
-    align: "right",
-    render: (r) => formatInt(r.views),
-  },
-  {
-    key: "alcance",
-    header: "Alcance",
-    align: "right",
-    render: (r) => formatInt(r.alcance),
-  },
-  {
-    key: "curtidas",
-    header: "Curtidas",
-    align: "right",
-    render: (r) => formatInt(r.curtidas),
-  },
-  {
-    key: "salvamentos",
-    header: "Salv.",
-    align: "right",
-    render: (r) => formatInt(r.salvamentos),
-  },
-  {
-    key: "taxaEngajamento",
-    header: "ER%",
-    align: "right",
-    render: (r) =>
-      Number.isFinite(r.taxaEngajamento)
-        ? `${r.taxaEngajamento.toFixed(2)}%`
-        : "—",
-    total: "none",
-  },
-  {
-    key: "permalink",
-    header: "Link",
-    align: "center",
-    render: (r) =>
-      r.permalink ? (
-        <Link
-          href={r.permalink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-primary underline-offset-4 hover:underline"
-        >
-          Ver
-        </Link>
-      ) : (
-        "—"
-      ),
-    total: "none",
-  },
-];
 
 async function IgPostsSection({
   getData,
@@ -620,26 +652,45 @@ async function IgPostsSection({
 }) {
   const result = await getData(sp);
 
-  return (
-    <MetricTable
-      title="Todos os posts"
-      description="Ordenado por data mais recente"
-      columns={POST_COLUMNS}
-      rows={result.allPosts}
-      showTotal={false}
-      empty="Nenhum post encontrado."
-      maxRows={50}
-    />
-  );
+  const rows: IgPostTableRow[] = result.allPosts.map((p) => ({
+    postId: p.postId,
+    tipo: p.tipo,
+    tipoLabel: p.tipoLabel,
+    legenda: p.legenda,
+    dataFmt: formatDateBr(p.data as Date | null),
+    dataTs: p.data ? (p.data as Date).getTime() : 0,
+    hora: p.hora,
+    views: p.views,
+    alcance: p.alcance,
+    curtidas: p.curtidas,
+    comentarios: p.comentarios,
+    salvamentos: p.salvamentos,
+    visitasPerfil: p.visitasPerfil,
+    seguidores: p.seguidores,
+    er: p.taxaEngajamento,
+    permalink: p.permalink,
+  }));
+
+  return <IgPostsTable rows={rows} />;
 }
 
 // ---------------------------------------------------------------------------
 // Empty state
 // ---------------------------------------------------------------------------
 
-function EmptyCard({ title, message }: { title: string; message: string }) {
+function EmptyCard({
+  title,
+  message,
+  className,
+}: {
+  title: string;
+  message: string;
+  className?: string;
+}) {
   return (
-    <div className="surface-card flex flex-col gap-2 p-5 lg:p-6">
+    <div
+      className={`surface-card flex flex-col gap-2 p-5 lg:p-6 ${className ?? ""}`}
+    >
       <h3 className="panel-title">{title}</h3>
       <p className="text-sm text-muted-foreground">{message}</p>
     </div>

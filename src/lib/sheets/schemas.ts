@@ -415,7 +415,10 @@ export const IG_TIAGO_PERFIL_COLUMN_MAP = IG_METTA_PERFIL_COLUMN_MAP;
  * Colunas A-O: Post ID, Data, Tipo, Legenda, Permalink, Thumbnail URL,
  * Curtidas, Comentários, Views, Alcance, Salvamentos, Compartilhamentos,
  * Repostagens, Skip Rate %, Taxa Engajamento %
- * Coluna P (adicionada 2026-06): Hora (HH:mm BRT)
+ * Coluna P (2026-06): Hora (HH:mm BRT)
+ * Colunas Q-R (2026-06): Visitas Perfil, Seguidores (follows) — só FEED;
+ *   Reels não suportam essas métricas por mídia → 0. Linhas antigas (A:P)
+ *   parseiam Q/R ausentes como 0.
  */
 export const IgPostsRowSchema = z.object({
   postId: zString,
@@ -434,6 +437,8 @@ export const IgPostsRowSchema = z.object({
   skipRate: zFloat,
   taxaEngajamento: zFloat,
   hora: zString,
+  visitasPerfil: zInt,
+  seguidores: zInt,
 });
 export type IgPostsRow = z.infer<typeof IgPostsRowSchema>;
 
@@ -454,6 +459,32 @@ export const IG_METTA_POSTS_COLUMN_MAP = {
   skipRate: 13,
   taxaEngajamento: 14,
   hora: 15,
+  visitasPerfil: 16,
+  seguidores: 17,
 } as const;
 
 export const IG_TIAGO_POSTS_COLUMN_MAP = IG_METTA_POSTS_COLUMN_MAP;
+
+/**
+ * Demografia de seguidores (aba ig_*_demograficos, overwrite diário).
+ * A: Dimensao (idade_genero | cidade | pais)
+ * B: Chave — para idade_genero é "<faixa>|<genero>" (ex. "25-34|F")
+ * C: Seguidores (contagem)
+ * D: Coletado Em (data)
+ */
+export const IgDemograficosRowSchema = z.object({
+  dimensao: zString,
+  chave: zString,
+  seguidores: zInt,
+  coletadoEm: zDate,
+});
+export type IgDemograficosRow = z.infer<typeof IgDemograficosRowSchema>;
+
+export const IG_METTA_DEMOGRAFICOS_COLUMN_MAP = {
+  dimensao: 0,
+  chave: 1,
+  seguidores: 2,
+  coletadoEm: 3,
+} as const;
+
+export const IG_TIAGO_DEMOGRAFICOS_COLUMN_MAP = IG_METTA_DEMOGRAFICOS_COLUMN_MAP;

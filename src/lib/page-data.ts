@@ -117,37 +117,45 @@ export const getFilters = cache(async (sp: SP) => parseFilters(await sp));
 export const getInstagramMetta = cache(async (sp?: SP) => {
   const spv = sp ? await sp : {};
   const filters = parseFilters(spv);
-  const tipos =
-    typeof spv.tipos === "string"
-      ? spv.tipos.split(",").map((t) => t.trim()).filter(Boolean)
-      : undefined;
   const criterio =
     typeof spv.criterio === "string" &&
     ["views", "er", "alcance"].includes(spv.criterio)
       ? (spv.criterio as "views" | "er" | "alcance")
       : undefined;
-  const data = await readAllSheets(["ig_metta_perfil", "ig_metta_posts"]);
+  const data = await readAllSheets([
+    "ig_metta_perfil",
+    "ig_metta_posts",
+    "ig_metta_demograficos",
+  ]);
   return calcInstagram(
-    { profile: data.ig_metta_perfil, posts: data.ig_metta_posts },
-    { from: filters.from, to: filters.to, tipos, criterio }
+    {
+      profile: data.ig_metta_perfil,
+      posts: data.ig_metta_posts,
+      demograficos: data.ig_metta_demograficos,
+    },
+    { from: filters.from, to: filters.to, criterio }
   );
 });
 
 export const getInstagramTiago = cache(async (sp?: SP) => {
   const spv = sp ? await sp : {};
   const filters = parseFilters(spv);
-  const tipos =
-    typeof spv.tipos === "string"
-      ? spv.tipos.split(",").map((t) => t.trim()).filter(Boolean)
-      : undefined;
   const criterio =
     typeof spv.criterio === "string" &&
     ["views", "er", "alcance"].includes(spv.criterio)
       ? (spv.criterio as "views" | "er" | "alcance")
       : undefined;
-  const data = await readAllSheets(["ig_tiago_perfil", "ig_tiago_posts"]);
+  const data = await readAllSheets([
+    "ig_tiago_perfil",
+    "ig_tiago_posts",
+    "ig_tiago_demograficos",
+  ]);
   return calcInstagram(
-    { profile: data.ig_tiago_perfil, posts: data.ig_tiago_posts },
-    { from: filters.from, to: filters.to, tipos, criterio }
+    {
+      profile: data.ig_tiago_perfil,
+      posts: data.ig_tiago_posts,
+      demograficos: data.ig_tiago_demograficos,
+    },
+    { from: filters.from, to: filters.to, criterio }
   );
 });
