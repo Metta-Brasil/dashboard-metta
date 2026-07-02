@@ -25,10 +25,10 @@ export const FUNIL_LEAD_PATTERNS: Record<Funil, RegExp> = {
   sessao: /sess[ãa]o|diagn/i,
   isca: /isca/i,
   reality: /real/i,
-  // "Todos" = a definição de Total da planilha (aba Report): soma
-  // Aplicação + Sessão Estratégica + Diagnóstico. Sala/Isca/Reality
-  // NÃO entram no consolidado da planilha (não há fórmula p/ eles).
-  todos: /aplica|sess[ãa]o|diagn/i,
+  // "Todos" = união dos 5 funis, consistente com o lado de campanhas
+  // (PERP+CAPT pega Sala/Isca/Reality também). Sem isso o gasto somava
+  // todos os funis mas leads/MQL só 3, distorcendo CPL/CMQL e taxas.
+  todos: /sala|aplica|sess[ãa]o|diagn|isca|real/i,
 };
 
 export function filterFbTodosByFunil(
