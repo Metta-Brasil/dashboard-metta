@@ -24,7 +24,6 @@ import {
   UserCheckIcon,
   HandshakeIcon,
   Share2Icon,
-  ComponentIcon,
 } from "lucide-react";
 
 import { InstagramIcon } from "@/components/instagram-icon";
@@ -44,7 +43,6 @@ const navMain = [
   { title: "Origem", url: "/origem", icon: Share2Icon },
   { title: "Instagram Metta", url: "/instagram-metta", icon: InstagramIcon },
   { title: "Instagram Tiago", url: "/instagram-tiago", icon: InstagramIcon },
-  { title: "Componentes", url: "/componentes", icon: ComponentIcon },
 ];
 
 type SidebarUser = { name: string; email: string; avatar: string };
