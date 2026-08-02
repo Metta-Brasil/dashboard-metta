@@ -94,9 +94,14 @@ export function MetricTableInteractive({
           <tr className="text-[7px] uppercase tracking-[0.07em] text-muted-foreground sm:text-[11px]">
             {columns.map((c, ci) => {
               const active = sort?.col === ci;
+              const stickyFirst = ci === 0;
               const thCls = cn(
                 "border-b border-border px-3 py-2.5 font-medium first:rounded-l-md last:rounded-r-md",
-                scrollable ? "sticky top-0 z-20 bg-muted" : "bg-muted/40",
+                stickyFirst
+                  ? cn("sticky left-0 bg-muted", scrollable ? "top-0 z-30" : "z-20")
+                  : scrollable
+                    ? "sticky top-0 z-20 bg-muted"
+                    : "bg-muted/40",
                 c.align === "right" && "text-right",
                 c.align === "center" && "text-center",
                 !c.align && "text-left",
@@ -164,6 +169,7 @@ export function MetricTableInteractive({
                     key={c.key}
                     className={cn(
                       "border-b border-border/50 px-3 py-2.5 tabular-nums text-foreground/90 group-last:border-b-0",
+                      ci === 0 && "sticky left-0 z-10 bg-[var(--card)]",
                       c.align === "right" && "text-right",
                       c.align === "center" && "text-center",
                       c.className
@@ -182,7 +188,11 @@ export function MetricTableInteractive({
                   key={c.key}
                   className={cn(
                     "border-t-2 border-border px-3 py-2.5 tabular-nums first:rounded-bl-md last:rounded-br-md",
-                    scrollable ? "sticky bottom-0 z-20 bg-muted" : "bg-muted/50",
+                    ci === 0
+                      ? cn("sticky left-0 bg-muted", scrollable ? "bottom-0 z-30" : "z-20")
+                      : scrollable
+                        ? "sticky bottom-0 z-20 bg-muted"
+                        : "bg-muted/50",
                     c.align === "right" && "text-right",
                     c.align === "center" && "text-center",
                     c.className

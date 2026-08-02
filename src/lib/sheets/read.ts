@@ -10,6 +10,9 @@ import {
   AT_SE_COLUMN_MAP,
   AtLeadRow,
   AtLeadRowSchema,
+  CLINT_COLUMN_MAP,
+  ClintRow,
+  ClintRowSchema,
   FB_AT_COLUMN_MAP,
   FB_TODOS_COLUMN_MAP,
   FbAtRow,
@@ -57,6 +60,7 @@ export type SheetTab =
   | "leads"
   | "sdr"
   | "vendas"
+  | "clint"
   | "Metas"
   | "ads_links"
   // Análise Tráfego (relatório per-anúncio): aba fb + abas de lead
@@ -95,6 +99,7 @@ const RANGES: Record<SheetTab, string> = {
   leads: "leads!A:P",
   sdr: "sdr!A:AB",
   vendas: "vendas!A:AE",
+  clint: "clint!A:AK",
   Metas: "Metas!A:D",
   ads_links: "'ads links'!A:C",
   fb_at: "fb!A:I",
@@ -117,6 +122,7 @@ type TabRowMap = {
   leads: LeadRow;
   sdr: SdrRow;
   vendas: VendaRow;
+  clint: ClintRow;
   Metas: MetaRow;
   ads_links: AdsLinkRow;
   fb_at: FbAtRow;
@@ -164,6 +170,10 @@ function parseTab<T extends SheetTab>(
       }) as TabRowMap[T][];
     case "vendas":
       return parseSheetData(VendaRowSchema, values, VENDAS_COLUMN_MAP, {
+        tab,
+      }) as TabRowMap[T][];
+    case "clint":
+      return parseSheetData(ClintRowSchema, values, CLINT_COLUMN_MAP, {
         tab,
       }) as TabRowMap[T][];
     case "Metas":
@@ -403,6 +413,7 @@ export async function refreshAllSheets(): Promise<{
     "leads",
     "sdr",
     "vendas",
+    "clint",
     "Metas",
     "ads_links",
     "fb_at",

@@ -1,4 +1,4 @@
-import type { LeadRow, SdrRow, VendaRow } from "@/lib/sheets/schemas";
+import type { ClintRow, LeadRow, SdrRow, VendaRow } from "@/lib/sheets/schemas";
 import {
   dedupeLeadsByEmail,
   filterByDate,
@@ -8,7 +8,9 @@ import {
   isMql,
   isReuniaoRealizada,
   normalizeQualif,
+  type RowSource,
 } from "./shared";
+import { clintRows } from "./clint";
 import type {
   FilterState,
   OrigemResult,
@@ -38,7 +40,7 @@ import type {
  * qualificacaoSnap).
  */
 export function calcOrigem(
-  data: Pick<RawData, "leads" | "sdr" | "vendas">,
+  data: Pick<RawData, "leads" | "sdr" | "vendas" | "clint">,
   filters: FilterState
 ): OrigemResult {
   const funis = filters.funis ?? ["todos"];
@@ -46,6 +48,10 @@ export function calcOrigem(
   const leadsF = filterLeadsByFunil(data.leads, funis);
   const sdrF = filterLeadsByFunil(data.sdr, funis);
   const vendasF = filterVendasByFunil(data.vendas, funis);
+  const clintF = filterLeadsByFunil(clintRows(data), funis).map((c) => ({
+    ...c,
+    _src: "clint" as RowSource,
+  }));
 
   const leadsInRange = filterByDate(
     leadsF,
@@ -71,6 +77,12 @@ export function calcOrigem(
     filters.from,
     filters.to
   );
+  const clintInRange = filterByDate(
+    clintF,
+    (r) => r.dataCriacao,
+    filters.from,
+    filters.to
+  );
 
   const leadsUnicos = dedupeLeadsByEmail(leadsInRange);
   const leadByEmail = indexLeadsByEmail(leadsUnicos);
@@ -81,6 +93,7 @@ export function calcOrigem(
   type Metrics = {
     leadsQualif: number;
     mql: number;
+    negociosCriados: number;
     agendamentos: number;
     reunioesAgendadas: number;
     reunioesRealizadas: number;
@@ -90,6 +103,7 @@ export function calcOrigem(
   const emptyMetrics = (): Metrics => ({
     leadsQualif: 0,
     mql: 0,
+    negociosCriados: 0,
     agendamentos: 0,
     reunioesAgendadas: 0,
     reunioesRealizadas: 0,
@@ -102,6 +116,7 @@ export function calcOrigem(
       dimensao,
       leadsQualif: m.leadsQualif,
       mql: m.mql,
+      negociosCriados: m.negociosCriados,
       agendamentos: m.agendamentos,
       reunioesAgendadas: m.reunioesAgendadas,
       reunioesRealizadas: m.reunioesRealizadas,
@@ -128,6 +143,7 @@ export function calcOrigem(
     keyFromLead: (l: LeadRow) => string | null;
     keyFromSdr: (s: SdrRow) => string | null;
     keyFromVenda: (v: VendaRow) => string | null;
+    keyFromClint: (c: ClintRow) => string | null;
     allowedKeys?: ReadonlySet<string>;
     fallbackKey?: string | null;
     onlyMqlLeads?: boolean;
@@ -196,6 +212,15 @@ export function calcOrigem(
       m.faturamento += v.valorContrato;
     }
 
+    // Negócios criados (Clint, jul+) — agrupa pela própria dimensão da linha.
+    for (const c of clintInRange) {
+      const lead = leadByEmail.get(c.email);
+      const raw = lead ? opts.keyFromLead(lead) : opts.keyFromClint(c);
+      const key = resolveKey(raw);
+      if (!key) continue;
+      ensure(key).negociosCriados += 1;
+    }
+
     return buckets;
   }
 
@@ -217,6 +242,7 @@ export function calcOrigem(
     keyFromLead: (l) => lower(l.utmSource),
     keyFromSdr: (s) => lower(s.utmSourceSnap),
     keyFromVenda: (v) => lower(v.utmSourceSnap),
+    keyFromClint: (c) => lower(c.utmSource),
   });
   const porUtmSource = mapToSortedRows(utmSourceMap, toRow);
 
@@ -225,6 +251,7 @@ export function calcOrigem(
     keyFromLead: (l) => lower(l.utmMedium),
     keyFromSdr: (s) => lower(s.utmMediumSnap),
     keyFromVenda: (v) => lower(v.utmMediumSnap),
+    keyFromClint: (c) => lower(c.utmMedium),
   });
   const porUtmMedium = mapToSortedRows(utmMediumMap, toRow);
 
@@ -233,6 +260,7 @@ export function calcOrigem(
     keyFromLead: (l) => raw(l.utmCampaign),
     keyFromSdr: (s) => raw(s.utmCampaignSnap),
     keyFromVenda: (v) => raw(v.utmCampaignSnap),
+    keyFromClint: (c) => raw(c.utmCampaign),
   });
   const porUtmCampaign = mapToSortedRows(utmCampaignMap, toRow);
 
@@ -241,6 +269,7 @@ export function calcOrigem(
     keyFromLead: (l) => raw(l.utmContent),
     keyFromSdr: (s) => raw(s.utmContentSnap),
     keyFromVenda: (v) => raw(v.utmContentSnap),
+    keyFromClint: (c) => raw(c.utmContent),
   });
   const porUtmContent = mapToSortedRows(utmContentMap, toRow);
 
@@ -259,6 +288,7 @@ export function calcOrigem(
     keyFromLead: (l) => qualifLabel(l.qualificacao),
     keyFromSdr: (s) => qualifLabel(s.qualificacaoSnap),
     keyFromVenda: (v) => qualifLabel(v.qualificacaoSnap),
+    keyFromClint: (c) => qualifLabel(c.qualificacao),
     allowedKeys: qualifAllowed,
   });
   const porQualificacao = QUALIF_ORDER.map((label) => {
@@ -271,6 +301,7 @@ export function calcOrigem(
     keyFromLead: (l) => classifyCargo(l.cargo),
     keyFromSdr: (s) => classifyCargo(s.cargoSnap),
     keyFromVenda: (v) => classifyCargo(v.cargoSnap),
+    keyFromClint: (c) => classifyCargo(c.cargo),
     allowedKeys: CARGO_ALLOWED_SET,
     fallbackKey: "Outros",
   });
@@ -284,6 +315,7 @@ export function calcOrigem(
     keyFromLead: (l) => classifyFaturamento(l.faturamento),
     keyFromSdr: (s) => classifyFaturamento(s.faturamentoSnap),
     keyFromVenda: (v) => classifyFaturamento(v.faturamentoSnap),
+    keyFromClint: (c) => classifyFaturamento(c.faturamento),
     allowedKeys: FATURAMENTO_FAIXAS_SET,
   });
   const porFaturamento = FATURAMENTO_FAIXAS_QUALIFICADAS.map(({ label, qualif }) => {
@@ -296,6 +328,7 @@ export function calcOrigem(
     keyFromLead: (l) => classifySegmento(l.segmento),
     keyFromSdr: (s) => classifySegmento(s.segmentoSnap),
     keyFromVenda: (v) => classifySegmento(v.segmentoSnap),
+    keyFromClint: (c) => classifySegmento(c.segmento),
     allowedKeys: SEGMENTO_ALLOWED_SET,
   });
   const porSegmento = SEGMENTO_ORDER.map((label) => {
@@ -318,8 +351,8 @@ export function calcOrigem(
 // ----- Sorted rows (UTM tables: por leadsQualif desc, depois dimensao asc) ---
 
 function mapToSortedRows(
-  map: Map<string, { leadsQualif: number; mql: number; agendamentos: number; reunioesAgendadas: number; reunioesRealizadas: number; vendas: number; faturamento: number }>,
-  toRow: (dimensao: string, m: { leadsQualif: number; mql: number; agendamentos: number; reunioesAgendadas: number; reunioesRealizadas: number; vendas: number; faturamento: number }) => OrigemRow
+  map: Map<string, { leadsQualif: number; mql: number; negociosCriados: number; agendamentos: number; reunioesAgendadas: number; reunioesRealizadas: number; vendas: number; faturamento: number }>,
+  toRow: (dimensao: string, m: { leadsQualif: number; mql: number; negociosCriados: number; agendamentos: number; reunioesAgendadas: number; reunioesRealizadas: number; vendas: number; faturamento: number }) => OrigemRow
 ): OrigemRow[] {
   return Array.from(map.entries())
     .map(([dim, m]) => toRow(dim, m))

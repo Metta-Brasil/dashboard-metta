@@ -109,6 +109,20 @@ export function isSameDayBrt(a: Date, b: Date): boolean {
   return startOfDayBrt(a).getTime() === startOfDayBrt(b).getTime();
 }
 
+/**
+ * Corte da migração Clint: até 30/jun/2026 os dados de negócio vêm das
+ * abas legadas (sdr/vendas); a partir de 01/jul/2026 vêm da aba clint.
+ * O corte é aplicado por linha via `_src` DENTRO do próprio filtro de
+ * data, no eixo de cada métrica — assim um negócio criado em junho com
+ * venda em julho conta a venda pelo lado Clint sem duplicar (a linha
+ * legada da mesma venda, se existir, cai fora por data >= corte).
+ * Linhas sem `_src` (fb_todos/leads) não sofrem corte algum.
+ */
+export type RowSource = "legacy" | "clint";
+export const MIGRACAO_CLINT_CUTOFF_TS = startOfDayBrt(
+  new Date("2026-07-01T12:00:00-03:00")
+).getTime();
+
 /** Filtro inclusivo em data BR (>= from, <= to no final do dia). */
 export function filterByDate<T>(
   rows: T[],
@@ -118,11 +132,16 @@ export function filterByDate<T>(
 ): T[] {
   const f = startOfDayBrt(from).getTime();
   const t = startOfDayBrt(to).getTime() + 24 * 60 * 60 * 1000 - 1;
+  const cut = MIGRACAO_CLINT_CUTOFF_TS;
   return rows.filter((r) => {
     const d = getDate(r);
     if (!d) return false;
     const ts = d.getTime();
-    return ts >= f && ts <= t;
+    if (ts < f || ts > t) return false;
+    const src = (r as { _src?: RowSource })._src;
+    if (src === "clint" && ts < cut) return false; // Clint só conta jul+
+    if (src === "legacy" && ts >= cut) return false; // legado só conta pré-jul
+    return true;
   });
 }
 

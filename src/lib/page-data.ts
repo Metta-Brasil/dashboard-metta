@@ -1,6 +1,7 @@
 import { cache } from "react";
 
 import { calcAnuncios } from "@/lib/calc/anuncios";
+import { mergeClint } from "@/lib/calc/clint";
 import { calcCloser } from "@/lib/calc/closer";
 import { calcInstagram } from "@/lib/calc/instagram";
 import { calcMetas } from "@/lib/calc/metas";
@@ -32,20 +33,20 @@ type SP = Promise<Record<string, string | string[] | undefined>>;
 
 export const getVisaoGeral = cache(async (sp: SP) => {
   const filters = parseFilters(await sp);
-  const data = await readAllSheets(["fb_todos", "leads", "sdr", "vendas"]);
-  return calcVisaoGeral(data, filters);
+  const data = await readAllSheets(["fb_todos", "leads", "sdr", "vendas", "clint"]);
+  return calcVisaoGeral(mergeClint(data), filters);
 });
 
 export const getTrafego = cache(async (sp: SP) => {
   const filters = parseFilters(await sp);
-  const data = await readAllSheets(["fb_todos", "leads"]);
-  return calcTrafego(data, filters);
+  const data = await readAllSheets(["fb_todos", "leads", "clint"]);
+  return calcTrafego(mergeClint(data), filters);
 });
 
 export const getSdr = cache(async (sp: SP) => {
   const filters = parseFilters(await sp);
-  const data = await readAllSheets(["leads", "sdr", "vendas"]);
-  return calcSdr(data, filters);
+  const data = await readAllSheets(["leads", "sdr", "vendas", "clint"]);
+  return calcSdr(mergeClint(data), filters);
 });
 
 export const getCloser = cache(async (sp: SP) => {
@@ -55,9 +56,10 @@ export const getCloser = cache(async (sp: SP) => {
     "leads",
     "sdr",
     "vendas",
+    "clint",
     "Metas",
   ]);
-  return calcCloser(data, filters);
+  return calcCloser(mergeClint(data), filters);
 });
 
 export const getAnuncios = cache(async (sp: SP) => {
@@ -73,14 +75,15 @@ export const getAnuncios = cache(async (sp: SP) => {
     "at_sala",
     "at_se",
     "at_aph",
+    "clint",
   ]);
-  return calcAnuncios(data, filters);
+  return calcAnuncios(mergeClint(data), filters);
 });
 
 export const getOrigem = cache(async (sp: SP) => {
   const filters = parseFilters(await sp);
-  const data = await readAllSheets(["leads", "sdr", "vendas"]);
-  return calcOrigem(data, filters);
+  const data = await readAllSheets(["leads", "sdr", "vendas", "clint"]);
+  return calcOrigem(mergeClint(data), filters);
 });
 
 export const getMetas = cache(async (sp: SP) => {
@@ -90,9 +93,10 @@ export const getMetas = cache(async (sp: SP) => {
     "leads",
     "sdr",
     "vendas",
+    "clint",
     "Metas",
   ]);
-  return calcMetas(data, filters);
+  return calcMetas(mergeClint(data), filters);
 });
 
 export const getTpDistribuicao = cache(async (sp: SP) => {
@@ -137,6 +141,12 @@ export const getInstagramMetta = cache(async (sp?: SP) => {
     },
     { from: filters.from, to: filters.to, criterio }
   );
+});
+
+/** Página unificada /instagram: escolhe a conta pelo param `conta`. */
+export const getInstagramConta = cache(async (sp: SP) => {
+  const spv = await sp;
+  return spv.conta === "tiago" ? getInstagramTiago(sp) : getInstagramMetta(sp);
 });
 
 export const getInstagramTiago = cache(async (sp?: SP) => {

@@ -34,6 +34,8 @@ type InstagramPageProps = {
   description: string;
   sp: SP;
   getData: (sp: SP) => Promise<IgResult>;
+  /** Elemento extra à esquerda do toolbar (ex: toggle de conta). */
+  toolbarLeading?: React.ReactNode;
 };
 
 // ---------------------------------------------------------------------------
@@ -105,15 +107,19 @@ export function InstagramPage({
   description,
   sp,
   getData,
+  toolbarLeading,
 }: InstagramPageProps) {
   return (
     <PageShell
       title={title}
       description={description}
       toolbar={
-        <Suspense>
-          <IgToolbar sp={sp} />
-        </Suspense>
+        <div className="flex flex-wrap items-center gap-2">
+          <Suspense>
+            {toolbarLeading}
+            <IgToolbar sp={sp} />
+          </Suspense>
+        </div>
       }
     >
       <Suspense fallback={<KpisFallback />}>

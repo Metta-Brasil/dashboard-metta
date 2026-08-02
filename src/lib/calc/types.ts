@@ -1,6 +1,7 @@
 import type {
   AdsLinkRow,
   AtLeadRow,
+  ClintRow,
   FbAtRow,
   FbTodosRow,
   LeadRow,
@@ -48,6 +49,8 @@ export type RawData = {
   leads: LeadRow[];
   sdr: SdrRow[];
   vendas: VendaRow[];
+  /** Negócios do CRM Clint (julho/2026 em diante). Fonte da migração. */
+  clint?: ClintRow[];
   Metas?: MetaRow[];
   ads_links?: AdsLinkRow[];
   // Análise Tráfego (relatório per-anúncio)
@@ -64,6 +67,7 @@ export type RawSubset<K extends keyof RawData> = Pick<RawData, K>;
 export type {
   AdsLinkRow,
   AtLeadRow,
+  ClintRow,
   FbAtRow,
   FbTodosRow,
   LeadRow,
@@ -94,16 +98,20 @@ export type Delta = {
 
 export type VisaoGeralKPIs = {
   investimento: number;
-  leads: number;
-  leadsDelta: Delta;
-  cpl: number;
+  /** Negócios criados no CRM Clint (jul/2026+). Substitui a antiga "Leads". */
+  negociosCriados: number;
+  negociosCriadosDelta: Delta;
+  /** Investimento ÷ Negócios criados (antigo CPL). */
+  custoPorNegocio: number;
   mql: number;
   cmql: number;
-  txLeadParaMql: number;
+  /** MQL ÷ Negócios criados (antiga taxa Lead→MQL). */
+  txNegocioParaMql: number;
   agendamentos: number;
   reunioesAgendadas: number;
   reunioes: number; // realizadas
   show: number; // realizadas / agendadas
+  noShow: number; // agendadas - realizadas
   vendas: number;
   faturamento: number;
   ticketMedio: number;
@@ -121,7 +129,7 @@ export type VisaoGeralKPIs = {
 export type DailyPoint = {
   dia: Date;
   investimento: number;
-  leads: number;
+  negociosCriados: number;
   mql: number;
   cmql: number | null;
   agendamentos: number;
@@ -135,14 +143,14 @@ export type DailyPoint = {
 
 export type CustoPorEtapaPoint = {
   dia: Date;
-  cpl: number | null;
+  custoPorNegocio: number | null;
   cmql: number | null;
   cac: number | null;
 };
 
 export type DistribuicaoPorFunil = {
   funil: Funil;
-  leads: number;
+  negociosCriados: number;
   mql: number;
   reunioes: number;
   vendas: number;
@@ -154,6 +162,10 @@ export type TabelaDiariaRow = {
   investimento: number;
   mql: number;
   custoPorMql: number | null;
+  negociosCriados: number;
+  custoPorNegocio: number | null;
+  /** Taxa MQL → Negócio criado (negócios ÷ MQL). */
+  mqlParaNegocio: number | null;
   agendamentos: number;
   mqlParaAgend: number | null;
   reunioesAgendadas: number;
@@ -169,12 +181,19 @@ export type TabelaDiariaTotal = Omit<TabelaDiariaRow, "dia"> & {
   etapa: "TOTAL";
 };
 
+/** Par nome→valor para gráficos de ranking/distribuição. */
+export type NomeValor = { name: string; value: number };
+
 export type VisaoGeralResult = {
   kpis: VisaoGeralKPIs;
   serieDiaria: DailyPoint[];
   funilConsolidado: FunnelStep[];
   custoPorEtapa: CustoPorEtapaPoint[];
   distribuicaoPorFunil: DistribuicaoPorFunil[];
+  /** Negócios criados por segmento de mercado (rosca). */
+  distribuicaoPorSegmento: NomeValor[];
+  /** Negócios criados por subsegmento (barras horizontais). */
+  distribuicaoPorSubsegmento: NomeValor[];
   tabelaDiaria: TabelaDiariaRow[];
   tabelaDiariaTotal: TabelaDiariaTotal;
 };
@@ -198,6 +217,10 @@ export type TrafegoKPIs = {
   cmql: number;
   /** MQL / Leads */
   txLeadMql: number;
+  /** Negócios criados no Clint (jul/2026+). */
+  negociosCriados: number;
+  /** Investimento ÷ Negócios criados. */
+  custoPorNegocio: number;
 };
 
 export type TrafegoComboPoint = {
@@ -207,6 +230,8 @@ export type TrafegoComboPoint = {
   leads: number;
   mql: number;
   cmql: number | null;
+  negociosCriados: number;
+  custoPorNegocio: number | null;
 };
 
 export type TrafegoFunilResumo = {
@@ -279,6 +304,8 @@ export type TrafegoRankingRow = {
   cpl: number;
   mql: number;
   cmql: number;
+  negociosCriados: number;
+  custoPorNegocio: number;
 };
 
 export type TrafegoResult = {
@@ -339,6 +366,12 @@ export type TpDistribuicaoResult = {
 // ---------------------------------------------------------------------------
 
 export type SDRKpis = {
+  /** Negócios criados no Clint (jul/2026+). */
+  negociosCriados: number;
+  /** É SAL (Clint) — negócios marcados como SAL no período. */
+  sal: number;
+  /** É SQL (Clint) — negócios marcados como SQL no período. */
+  sql: number;
   agendamentos: number;
   reunioesAgendadas: number;
   realizadas: number;
@@ -364,9 +397,15 @@ export type SDRHeatmapCell = {
 
 export type SDRRow = {
   sdr: string;
+  /** Negócios criados no Clint atribuídos a este SDR (jul+). */
+  negociosCriados: number;
+  /** Agendamentos ÷ Negócios criados. */
+  taxaAgendamento: number;
   agendou: number;
   realizou: number;
   show: number;
+  /** No-show = 1 − show (agendadas que não realizaram). */
+  noShow: number;
   propostas: number;
   txProposta: number;
   valorProp: number;
@@ -376,7 +415,13 @@ export type SDRRow = {
   leadsAtribuidos?: number;
   tentativas?: number;
   taxaContato?: number;
-  taxaAgendamento?: number;
+};
+
+/** Ponto diário: reuniões agendadas e realizadas por data da reunião. */
+export type SDRReuniaoDiaPoint = {
+  dia: Date;
+  agendadas: number;
+  realizadas: number;
 };
 
 export type SDRResult = {
@@ -392,6 +437,7 @@ export type SDRResult = {
   heatmapRealizadas: SDRHeatmapCell[];
   heatmapPropostas: SDRHeatmapCell[];
   heatmapVendas: SDRHeatmapCell[];
+  serieReunioesDia: SDRReuniaoDiaPoint[];
   porData: SDRPorDataRow[];
 };
 
@@ -566,6 +612,12 @@ export type AnuncioCard = {
   cpl: number;
   mql: number;
   cmql: number;
+  /** Negócios criados no Clint (jul/2026+), atribuídos por UTM. */
+  negociosCriados: number;
+  /** Investimento ÷ Negócios criados. */
+  custoPorNegocio: number;
+  /** Negócios criados ÷ MQL. */
+  mqlParaNegocio: number;
   agendamentos: number;
   reunioesAgendadas: number;
   reunioesRealizadas: number;
@@ -578,8 +630,8 @@ export type AnuncioCard = {
 };
 
 export type AnunciosResult = {
-  /** Top 3 por MQL (desc) */
-  topMql: AnuncioCard[];
+  /** Top 3 por Negócios criados (desc) */
+  topNegocios: AnuncioCard[];
   /** Top 3 por agendamentos (desc) */
   topAgendamento: AnuncioCard[];
   /** Top 3 por reuniões realizadas (desc) */
@@ -601,6 +653,8 @@ export type OrigemRow = {
   dimensao: string;
   leadsQualif: number;
   mql: number;
+  /** Negócios criados no Clint (jul/2026+) atribuídos à dimensão. */
+  negociosCriados: number;
   agendamentos: number;
   reunioesAgendadas: number;
   reunioesRealizadas: number;
@@ -642,9 +696,12 @@ export type TimeInStagePoint = {
 
 export type SDRPorDataRow = {
   dia: Date;
+  negociosCriados: number;
+  taxaAgendamento: number;
   agendou: number;
   realizou: number;
   show: number;
+  noShow: number;
   propostas: number;
   txProposta: number;
   valorProp: number;

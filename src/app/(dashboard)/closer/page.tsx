@@ -119,11 +119,6 @@ async function CloserContent({ searchParams }: PageProps) {
       render: (r) => r.sdr ?? "—",
     },
     {
-      key: "pagamento",
-      header: "Pagamento",
-      render: (r) => r.pagamento || "—",
-    },
-    {
       key: "ciclo",
       header: "Ciclo (dias)",
       align: "right",

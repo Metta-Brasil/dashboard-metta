@@ -11,7 +11,9 @@ import {
   safeRate,
   startOfDayBrt,
   sumBy,
+  type RowSource,
 } from "./shared";
+import { clintRows } from "./clint";
 import type {
   CustoPorEtapaPoint,
   DailyPoint,
@@ -20,6 +22,7 @@ import type {
   FilterState,
   Funil,
   FunnelStep,
+  NomeValor,
   RawData,
   TabelaDiariaRow,
   TabelaDiariaTotal,
@@ -33,7 +36,7 @@ import type {
  * Fonte: PRD §5.2.1.
  */
 export function calcVisaoGeral(
-  data: Pick<RawData, "fb_todos" | "leads" | "sdr" | "vendas">,
+  data: Pick<RawData, "fb_todos" | "leads" | "sdr" | "vendas" | "clint">,
   filters: FilterState
 ): VisaoGeralResult {
   const funis = filters.funis ?? ["todos"];
@@ -43,6 +46,11 @@ export function calcVisaoGeral(
   const leadsF = filterLeadsByFunil(data.leads, funis);
   const sdrF = filterLeadsByFunil(data.sdr, funis);
   const vendasF = filterVendasByFunil(data.vendas, funis);
+  // Negócios criados: só existem no Clint (jul+). Marcamos _src p/ o corte.
+  const clintF = filterLeadsByFunil(clintRows(data), funis).map((c) => ({
+    ...c,
+    _src: "clint" as RowSource,
+  }));
 
   // Filtragem por data (range atual)
   const fbInRange = filterByDate(fbTodosF, (r) => r.day, filters.from, filters.to);
@@ -50,13 +58,16 @@ export function calcVisaoGeral(
   const sdrAgendInRange = filterByDate(sdrF, (r) => r.dataAgendamento, filters.from, filters.to);
   const sdrReuniaoInRange = filterByDate(sdrF, (r) => r.dataReuniao, filters.from, filters.to);
   const vendasInRange = filterByDate(vendasF, (r) => r.dataCompra, filters.from, filters.to);
+  const negociosInRange = filterByDate(clintF, (r) => r.dataCriacao, filters.from, filters.to);
 
   // ----- Métricas de tráfego -----
   const investimento = sumBy(fbInRange, (r) => r.amountSpent);
 
-  // ----- Leads (dedup por email) -----
+  // ----- Negócios criados (Clint, jul+) -----
+  const negociosCriados = negociosInRange.length;
+
+  // ----- MQL (aba leads, dedup por email; segue valendo pré e pós-julho) -----
   const leadsUnicos = dedupeLeadsByEmail(leadsInRange);
-  const leadsCount = leadsUnicos.length;
   const leadsMqlList = leadsUnicos.filter((l) => isMql(l.qualificacao));
   const mql = leadsMqlList.length;
 
@@ -70,13 +81,14 @@ export function calcVisaoGeral(
   const faturamento = sumBy(vendasInRange, (r) => r.valorContrato);
 
   // ----- KPIs derivados -----
-  const cpl = safeRate(investimento, leadsCount);
+  const custoPorNegocio = safeRate(investimento, negociosCriados);
   const cmql = safeRate(investimento, mql);
   const cac = safeRate(investimento, vendasCount);
   const roas = safeRate(faturamento, investimento);
   const ticketMedio = safeRate(faturamento, vendasCount);
-  const txLeadParaMql = safeRate(mql, leadsCount);
+  const txNegocioParaMql = safeRate(mql, negociosCriados);
   const show = safeRate(reunioes, reunioesAgendadas);
+  const noShow = Math.max(reunioesAgendadas - reunioes, 0);
   const conversaoVendas = safeRate(vendasCount, mql);
   const convReunParaVenda = safeRate(vendasCount, reunioes);
 
@@ -85,21 +97,27 @@ export function calcVisaoGeral(
   const pipeline = sumBy(sdrPropostas, (s) => s.valorProposta);
   const propostasEmAberto = sdrPropostas.length;
 
-  // ----- leadsDelta vs período anterior de mesma duração -----
-  const leadsDelta = computeLeadsDelta(leadsF, leadsCount, filters.from, filters.to);
+  // ----- delta de Negócios criados vs período anterior de mesma duração -----
+  const negociosCriadosDelta = computeNegociosDelta(
+    clintF,
+    negociosCriados,
+    filters.from,
+    filters.to
+  );
 
   const kpis: VisaoGeralKPIs = {
     investimento,
-    leads: leadsCount,
-    leadsDelta,
-    cpl,
+    negociosCriados,
+    negociosCriadosDelta,
+    custoPorNegocio,
     mql,
     cmql,
-    txLeadParaMql,
+    txNegocioParaMql,
     agendamentos,
     reunioesAgendadas,
     reunioes,
     show,
+    noShow,
     vendas: vendasCount,
     faturamento,
     ticketMedio,
@@ -133,13 +151,14 @@ export function calcVisaoGeral(
     // contamos pela data de inscrição daquele dia específico.
     const leadsDay = leadsUnicos.filter((l) => inDay(l.dataInscricao));
     const mqlDay = leadsDay.filter((l) => isMql(l.qualificacao));
+    const negociosDay = negociosInRange.filter((r) => inDay(r.dataCriacao));
     const sdrAgendDay = sdrAgendInRange.filter((r) => inDay(r.dataAgendamento));
     const sdrReuniaoDay = sdrReuniaoInRange.filter((r) => inDay(r.dataReuniao));
     const reunioesRealizadasDay = sdrReuniaoDay.filter((r) => isReuniaoRealizada(r.status));
     const vendasDay = vendasInRange.filter((r) => inDay(r.dataCompra));
 
     const investimentoDay = sumBy(fbDay, (r) => r.amountSpent);
-    const leadsCountDay = leadsDay.length;
+    const negociosCountDay = negociosDay.length;
     const mqlCountDay = mqlDay.length;
     const agendCountDay = sdrAgendDay.length;
     const reunAgCountDay = sdrReuniaoDay.length;
@@ -147,7 +166,8 @@ export function calcVisaoGeral(
     const vendasCountDay = vendasDay.length;
     const faturamentoDay = sumBy(vendasDay, (r) => r.valorContrato);
 
-    const cplDay = leadsCountDay > 0 ? investimentoDay / leadsCountDay : null;
+    const custoPorNegocioDay =
+      negociosCountDay > 0 ? investimentoDay / negociosCountDay : null;
     const cmqlDay = mqlCountDay > 0 ? investimentoDay / mqlCountDay : null;
     const cacDay = vendasCountDay > 0 ? investimentoDay / vendasCountDay : null;
 
@@ -158,7 +178,7 @@ export function calcVisaoGeral(
     serieDiaria.push({
       dia,
       investimento: investimentoDay,
-      leads: leadsCountDay,
+      negociosCriados: negociosCountDay,
       mql: mqlCountDay,
       cmql: cmqlDay,
       agendamentos: agendCountDay,
@@ -171,7 +191,7 @@ export function calcVisaoGeral(
 
     custoPorEtapa.push({
       dia,
-      cpl: cplDay,
+      custoPorNegocio: custoPorNegocioDay,
       cmql: cmqlDay,
       cac: cacDay,
     });
@@ -181,6 +201,9 @@ export function calcVisaoGeral(
       investimento: investimentoDay,
       mql: mqlCountDay,
       custoPorMql: cmqlDay,
+      negociosCriados: negociosCountDay,
+      custoPorNegocio: custoPorNegocioDay,
+      mqlParaNegocio: mqlCountDay > 0 ? negociosCountDay / mqlCountDay : null,
       agendamentos: agendCountDay,
       mqlParaAgend: mqlCountDay > 0 ? agendCountDay / mqlCountDay : null,
       reunioesAgendadas: reunAgCountDay,
@@ -199,6 +222,9 @@ export function calcVisaoGeral(
     investimento,
     mql,
     custoPorMql: mql > 0 ? investimento / mql : null,
+    negociosCriados,
+    custoPorNegocio: negociosCriados > 0 ? investimento / negociosCriados : null,
+    mqlParaNegocio: mql > 0 ? negociosCriados / mql : null,
     agendamentos,
     mqlParaAgend: mql > 0 ? agendamentos / mql : null,
     reunioesAgendadas,
@@ -210,14 +236,15 @@ export function calcVisaoGeral(
     faturamento,
   };
 
-  // ----- Funil consolidado — 6 etapas -----
-  // Leads → MQL → Agendamentos → Reuniões agendadas → Reuniões realizadas → Vendas.
+  // ----- Funil consolidado — 5 etapas -----
+  // MQL → Negócios criados → Reuniões agendadas → Reuniões realizadas → Vendas.
+  // (No Clint "agendamentos" e "reuniões agendadas" são a mesma coisa — ter
+  // data de reunião — então viraram um passo só.)
   // conversaoEtapa = taxa sobre a etapa anterior (queda exibida entre barras).
   const funilConsolidado: FunnelStep[] = [
-    { etapa: "Leads", valor: leadsCount, conversaoEtapa: 1 },
-    { etapa: "MQL", valor: mql, conversaoEtapa: safeRate(mql, leadsCount) },
-    { etapa: "Reuniões previstas (Agendamento)", valor: agendamentos, conversaoEtapa: safeRate(agendamentos, mql) },
-    { etapa: "Reuniões marcadas (R. Agendadas)", valor: reunioesAgendadas, conversaoEtapa: safeRate(reunioesAgendadas, agendamentos) },
+    { etapa: "MQL", valor: mql, conversaoEtapa: 1 },
+    { etapa: "Negócios criados", valor: negociosCriados, conversaoEtapa: safeRate(negociosCriados, mql) },
+    { etapa: "Reuniões agendadas", valor: reunioesAgendadas, conversaoEtapa: safeRate(reunioesAgendadas, negociosCriados) },
     { etapa: "Reuniões realizadas", valor: reunioes, conversaoEtapa: safeRate(reunioes, reunioesAgendadas) },
     { etapa: "Vendas", valor: vendasCount, conversaoEtapa: safeRate(vendasCount, reunioes) },
   ];
@@ -244,6 +271,15 @@ export function calcVisaoGeral(
       filters.from,
       filters.to
     );
+    const negociosF1 = filterByDate(
+      filterLeadsByFunil(clintRows(data), [f]).map((c) => ({
+        ...c,
+        _src: "clint" as RowSource,
+      })),
+      (r) => r.dataCriacao,
+      filters.from,
+      filters.to
+    );
 
     const leadsUnicosF1 = dedupeLeadsByEmail(leadsF1);
     const mqlF1 = leadsUnicosF1.filter((l) => isMql(l.qualificacao)).length;
@@ -253,7 +289,7 @@ export function calcVisaoGeral(
 
     return {
       funil: f,
-      leads: leadsUnicosF1.length,
+      negociosCriados: negociosF1.length,
       mql: mqlF1,
       reunioes: reunioesF1,
       vendas: vendasCountF1,
@@ -261,15 +297,36 @@ export function calcVisaoGeral(
     };
   });
 
+  // ----- Distribuição de negócios criados por segmento / subsegmento -----
+  const distribuicaoPorSegmento = agrupaContagem(negociosInRange, (r) => r.segmento);
+  const distribuicaoPorSubsegmento = agrupaContagem(
+    negociosInRange,
+    (r) => r.subsegmento
+  ).slice(0, 12);
+
   return {
     kpis,
     serieDiaria,
     funilConsolidado,
     custoPorEtapa,
     distribuicaoPorFunil,
+    distribuicaoPorSegmento,
+    distribuicaoPorSubsegmento,
     tabelaDiaria,
     tabelaDiariaTotal,
   };
+}
+
+/** Conta ocorrências por chave (vazio → "Não informado"), ordena desc. */
+function agrupaContagem<T>(rows: T[], key: (r: T) => string): NomeValor[] {
+  const m = new Map<string, number>();
+  for (const r of rows) {
+    const k = (key(r) || "").trim() || "Não informado";
+    m.set(k, (m.get(k) ?? 0) + 1);
+  }
+  return [...m.entries()]
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value);
 }
 
 // ---------------------------------------------------------------------------
@@ -277,14 +334,15 @@ export function calcVisaoGeral(
 // ---------------------------------------------------------------------------
 
 /**
- * Calcula delta de leads vs período anterior de mesma duração.
+ * Delta de Negócios criados vs período anterior de mesma duração.
  * Período anterior = janela imediatamente antes de `from`, com mesma
  * quantidade de dias do range atual (calendar days, inclusivo).
- * Retorna null se duração for inválida ou se denominador (leads anteriores) for zero.
+ * Retorna null se duração for inválida ou se o denominador (negócios do
+ * período anterior) for zero — ex: qualquer janela inteiramente pré-julho.
  */
-function computeLeadsDelta<T extends { funil: string; dataInscricao: Date | null; email: string }>(
-  leadsFiltradosPorFunil: T[],
-  leadsAtuais: number,
+function computeNegociosDelta<T extends { dataCriacao: Date | null; _src: RowSource }>(
+  negociosFiltradosPorFunil: T[],
+  negociosAtuais: number,
   from: Date,
   to: Date
 ): Delta {
@@ -301,18 +359,16 @@ function computeLeadsDelta<T extends { funil: string; dataInscricao: Date | null
   const prevTo = new Date(fromStart - 1); // 1ms antes do início do range atual
   const prevFrom = new Date(fromStart - durationDays * DAY_MS);
 
-  const leadsPrevRange = filterByDate(
-    leadsFiltradosPorFunil,
-    (r) => r.dataInscricao,
+  const negociosPrev = filterByDate(
+    negociosFiltradosPorFunil,
+    (r) => r.dataCriacao,
     prevFrom,
     prevTo
-  );
-  const leadsPrevUnicos = dedupeLeadsByEmail(leadsPrevRange as unknown as Parameters<typeof dedupeLeadsByEmail>[0]);
-  const leadsPrev = leadsPrevUnicos.length;
+  ).length;
 
-  if (leadsPrev === 0) return null;
+  if (negociosPrev === 0) return null;
 
-  const ratio = (leadsAtuais - leadsPrev) / leadsPrev;
+  const ratio = (negociosAtuais - negociosPrev) / negociosPrev;
   return {
     value: ratio,
     direction: ratio >= 0 ? "up" : "down",

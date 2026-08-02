@@ -141,6 +141,73 @@ export const LEADS_COLUMN_MAP = {
   dataInscricao: 15,
 } as const;
 
+/**
+ * Aba `clint` — negócios vindos do CRM Clint (a partir de julho/2026).
+ * A aba tem 37 colunas (A..AK); mapeamos só o que o dashboard consome.
+ * `fonte` distingue linhas nativas do Clint ("Clint") do dump histórico
+ * do HubSpot ("HubsSpot") — só as de fonte Clint entram na migração.
+ * Datas-guia por métrica: dataCriacao (B) = negócio criado,
+ * dataReuniao (C) = reunião, dataVenda (E) = venda.
+ */
+export const ClintRowSchema = z.object({
+  fonte: zString,
+  dataCriacao: zDate,
+  dataReuniao: zDate,
+  hora: zString,
+  dataVenda: zDate,
+  nome: zString,
+  email: zEmail,
+  cargo: zString,
+  faturamento: zString,
+  qualificacao: zString,
+  segmento: zString,
+  subsegmento: zString,
+  funil: zString,
+  utmSource: zString,
+  utmMedium: zString,
+  utmCampaign: zString,
+  utmContent: zString,
+  utmTerm: zString,
+  status: zString,
+  etapa: zString,
+  sdr: zString,
+  closer: zString,
+  eSal: zString,
+  eSql: zString,
+  tag: zString,
+  valor: zCurrency,
+});
+export type ClintRow = z.infer<typeof ClintRowSchema>;
+
+export const CLINT_COLUMN_MAP = {
+  fonte: 0,
+  dataCriacao: 1,
+  dataReuniao: 2,
+  hora: 3,
+  dataVenda: 4,
+  nome: 5,
+  email: 6,
+  cargo: 9,
+  faturamento: 10,
+  qualificacao: 11,
+  segmento: 12,
+  subsegmento: 13,
+  funil: 14,
+  utmSource: 15,
+  utmMedium: 16,
+  utmCampaign: 17,
+  utmContent: 18,
+  utmTerm: 19,
+  status: 26,
+  etapa: 27,
+  sdr: 29,
+  closer: 30,
+  eSal: 31,
+  eSql: 32,
+  tag: 35,
+  valor: 36,
+} as const;
+
 export const SdrRowSchema = z.object({
   dataAgendamento: zDate,
   dataReuniao: zDate,

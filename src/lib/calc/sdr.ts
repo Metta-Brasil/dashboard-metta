@@ -4,6 +4,7 @@ import {
   canonicalSdrStatus,
   dayKey,
   dedupeLeadsByEmail,
+  eachDay,
   filterByDate,
   filterLeadsByFunil,
   filterVendasByFunil,
@@ -12,7 +13,9 @@ import {
   safeRate,
   startOfDayBrt,
   sumBy,
+  type RowSource,
 } from "./shared";
+import { clintRows } from "./clint";
 import type {
   FilterState,
   FunnelStep,
@@ -21,11 +24,15 @@ import type {
   SDRKpis,
   SDRPorDataRow,
   SDRResult,
+  SDRReuniaoDiaPoint,
   SDRRow,
   TimeInStagePoint,
 } from "./types";
 
 const MS_DAY = 24 * 60 * 60 * 1000;
+
+/** Bucket para negócios criados sem SDR preenchido na Clint. */
+const SEM_SDR = "Não atribuído";
 
 /** "HH:MM[:SS]" → 0..23 ; serial Sheets / fração ; ou fallback dataReuniao.getHours(). */
 function reuniaoHour(s: SdrSheetRow): number | null {
@@ -114,7 +121,7 @@ function statsDias(diffs: number[]): TimeInStagePoint {
  * Fonte: PRD §5.2.3 + reforma 2026-05.
  */
 export function calcSdr(
-  data: Pick<RawData, "leads" | "sdr" | "vendas">,
+  data: Pick<RawData, "leads" | "sdr" | "vendas" | "clint">,
   filters: FilterState
 ): SDRResult {
   const funis = filters.funis ?? ["todos"];
@@ -124,10 +131,17 @@ export function calcSdr(
   let sdrF = filterLeadsByFunil(data.sdr, funis);
   const vendasF = filterVendasByFunil(data.vendas, funis);
 
-  // 1b. Opções do select SDR — derivadas do recorte de funil ANTES do filtro
-  //     SDR pra a lista não encolher.
+  // 1b. Opções do select SDR — derivadas dos registros DO PERÍODO (com o
+  //     corte Clint aplicado). Assim, jul+ lista só os SDRs da Clint; nomes
+  //     legados (só até junho) não aparecem numa janela de julho.
+  const sdrNamesPool = [
+    ...filterByDate(sdrF, (r) => r.dataAgendamento, filters.from, filters.to),
+    ...filterByDate(sdrF, (r) => r.dataReuniao, filters.from, filters.to),
+  ];
   const sdrNames = Array.from(
-    new Set(sdrF.map((s) => s.quemAgendou).filter((n) => n && n.trim() !== ""))
+    new Set(
+      sdrNamesPool.map((s) => s.quemAgendou).filter((n) => n && n.trim() !== "")
+    )
   ).sort((a, b) => a.localeCompare(b, "pt-BR"));
 
   // 1c. Filtro SDR (aditivo). Filtro de Status foi removido da página.
@@ -152,6 +166,33 @@ export function calcSdr(
     sdrEmailsDoPeriodo.has(l.email)
   ).length;
 
+  // 2b. Negócios criados (Clint, jul+), respeitando funil e filtro de SDR.
+  let clintNeg = filterLeadsByFunil(clintRows(data), funis);
+  if (filters.sdr?.length)
+    clintNeg = clintNeg.filter((c) => filters.sdr!.includes(c.sdr));
+  const negRows = filterByDate(
+    clintNeg.map((c) => ({ ...c, _src: "clint" as RowSource })),
+    (r) => r.dataCriacao,
+    filters.from,
+    filters.to
+  );
+  const negociosCriados = negRows.length;
+  // Negócios criados por SDR (coluna SDR da Clint) e por dia (data de criação).
+  const negBySdr = new Map<string, number>();
+  const negByDay = new Map<string, number>();
+  for (const c of negRows) {
+    const s = (c.sdr ?? "").trim() || SEM_SDR;
+    negBySdr.set(s, (negBySdr.get(s) ?? 0) + 1);
+    if (c.dataCriacao)
+      negByDay.set(
+        dayKey(startOfDayBrt(c.dataCriacao)),
+        (negByDay.get(dayKey(startOfDayBrt(c.dataCriacao))) ?? 0) + 1
+      );
+  }
+  const isSim = (v: string) => /sim/i.test((v ?? "").trim());
+  const sal = negRows.filter((c) => isSim(c.eSal)).length;
+  const sql = negRows.filter((c) => isSim(c.eSql)).length;
+
   // 3. Métricas agregadas.
   const agendamentos = sdrAgendInRange.length;
   const reunioesAgendadas = sdrReuniaoInRange.length;
@@ -166,6 +207,9 @@ export function calcSdr(
   const faturamentoAtribuido = sumBy(vendasAtribuidasRows, (v) => v.valorContrato);
 
   const kpis: SDRKpis = {
+    negociosCriados,
+    sal,
+    sql,
     agendamentos,
     reunioesAgendadas,
     realizadas,
@@ -181,9 +225,14 @@ export function calcSdr(
     taxaAgendamento: safeRate(agendamentos, tentativasContato),
   };
 
-  // 4. Funil SDR — 5 etapas (PRD §5.2.3).
+  // 4. Funil SDR (PRD §5.2.3) + Negócios criados no topo (Clint, jul+).
   const funilSdr: FunnelStep[] = [
-    { etapa: "Agendamentos", valor: agendamentos, conversaoEtapa: 1 },
+    { etapa: "Negócios criados", valor: negociosCriados, conversaoEtapa: 1 },
+    {
+      etapa: "Agendamentos",
+      valor: agendamentos,
+      conversaoEtapa: safeRate(agendamentos, negociosCriados),
+    },
     {
       etapa: "Reuniões marcadas",
       valor: reunioesAgendadas,
@@ -342,16 +391,40 @@ export function calcSdr(
   const heatmapPropostas = buildHeatmap(propostasHeatRows);
   const heatmapVendas = buildHeatmap(vendasHeatRows);
 
-  // 7. Performance por SDR — mantém comportamento existente.
+  // Série diária: reuniões agendadas e realizadas por data da reunião.
+  const reunByDay = new Map<string, { ag: number; re: number }>();
+  for (const s of sdrReuniaoInRange) {
+    if (!s.dataReuniao) continue;
+    const k = dayKey(startOfDayBrt(s.dataReuniao));
+    const b = reunByDay.get(k) ?? { ag: 0, re: 0 };
+    b.ag += 1;
+    if (isReuniaoRealizada(s.status)) b.re += 1;
+    reunByDay.set(k, b);
+  }
+  const serieReunioesDia: SDRReuniaoDiaPoint[] = eachDay(
+    filters.from,
+    filters.to
+  ).map((dia) => {
+    const b = reunByDay.get(dayKey(dia));
+    return { dia, agendadas: b?.ag ?? 0, realizadas: b?.re ?? 0 };
+  });
+
+  // 7. Performance por SDR — só SDRs com atividade no período (jul+ = Clint).
   const nomes = Array.from(
     new Set(
-      sdrF.map((s) => s.quemAgendou).filter((n) => n && n.trim() !== "")
+      [...sdrAgendInRange, ...sdrReuniaoInRange]
+        .map((s) => s.quemAgendou)
+        .filter((n) => n && n.trim() !== "")
     )
   ).sort((a, b) => a.localeCompare(b, "pt-BR"));
+  // Negócios criados sem SDR entram como "Não atribuído" (não somem da conta).
+  if ((negBySdr.get(SEM_SDR) ?? 0) > 0) nomes.push(SEM_SDR);
 
   const porSdr: SDRRow[] = nomes.map((nome) => {
-    const meusAgend = sdrAgendInRange.filter((s) => s.quemAgendou === nome);
-    const minhasReun = sdrReuniaoInRange.filter((s) => s.quemAgendou === nome);
+    const matchSdr = (s: SdrSheetRow) =>
+      nome === SEM_SDR ? !s.quemAgendou.trim() : s.quemAgendou === nome;
+    const meusAgend = sdrAgendInRange.filter(matchSdr);
+    const minhasReun = sdrReuniaoInRange.filter(matchSdr);
     const realizou = minhasReun.filter((s) => isReuniaoRealizada(s.status)).length;
 
     const minhasPropostasRows = minhasReun.filter((s) =>
@@ -374,12 +447,17 @@ export function calcSdr(
     ).length;
     const tentativas = leadsAtribuidos;
     const reuniaoCountSdr = minhasReun.length;
+    const negociosSdr = negBySdr.get(nome) ?? 0;
+    const showSdr = safeRate(realizou, reuniaoCountSdr);
 
     return {
       sdr: nome,
+      negociosCriados: negociosSdr,
+      taxaAgendamento: safeRate(meusAgend.length, negociosSdr),
       agendou: meusAgend.length,
       realizou,
-      show: safeRate(realizou, reuniaoCountSdr),
+      show: showSdr,
+      noShow: reuniaoCountSdr > 0 ? 1 - showSdr : 0,
       propostas: minhasPropostas,
       txProposta: safeRate(minhasPropostas, realizou),
       valorProp,
@@ -388,37 +466,30 @@ export function calcSdr(
       leadsAtribuidos,
       tentativas,
       taxaContato: safeRate(tentativas, leadsAtribuidos),
-      taxaAgendamento: safeRate(meusAgend.length, tentativas),
     };
   });
-  porSdr.sort((a, b) => b.agendou - a.agendou);
+  porSdr.sort((a, b) => b.negociosCriados - a.negociosCriados || b.agendou - a.agendou);
 
-  // 8. Performance por data — agrupado por dataAgendamento (default) ou
-  //    dataReuniao (apenas realizadas).
-  const mode: "agendamento" | "reuniao" = filters.sdrDate ?? "agendamento";
+  // 8. Performance por data — mesmas métricas da Performance por SDR, por dia.
+  //    Agrupado pela data da reunião; negócios criados entram pela data de
+  //    criação. Sem toggle (removido na migração Clint).
   const grupos = new Map<
     string,
     { dia: Date; rows: SdrSheetRow[]; vendas: VendaRow[] }
   >();
 
-  if (mode === "agendamento") {
-    for (const s of sdrAgendInRange) {
-      if (!s.dataAgendamento) continue;
-      const dia = startOfDayBrt(s.dataAgendamento);
-      const k = dayKey(dia);
-      const bucket = grupos.get(k);
-      if (bucket) bucket.rows.push(s);
-      else grupos.set(k, { dia, rows: [s], vendas: [] });
-    }
-  } else {
-    for (const s of sdrReuniaoInRange) {
-      if (!s.dataReuniao) continue;
-      if (!isReuniaoRealizada(s.status)) continue;
-      const dia = startOfDayBrt(s.dataReuniao);
-      const k = dayKey(dia);
-      const bucket = grupos.get(k);
-      if (bucket) bucket.rows.push(s);
-      else grupos.set(k, { dia, rows: [s], vendas: [] });
+  for (const s of sdrReuniaoInRange) {
+    if (!s.dataReuniao) continue;
+    const dia = startOfDayBrt(s.dataReuniao);
+    const k = dayKey(dia);
+    const bucket = grupos.get(k);
+    if (bucket) bucket.rows.push(s);
+    else grupos.set(k, { dia, rows: [s], vendas: [] });
+  }
+  // Dias que têm negócio criado mas nenhuma reunião ainda entram na tabela.
+  for (const k of negByDay.keys()) {
+    if (!grupos.has(k)) {
+      grupos.set(k, { dia: new Date(`${k}T12:00:00-03:00`), rows: [], vendas: [] });
     }
   }
 
@@ -456,16 +527,21 @@ export function calcSdr(
       const proPostas = propostasRowsG.length;
       const valorPropG = sumBy(propostasRowsG, (r) => r.valorProposta);
       const vendasG = g.vendas.length;
+      const negG = negByDay.get(dayKey(g.dia)) ?? 0;
+      const showG = safeRate(realizou, agendou);
       return {
         dia: g.dia,
+        negociosCriados: negG,
+        taxaAgendamento: safeRate(agendou, negG),
         agendou,
         realizou,
-        show: safeRate(realizou, agendou),
+        show: showG,
+        noShow: agendou > 0 ? 1 - showG : 0,
         propostas: proPostas,
         txProposta: safeRate(proPostas, realizou),
         valorProp: valorPropG,
         vendas: vendasG,
-        close: safeRate(vendasG, realizou),
+        close: safeRate(vendasG, proPostas),
       } satisfies SDRPorDataRow;
     })
     .sort((a, b) => b.dia.getTime() - a.dia.getTime());
@@ -480,6 +556,7 @@ export function calcSdr(
     heatmapRealizadas,
     heatmapPropostas,
     heatmapVendas,
+    serieReunioesDia,
     porData,
   };
 }

@@ -8,7 +8,9 @@ import {
   isReuniaoRealizada,
   safeRate,
   sumBy,
+  type RowSource,
 } from "./shared";
+import { clintRows } from "./clint";
 import type {
   FilterState,
   Funil,
@@ -49,7 +51,7 @@ import type { MetaRow, VendaRow } from "@/lib/sheets/schemas";
  * vendas/faturamento são filtradas por produto).
  */
 export function calcMetas(
-  data: Pick<RawData, "fb_todos" | "leads" | "sdr" | "vendas" | "Metas">,
+  data: Pick<RawData, "fb_todos" | "leads" | "sdr" | "vendas" | "clint" | "Metas">,
   filters: FilterState
 ): MetasResult {
   const metas = data.Metas ?? [];
@@ -136,6 +138,19 @@ export function calcMetas(
   const realVendas = vendasInRange.length;
   const realFaturamento = sumBy(vendasInRange, (r) => r.valorContrato);
 
+  // Negócios criados (Clint, jul+) por data de criação, respeitando funil.
+  const clintF = filterLeadsByFunil(clintRows(data), funis).map((c) => ({
+    ...c,
+    _src: "clint" as RowSource,
+  }));
+  const realNegociosCriados = filterByDate(
+    clintF,
+    (r) => r.dataCriacao,
+    filters.from,
+    filters.to
+  ).length;
+  const realCustoPorNegocio = safeRate(realInvestimento, realNegociosCriados);
+
   // Indexa metas do mês alvo por métrica canonical.
   const metaTotalPorMetrica = indexMetasPorMetrica(metasDoMes);
 
@@ -165,6 +180,7 @@ export function calcMetas(
   const tabelaSpec: Array<{ nome: string; key: MetricaCanonical; real: number }> = [
     { nome: "Investimento", key: "investimento", real: realInvestimento },
     { nome: "MQL", key: "mql", real: realMql },
+    { nome: "Negócios criados", key: "negocios_criados", real: realNegociosCriados },
     { nome: "Agendamentos", key: "agendamentos", real: realAgendamentos },
     {
       nome: "Reuniões agendadas",
@@ -208,12 +224,30 @@ export function calcMetas(
   const metaVendasTotal = metaTotalPorMetrica.get("vendas") ?? null;
   const metaConversaoTotal = metaTotalPorMetrica.get("conversao") ?? null;
 
+  const metaNegociosTotal = metaTotalPorMetrica.get("negocios_criados") ?? null;
+  const metaCustoNegocioTotal =
+    metaTotalPorMetrica.get("custo_por_negocio") ?? null;
+
   const cardsTaxa: MetasCardTaxa[] = [
     {
       nome: "CMQL",
       realValor: realMql > 0 ? realCmql : null,
       metaValor: metaTotalCmql,
       isInverse: true,
+    },
+    {
+      nome: "Custo/negócio",
+      realValor: realNegociosCriados > 0 ? realCustoPorNegocio : null,
+      metaValor: metaCustoNegocioTotal,
+      isInverse: true,
+    },
+    {
+      nome: "Tx MQL / Negócio",
+      realValor: realMql > 0 ? safeRate(realNegociosCriados, realMql) : null,
+      metaValor:
+        metaNegociosTotal != null && metaMqlTotal != null && metaMqlTotal > 0
+          ? safeRate(metaNegociosTotal, metaMqlTotal)
+          : null,
     },
     {
       nome: "Tx Agendamento / MQL",
@@ -356,6 +390,8 @@ export function calcMetas(
 type MetricaCanonical =
   | "investimento"
   | "mql"
+  | "negocios_criados"
+  | "custo_por_negocio"
   | "cmql"
   | "agendamentos"
   | "reunioes_agendadas"
@@ -370,6 +406,8 @@ function normalizeMetricaLabel(raw: string): MetricaCanonical {
   if (s.includes("invest")) return "investimento";
   if (s === "cmql" || s.includes("c.mql") || s.includes("c mql")) return "cmql";
   if (s === "mql" || (s.includes("mql") && !s.includes("cmql"))) return "mql";
+  if (s.includes("custo") && s.includes("neg")) return "custo_por_negocio";
+  if (s.includes("negóci") || s.includes("negoci")) return "negocios_criados";
   if (s.includes("agendam")) return "agendamentos";
   if (s.includes("reuni") && s.includes("agend")) return "reunioes_agendadas";
   if (s.includes("reuni") && s.includes("realiz")) return "reunioes_realizadas";

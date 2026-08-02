@@ -1,12 +1,11 @@
 import { Suspense } from "react";
 
+import { MultiLineChart } from "@/components/dashboard/charts";
 import { FunnelVertical } from "@/components/dashboard/funnel-vertical";
 import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
 import { FilterSelect } from "@/components/dashboard/filter-select";
 import { MetricTable, type Column } from "@/components/dashboard/metric-table";
 import { SDRHeatmap } from "@/components/dashboard/sdr-heatmap";
-import { SdrDataToggle } from "@/components/dashboard/sdr-data-toggle";
-import { TimeInStage } from "@/components/dashboard/time-in-stage";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
 import {
@@ -72,6 +71,11 @@ async function SdrContent({ searchParams }: PageProps) {
 
   const kpis: Kpi[] = [
     {
+      label: "Negócios criados",
+      value: formatInt(k.negociosCriados),
+      hint: "Criados no CRM (jul+)",
+    },
+    {
       label: "Agendamentos",
       value: formatInt(k.agendamentos),
       hint: "Total agendado no período",
@@ -106,10 +110,39 @@ async function SdrContent({ searchParams }: PageProps) {
       value: formatBRLCompact(k.faturamento),
       hint: "Receita das vendas atribuídas",
     },
+    {
+      label: "SAL",
+      value: formatInt(k.sal),
+      hint: "Negócios marcados como SAL",
+    },
+    {
+      label: "SQL",
+      value: formatInt(k.sql),
+      hint: "Negócios marcados como SQL",
+    },
   ];
 
   const columns: Column<SDRRow>[] = [
     { key: "sdr", header: "SDR", render: (r) => r.sdr, align: "left" },
+    {
+      key: "negociosCriados",
+      header: "Negócios",
+      render: (r) => formatInt(r.negociosCriados),
+      align: "right",
+    },
+    {
+      key: "taxaAgendamento",
+      header: "Tx agend. %",
+      render: (r) => formatPercent(r.taxaAgendamento),
+      align: "right",
+      total: (rs) =>
+        formatPercent(
+          safeRate(
+            sumBy(rs, (r) => r.agendou),
+            sumBy(rs, (r) => r.negociosCriados)
+          )
+        ),
+    },
     {
       key: "agendou",
       header: "Agendou",
@@ -128,6 +161,13 @@ async function SdrContent({ searchParams }: PageProps) {
       render: (r) => formatPercent(r.show),
       align: "right",
       total: () => formatPercent(k.taxaShow),
+    },
+    {
+      key: "noShow",
+      header: "No-show %",
+      render: (r) => formatPercent(r.noShow),
+      align: "right",
+      total: () => formatPercent(1 - k.taxaShow),
     },
     {
       key: "propostas",
@@ -183,6 +223,25 @@ async function SdrContent({ searchParams }: PageProps) {
       align: "left",
     },
     {
+      key: "negociosCriados",
+      header: "Negócios",
+      render: (r) => formatInt(r.negociosCriados),
+      align: "right",
+    },
+    {
+      key: "taxaAgendamento",
+      header: "Tx agend. %",
+      render: (r) => formatPercent(r.taxaAgendamento),
+      align: "right",
+      total: (rs) =>
+        formatPercent(
+          safeRate(
+            sumBy(rs, (r) => r.agendou),
+            sumBy(rs, (r) => r.negociosCriados)
+          )
+        ),
+    },
+    {
       key: "agendou",
       header: "Agendou",
       render: (r) => formatInt(r.agendou),
@@ -206,6 +265,17 @@ async function SdrContent({ searchParams }: PageProps) {
             sumBy(rs, (r) => r.agendou)
           )
         ),
+    },
+    {
+      key: "noShow",
+      header: "No-show %",
+      render: (r) => formatPercent(r.noShow),
+      align: "right",
+      total: (rs) => {
+        const ag = sumBy(rs, (r) => r.agendou);
+        const re = sumBy(rs, (r) => r.realizou);
+        return formatPercent(ag > 0 ? 1 - re / ag : 0);
+      },
     },
     {
       key: "propostas",
@@ -257,13 +327,33 @@ async function SdrContent({ searchParams }: PageProps) {
     <>
       <KpiGrid kpis={kpis} />
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <FunnelVertical
-          title="Funil SDR"
-          steps={result.funilSdr}
-          monetaryEtapas={[]}
-        />
-        <TimeInStage points={result.timeInStage} />
+      <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
+        <div className="flex lg:col-span-1">
+          <FunnelVertical
+            title="Funil SDR"
+            steps={result.funilSdr}
+            monetaryEtapas={[]}
+            className="h-full w-full"
+          />
+        </div>
+        <div className="flex lg:col-span-2">
+          <MultiLineChart
+            title="Reuniões por dia"
+            description="Reuniões agendadas vs realizadas por data da reunião"
+            data={result.serieReunioesDia.map((r) => ({
+              dia: formatDayBr(r.dia),
+              agendadas: r.agendadas,
+              realizadas: r.realizadas,
+            }))}
+            xKey="dia"
+            lines={[
+              { key: "agendadas", label: "Reuniões agendadas" },
+              { key: "realizadas", label: "Reuniões realizadas" },
+            ]}
+            height={320}
+            className="h-full w-full"
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -291,17 +381,16 @@ async function SdrContent({ searchParams }: PageProps) {
 
       <MetricTable
         title="Performance por SDR"
-        description="Ordenado por agendamentos (desc)"
+        description="Ordenado por negócios criados (desc)"
         columns={columns}
         rows={result.porSdr}
       />
 
       <MetricTable
         title="Performance por data"
-        description="Métricas diárias agrupadas pela data selecionada."
+        description="Métricas diárias por data da reunião."
         columns={porDataColumns}
         rows={result.porData}
-        toolbar={<SdrDataToggle />}
       />
     </>
   );

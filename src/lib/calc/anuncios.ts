@@ -1,4 +1,11 @@
-import { filterByDate, isMql, isReuniaoRealizada, safeRate } from "./shared";
+import {
+  filterByDate,
+  isMql,
+  isReuniaoRealizada,
+  safeRate,
+  type RowSource,
+} from "./shared";
+import { clintRows } from "./clint";
 import type {
   AdsLinkRow,
   AnuncioCard,
@@ -111,6 +118,7 @@ export function calcAnuncios(
     RawData,
     | "sdr"
     | "vendas"
+    | "clint"
     | "ads_links"
     | "fb_at"
     | "at_ap"
@@ -228,6 +236,14 @@ export function calcAnuncios(
     filters.to
   );
 
+  // Negócios criados (Clint, jul+) por data de criação — atribuídos por UTM.
+  const clintInRange = filterByDate(
+    clintRows(data).map((c) => ({ ...c, _src: "clint" as RowSource })),
+    (r) => r.dataCriacao,
+    filters.from,
+    filters.to
+  );
+
   const cards: AnuncioCard[] = [];
   for (const [adName, a] of byAd.entries()) {
     if (!adName) continue;
@@ -249,6 +265,9 @@ export function calcAnuncios(
       matchUtm(v.utmContentSnap, v.utmCampaignSnap)
     );
     const faturamento = vendasDoAd.reduce((s, v) => s + v.valorContrato, 0);
+    const negociosCriados = clintInRange.filter((c) =>
+      matchUtm(c.utmContent, c.utmCampaign)
+    ).length;
 
     const { thumbnailUrl, instagramPermalink } = lookupAdsLink(
       adName,
@@ -268,6 +287,9 @@ export function calcAnuncios(
       cpl: safeRate(a.investimento, a.leads),
       mql: a.mql,
       cmql: safeRate(a.investimento, a.mql),
+      negociosCriados,
+      custoPorNegocio: safeRate(a.investimento, negociosCriados),
+      mqlParaNegocio: safeRate(negociosCriados, a.mql),
       agendamentos: agend,
       reunioesAgendadas,
       reunioesRealizadas,
@@ -284,9 +306,9 @@ export function calcAnuncios(
     return x.adName.localeCompare(y.adName);
   };
 
-  const topMql = [...cards]
-    .filter((c) => c.mql > 0)
-    .sort((x, y) => y.mql - x.mql || byVendasThenName(x, y))
+  const topNegocios = [...cards]
+    .filter((c) => c.negociosCriados > 0)
+    .sort((x, y) => y.negociosCriados - x.negociosCriados || byVendasThenName(x, y))
     .slice(0, 3);
   const topAgendamento = [...cards]
     .filter((c) => c.agendamentos > 0)
@@ -320,7 +342,7 @@ export function calcAnuncios(
     });
 
   return {
-    topMql,
+    topNegocios,
     topAgendamento,
     topReunioesRealizadas,
     galeria,

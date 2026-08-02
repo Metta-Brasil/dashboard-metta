@@ -168,7 +168,28 @@ async function MetasContent({ searchParams }: PageProps) {
       <div className="grid gap-6 lg:grid-cols-3">
         <ProgressStatCard {...absCard(get("Investimento"), { monetary: true })} />
         <ProgressStatCard {...absCard(get("MQL"), { monetary: false })} />
+        <ProgressStatCard
+          {...absCard(get("Negócios criados"), {
+            monetary: false,
+            sub: ratioSub(taxa("Tx MQL / Negócio"), "do MQL"),
+          })}
+        />
+      </div>
+
+      {/* Custos */}
+      <div className="grid gap-6 lg:grid-cols-3">
         <ProgressStatCard {...ceilingCard("CMQL", taxa("CMQL"))} />
+        <ProgressStatCard
+          {...ceilingCard("Custo/negócio", taxa("Custo/negócio"))}
+        />
+        <ProgressStatCard
+          {...rateCard(
+            "Tx MQL → Negócio",
+            "negócios criados / MQL",
+            taxa("Tx MQL / Negócio"),
+            `${formatInt(get("Negócios criados")?.realValor ?? 0)} de ${formatInt(realMql)} MQL`
+          )}
+        />
       </div>
 
       {/* Conversões */}

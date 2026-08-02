@@ -9,7 +9,9 @@ import {
   startOfDayBrt,
   sumBy,
   eachDay,
+  type RowSource,
 } from "./shared";
+import { clintRows } from "./clint";
 import type {
   FilterState,
   Funil,
@@ -33,7 +35,7 @@ import type {
  * Fonte: PRD §5.2.2 (linhas 1587-1900) + docs/inventario-completude.md linhas 140-263.
  */
 export function calcTrafego(
-  data: Pick<RawData, "fb_todos" | "leads">,
+  data: Pick<RawData, "fb_todos" | "leads" | "clint">,
   filters: FilterState
 ): TrafegoResult {
   const funis = filters.funis ?? ["todos"];
@@ -56,6 +58,20 @@ export function calcTrafego(
   const leadsCount = leadsUnicos.length;
   const mql = leadsUnicos.filter((l) => isMql(l.qualificacao)).length;
 
+  // Negócios criados (Clint, jul+): contagem por data de criação.
+  const clintF = filterLeadsByFunil(clintRows(data), funis).map((c) => ({
+    ...c,
+    _src: "clint" as RowSource,
+  }));
+  const negociosInRange = filterByDate(
+    clintF,
+    (r) => r.dataCriacao,
+    filters.from,
+    filters.to
+  );
+  const negociosCriados = negociosInRange.length;
+  const custoPorNegocio = safeRate(investimento, negociosCriados);
+
   const ctr = safeRate(cliques, impressoes);
   const cpc = safeRate(investimento, cliques);
   const cpm = impressoes > 0 ? (investimento * 1000) / impressoes : 0;
@@ -77,6 +93,8 @@ export function calcTrafego(
     mql,
     cmql,
     txLeadMql,
+    negociosCriados,
+    custoPorNegocio,
   };
 
   // 3. Série combo diária (Investimento, Cliques, Leads, MQL, CMQL) — PRD §5.2.2 "Combo investimento/MQL/CMQL"
@@ -94,6 +112,9 @@ export function calcTrafego(
     const invDay = sumBy(fbDay, (r) => r.amountSpent);
     const leadsDayCount = leadsDayUnicos.length;
     const mqlDay = leadsDayUnicos.filter((l) => isMql(l.qualificacao)).length;
+    const negociosDay = negociosInRange.filter((c) =>
+      inDay(c.dataCriacao)
+    ).length;
 
     return {
       dia,
@@ -102,6 +123,8 @@ export function calcTrafego(
       leads: leadsDayCount,
       mql: mqlDay,
       cmql: mqlDay > 0 ? invDay / mqlDay : null,
+      negociosCriados: negociosDay,
+      custoPorNegocio: negociosDay > 0 ? invDay / negociosDay : null,
     };
   });
 
@@ -224,6 +247,13 @@ export function calcTrafego(
     const leadsRowCount = leadsRow.length;
     const mqlRow = leadsRow.filter((l) => isMql(l.qualificacao)).length;
 
+    // Negócios criados atribuídos por utm_campaign (mesmo match dos leads).
+    const negociosRow = negociosInRange.filter((c) => {
+      const utm = c.utmCampaign;
+      if (!utm) return false;
+      return nome.includes(utm) || utm.includes(nome);
+    }).length;
+
     ranking.push({
       nome,
       agrupamento: rankingBy,
@@ -238,6 +268,8 @@ export function calcTrafego(
       cpl: safeRate(inv, leadsRowCount),
       mql: mqlRow,
       cmql: mqlRow > 0 ? inv / mqlRow : Infinity,
+      negociosCriados: negociosRow,
+      custoPorNegocio: safeRate(inv, negociosRow),
     });
   }
 
@@ -280,6 +312,11 @@ export function calcTrafego(
       valor: mql,
       conversaoEtapa: safeRate(mql, leadsCount),
     },
+    {
+      etapa: "Negócios criados",
+      valor: negociosCriados,
+      conversaoEtapa: safeRate(negociosCriados, mql),
+    },
   ];
 
   // 7. Funil resumo — snapshot dos totais com métricas secundárias por etapa.
@@ -312,6 +349,7 @@ export function calcTrafego(
     { metrica: "CPM", valor: cpm },
     { metrica: "CPL", valor: cpl },
     { metrica: "CMQL", valor: cmql },
+    { metrica: "Custo/negócio", valor: custoPorNegocio },
   ];
 
   return {

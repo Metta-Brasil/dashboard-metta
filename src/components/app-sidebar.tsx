@@ -41,8 +41,7 @@ const navMain = [
   { title: "Comercial SDR", url: "/sdr", icon: UserCheckIcon },
   { title: "Comercial Closer", url: "/closer", icon: HandshakeIcon },
   { title: "Origem", url: "/origem", icon: Share2Icon },
-  { title: "Instagram Metta", url: "/instagram-metta", icon: InstagramIcon },
-  { title: "Instagram Tiago", url: "/instagram-tiago", icon: InstagramIcon },
+  { title: "Instagram", url: "/instagram", icon: InstagramIcon },
 ];
 
 type SidebarUser = { name: string; email: string; avatar: string };

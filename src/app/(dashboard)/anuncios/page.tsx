@@ -57,16 +57,16 @@ async function AnunciosContent({ searchParams }: PageProps) {
 // Top por… (3 cards lado-a-lado)
 // ---------------------------------------------------------------------------
 
-type TopMetric = "mql" | "agendamento" | "reunioesRealizadas";
+type TopMetric = "negociosCriados" | "agendamento" | "reunioesRealizadas";
 
 function TopCardsRow({ result }: { result: AnunciosResult }) {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
       <TopCard
-        title="Top MQL"
-        description="Mais MQL"
-        items={result.topMql}
-        metric="mql"
+        title="Top Negócios criados"
+        description="Mais negócios criados"
+        items={result.topNegocios}
+        metric="negociosCriados"
       />
       <TopCard
         title="Top Agendamento"
@@ -133,14 +133,14 @@ function TopCardRow({
   metric: TopMetric;
 }) {
   const primaryLabel =
-    metric === "mql"
-      ? "MQL"
+    metric === "negociosCriados"
+      ? "Negócios"
       : metric === "agendamento"
         ? "Agend"
         : "Reun. real.";
   const primaryValue =
-    metric === "mql"
-      ? formatInt(item.mql)
+    metric === "negociosCriados"
+      ? formatInt(item.negociosCriados)
       : metric === "agendamento"
         ? formatInt(item.agendamentos)
         : formatInt(item.reunioesRealizadas);
@@ -246,12 +246,23 @@ function CreativeCard({ item }: { item: AnuncioCard }) {
           <CreativeMetric label="MQL" value={formatInt(item.mql)} />
         </div>
         <div className="grid grid-cols-3 gap-2">
+          <CreativeMetric
+            label="Negócios"
+            value={formatInt(item.negociosCriados)}
+          />
+          <CreativeMetric
+            label="Custo/neg"
+            value={formatBRL(item.custoPorNegocio)}
+          />
           <CreativeMetric label="Agend" value={formatInt(item.agendamentos)} />
+        </div>
+        <div className="grid grid-cols-3 gap-2">
           <CreativeMetric
             label="Reun. real."
             value={formatInt(item.reunioesRealizadas)}
           />
           <CreativeMetric label="Vendas" value={formatInt(item.vendas)} />
+          <CreativeMetric label="ROAS" value={`${item.roas.toFixed(1)}x`} />
         </div>
       </dl>
       {hasIg ? (
@@ -380,6 +391,25 @@ const RANKING_COLUMNS: Column<AnuncioCard>[] = [
         safeRate(
           sumBy(rs, (r) => r.investimento),
           sumBy(rs, (r) => r.mql)
+        )
+      ),
+  },
+  {
+    key: "negociosCriados",
+    header: "Negócios",
+    align: "right",
+    render: (r) => formatInt(r.negociosCriados),
+  },
+  {
+    key: "custoPorNegocio",
+    header: "Custo/neg",
+    align: "right",
+    render: (r) => formatBRL(r.custoPorNegocio),
+    total: (rs) =>
+      formatBRL(
+        safeRate(
+          sumBy(rs, (r) => r.investimento),
+          sumBy(rs, (r) => r.negociosCriados)
         )
       ),
   },

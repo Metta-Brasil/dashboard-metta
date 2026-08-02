@@ -22,6 +22,7 @@ type PageProps = {
  * `row[col.key]` pra obter o sortValue).
  */
 type RowWithRates = OrigemRow & {
+  pctMqlNeg: number;
   pctMqlAgend: number;
   pctAgendReunAg: number;
   pctReunAgReunReal: number;
@@ -33,6 +34,7 @@ const MAX_ROWS = 12;
 function enrich(r: OrigemRow): RowWithRates {
   return {
     ...r,
+    pctMqlNeg: safeRate(r.negociosCriados, r.mql),
     pctMqlAgend: safeRate(r.agendamentos, r.mql),
     pctAgendReunAg: safeRate(r.reunioesAgendadas, r.agendamentos),
     pctReunAgReunReal: safeRate(r.reunioesRealizadas, r.reunioesAgendadas),
@@ -51,6 +53,7 @@ function aggregate(rows: OrigemRow[]): OrigemRow {
     dimensao: "Total",
     leadsQualif: sumOf("leadsQualif"),
     mql: sumOf("mql"),
+    negociosCriados: sumOf("negociosCriados"),
     agendamentos: sumOf("agendamentos"),
     reunioesAgendadas: sumOf("reunioesAgendadas"),
     reunioesRealizadas: sumOf("reunioesRealizadas"),
@@ -110,6 +113,18 @@ async function OrigemContent({ searchParams }: PageProps) {
       key: "mql",
       header: "MQL",
       render: (r) => formatInt(r.mql),
+      align: "right",
+    },
+    {
+      key: "negociosCriados",
+      header: "Neg. criados",
+      render: (r) => formatInt(r.negociosCriados),
+      align: "right",
+    },
+    {
+      key: "pctMqlNeg",
+      header: "% MQL→Neg",
+      render: (r) => rateCell(r.negociosCriados, r.mql),
       align: "right",
     },
     {

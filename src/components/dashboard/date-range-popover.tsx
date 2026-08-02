@@ -1,5 +1,6 @@
 "use client";
 
+import { ptBR } from "date-fns/locale";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -34,6 +35,23 @@ function fmtIso(d: Date): string {
 }
 
 const PRESETS: Array<{ label: string; build: () => Range }> = [
+  {
+    label: "Hoje",
+    build: () => {
+      const d = new Date();
+      return { from: d, to: new Date() };
+    },
+  },
+  {
+    label: "Ontem",
+    build: () => {
+      const from = new Date();
+      from.setDate(from.getDate() - 1);
+      const to = new Date();
+      to.setDate(to.getDate() - 1);
+      return { from, to };
+    },
+  },
   {
     label: "Últimos 7 dias",
     build: () => {
@@ -185,6 +203,7 @@ export function DateRangePopover({
         <div className="flex flex-col gap-2">
           <Calendar
             mode="range"
+            locale={ptBR}
             selected={{ from: range.from, to: range.to }}
             onSelect={(r) => {
               if (r?.from && r?.to) setRange({ from: r.from, to: r.to });

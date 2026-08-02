@@ -52,17 +52,12 @@ export function calcCloser(
   const sdrF = filterLeadsByFunil(data.sdr, funis);
   let vendasF = filterVendasByFunil(data.vendas, funis);
 
-  // Filtros adicionais de produto/pagamento aplicam apenas em vendas.
-  // "Todos" / "" = sem filtro. Match case-insensitive por includes.
+  // Filtro de produto aplica apenas em vendas ("Todos"/"" = sem filtro).
+  // Forma de pagamento foi removida na migração Clint (não existe no CRM).
   const produtoFiltro = (filters.produto ?? "").trim();
   if (produtoFiltro && produtoFiltro.toLowerCase() !== "todos") {
     const p = produtoFiltro.toLowerCase();
     vendasF = vendasF.filter((v) => normalizeProduto(v.produto).toLowerCase() === p);
-  }
-  const pagamentoFiltro = (filters.pagamento ?? "").trim();
-  if (pagamentoFiltro && pagamentoFiltro.toLowerCase() !== "todos") {
-    const pg = pagamentoFiltro.toLowerCase();
-    vendasF = vendasF.filter((v) => v.formaPagamento.toLowerCase().includes(pg));
   }
 
   const sdrInRange = filterByDate(

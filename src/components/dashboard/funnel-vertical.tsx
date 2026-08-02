@@ -8,6 +8,8 @@ type FunnelVerticalProps = {
   steps: FunnelStep[];
   /** Etapas tratadas como monetárias (Investimento, Faturamento, etc.) */
   monetaryEtapas?: string[];
+  /** Larguras (%) por etapa — sobrepõe o taper esquemático padrão. */
+  widths?: number[];
   className?: string;
 };
 
@@ -21,6 +23,7 @@ export function FunnelVertical({
   description,
   steps,
   monetaryEtapas = ["Investimento", "Faturamento"],
+  widths,
   className,
 }: FunnelVerticalProps) {
   if (!steps.length) return null;
@@ -30,8 +33,10 @@ export function FunnelVertical({
   // as etapas baixas (vendas << investimento) num bloco indistinto —
   // a silhueta afunilada é esquemática; o dado real é o número/%.
   const n = steps.length;
+  // Larguras esquemáticas: 100, 85, e depois -15 por etapa (70, 55, 40, …),
+  // com piso pra não sumir em funis longos. `widths` sobrepõe por etapa.
   const widthAt = (i: number) =>
-    n <= 1 ? 100 : 100 - (i / (n - 1)) * 68;
+    widths?.[i] ?? (i === 0 ? 100 : Math.max(85 - (i - 1) * 15, 20));
 
   return (
     <div className={cn("surface-card p-5 lg:p-6", className)}>

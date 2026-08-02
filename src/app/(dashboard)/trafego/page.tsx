@@ -152,9 +152,16 @@ async function TrafegoKpis({ searchParams }: PageProps) {
       value: formatBRL(k.cmql),
       hint: "Investimento ÷ MQL",
     },
+    {
+      label: "Custo/negócio",
+      value: formatBRL(k.custoPorNegocio),
+      hint: "Investimento ÷ Negócios criados",
+    },
   ];
 
-  return <KpiGrid kpis={kpis} />;
+  return (
+    <KpiGrid kpis={kpis} cols="grid-cols-2 lg:grid-cols-3 xl:grid-cols-6" />
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -168,20 +175,28 @@ async function EvolucaoDiaria({ searchParams }: PageProps) {
     dia: formatDayBr(r.dia),
     investimento: Math.round(r.investimento),
     mql: r.mql,
+    negociosCriados: r.negociosCriados,
     cmql: r.cmql == null ? null : Math.round(r.cmql),
+    custoPorNegocio:
+      r.custoPorNegocio == null ? null : Math.round(r.custoPorNegocio),
   }));
 
   return (
     <ComboBarLineChart
-      title="Investimento, MQL e CMQL · diário"
-      description="Barras (Investimento + MQL) + linha (CMQL, eixo direito)"
+      title="Resumo geral diário"
+      description="Barras (Investimento · MQL · Negócios) + linhas de custo (eixo direito)"
       data={data}
       xKey="dia"
       bars={[
         { key: "investimento", label: "Investimento" },
         { key: "mql", label: "MQL" },
+        { key: "negociosCriados", label: "Negócios" },
       ]}
-      lines={[{ key: "cmql", label: "CMQL", axis: "right" }]}
+      lines={[
+        { key: "cmql", label: "CMQL", axis: "right" },
+        { key: "custoPorNegocio", label: "Custo/negócio", axis: "right" },
+      ]}
+      height={440}
       className="h-full"
     />
   );
@@ -318,6 +333,7 @@ async function FunilTrafego({ searchParams }: PageProps) {
       title="Funil de tráfego"
       steps={result.funilTrafego}
       monetaryEtapas={[]}
+      widths={[100, 90, 80, 70, 60, 50]}
       className="h-full w-full"
     />
   );
@@ -439,6 +455,26 @@ async function RankingMidia({ searchParams }: PageProps) {
           safeRate(
             sumBy(rs, (r) => r.investimento),
             sumBy(rs, (r) => r.mql)
+          )
+        ),
+    },
+    {
+      key: "negociosCriados",
+      header: "Negócios",
+      align: "right",
+      render: (r) => formatInt(r.negociosCriados),
+    },
+    {
+      key: "custoPorNegocio",
+      header: "Custo/neg",
+      align: "right",
+      render: (r) =>
+        r.negociosCriados > 0 ? formatBRL(r.custoPorNegocio) : "—",
+      total: (rs) =>
+        formatBRL(
+          safeRate(
+            sumBy(rs, (r) => r.investimento),
+            sumBy(rs, (r) => r.negociosCriados)
           )
         ),
     },
