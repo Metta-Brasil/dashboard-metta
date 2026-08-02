@@ -70,11 +70,13 @@ export function ChangePasswordForm() {
           {state.error}
         </p>
       )}
-      {state.ok && (
-        <p className="rounded-md border border-primary/40 bg-primary/10 px-3 py-2 text-sm text-foreground">
-          Senha alterada com sucesso.
-        </p>
-      )}
+      {/* Não existe mensagem de sucesso aqui: a action encerra a sessão e
+          leva pro /login com o aviso. Trocar a senha invalida o JWT desta
+          aba, então "salvo" seguido de logout silencioso era mentira. */}
+      <p className="text-xs text-muted-foreground">
+        Ao trocar a senha, sua sessão é encerrada em todos os dispositivos e
+        você entra de novo com a senha nova.
+      </p>
 
       <button
         type="submit"

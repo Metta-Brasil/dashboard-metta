@@ -27,7 +27,13 @@ export function parseSheetData<S extends ZodTypeAny>(
       }
       const result = schema.safeParse(obj);
       if (!result.success) {
-        errors.push(`[${context.tab}] linha ${idx + 2}: ${result.error.message}`);
+        // Só campo + código do problema. NUNCA o valor recebido: as abas
+        // leads/sdr/vendas/clint trazem nome, e-mail e telefone de lead, e
+        // o `message` do ZodError serializa a célula inteira pro log.
+        const campos = result.error.issues
+          .map((issue) => `${issue.path.join(".") || "(raiz)"}:${issue.code}`)
+          .join(", ");
+        errors.push(`[${context.tab}] linha ${idx + 2}: ${campos}`);
         return null;
       }
       return result.data as z.infer<S>;

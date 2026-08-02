@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { rateLimitAll, requestIp } from "@/lib/auth/ratelimit";
 import { confirmSignup, resendCode } from "@/lib/auth/users";
 import { sendVerificationCode } from "@/lib/email/brevo";
 import { cn } from "@/lib/utils";
@@ -14,10 +15,28 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
+/** Mesma mensagem pra todo limite: não diz qual estourou nem quanto falta. */
+const TOO_MANY = "Muitas tentativas. Tente novamente em alguns minutos.";
+
 async function confirmAction(formData: FormData) {
   "use server";
   const email = String(formData.get("email") ?? "");
   const code = String(formData.get("code") ?? "");
+  // Teto por origem: `confirmSignup` já limita as tentativas por e-mail
+  // (e queima o pendente quando estoura). Aqui o alvo é a força bruta
+  // dos 6 dígitos varrendo vários cadastros do mesmo lugar.
+  const ip = await requestIp();
+  const limited = await rateLimitAll([
+    { bucket: `auth:rl:signupconfirm:ip:${ip}`, limit: 30, windowSeconds: 900 },
+  ]);
+  if (!limited.ok) {
+    redirect(
+      "/signup?verify=" +
+        encodeURIComponent(email) +
+        "&error=" +
+        encodeURIComponent(TOO_MANY)
+    );
+  }
   const res = await confirmSignup(email, code);
   if (!res.ok) {
     redirect(
@@ -36,6 +55,14 @@ async function confirmAction(formData: FormData) {
 async function resendAction(formData: FormData) {
   "use server";
   const email = String(formData.get("email") ?? "");
+  // Mesmo teto por origem do cadastro: reenvio manda e-mail igual.
+  const ip = await requestIp();
+  const limited = await rateLimitAll([
+    { bucket: `auth:rl:signup:ip:${ip}`, limit: 10, windowSeconds: 3600 },
+  ]);
+  if (!limited.ok) {
+    redirect("/signup?error=" + encodeURIComponent(TOO_MANY));
+  }
   const res = await resendCode(email);
   if (!res.ok) {
     redirect(

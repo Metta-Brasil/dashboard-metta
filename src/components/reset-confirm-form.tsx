@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { rateLimitAll, requestIp } from "@/lib/auth/ratelimit";
 import { confirmPasswordReset, resendPasswordReset } from "@/lib/auth/users";
 import { sendPasswordResetCode } from "@/lib/email/brevo";
 import { cn } from "@/lib/utils";
@@ -13,6 +14,9 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+
+/** Mesma mensagem pra todo limite: não diz qual estourou nem quanto falta. */
+const TOO_MANY = "Muitas tentativas. Tente novamente em alguns minutos.";
 
 async function confirmReset(formData: FormData) {
   "use server";
@@ -28,6 +32,14 @@ async function confirmReset(formData: FormData) {
         encodeURIComponent(msg)
     );
   if (password !== confirm) back("As senhas não conferem.");
+  // Teto por origem: `confirmPasswordReset` já limita as tentativas por
+  // e-mail (e apaga o pedido quando estoura). Aqui o alvo é a força
+  // bruta dos 6 dígitos varrendo vários e-mails do mesmo lugar.
+  const ip = await requestIp();
+  const limited = await rateLimitAll([
+    { bucket: `auth:rl:pwresetconfirm:ip:${ip}`, limit: 30, windowSeconds: 900 },
+  ]);
+  if (!limited.ok) back(TOO_MANY);
   const res = await confirmPasswordReset(email, code, password);
   if (!res.ok) back(res.error);
   redirect(
@@ -39,9 +51,21 @@ async function confirmReset(formData: FormData) {
 async function resendReset(formData: FormData) {
   "use server";
   const email = String(formData.get("email") ?? "");
+  // Mesmo teto por origem do pedido inicial: reenvio manda e-mail igual.
+  const ip = await requestIp();
+  const limited = await rateLimitAll([
+    { bucket: `auth:rl:pwreset:ip:${ip}`, limit: 10, windowSeconds: 3600 },
+  ]);
+  if (!limited.ok) {
+    redirect("/recuperar?error=" + encodeURIComponent(TOO_MANY));
+  }
   const res = await resendPasswordReset(email);
   if (!res.ok) {
     redirect("/recuperar?error=" + encodeURIComponent(res.error));
+  }
+  // Sem pedido gravado não há o que reenviar: mesma tela, sem e-mail.
+  if (!res.send) {
+    redirect("/recuperar?verify=" + encodeURIComponent(res.email) + "&sent=1");
   }
   const sent = await sendPasswordResetCode(res.email, res.name, res.code);
   if (!sent.ok) {

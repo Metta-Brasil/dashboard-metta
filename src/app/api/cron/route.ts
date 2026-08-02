@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { bearerToken, secretMatches } from "@/app/api/_lib/secret";
 import { refreshAllSheets } from "@/lib/sheets/read";
 
 export const maxDuration = 120;
@@ -14,11 +15,14 @@ export const maxDuration = 120;
 function authorized(req: NextRequest): boolean {
   const cronSecret = process.env.CRON_SECRET;
   const revalidateSecret = process.env.REVALIDATE_SECRET;
-  const auth = req.headers.get("authorization");
+  const bearer = bearerToken(req.headers.get("authorization"));
   const xrs = req.headers.get("x-revalidate-secret");
-  if (cronSecret && auth === `Bearer ${cronSecret}`) return true;
-  if (revalidateSecret && auth === `Bearer ${revalidateSecret}`) return true;
-  if (revalidateSecret && xrs === revalidateSecret) return true;
+  // Os DOIS segredos continuam valendo de propósito: o Vercel Cron manda
+  // CRON_SECRET e o workflow .github/workflows/refresh-cache.yml usa
+  // REVALIDATE_SECRET. Aceitar só um quebra o refresh horário do cache.
+  if (secretMatches(cronSecret, bearer)) return true;
+  if (secretMatches(revalidateSecret, bearer)) return true;
+  if (secretMatches(revalidateSecret, xrs)) return true;
   return false;
 }
 
@@ -47,8 +51,11 @@ export async function GET(req: NextRequest) {
       { status: fbOk ? 200 : 500 }
     );
   } catch (err) {
+    // Detalhe só no log: erro da googleapis carrega spreadsheetId, range
+    // e às vezes o e-mail da service account — nada disso vai na resposta.
+    console.error("[cron] refresh falhou", err);
     return NextResponse.json(
-      { ok: false, error: String(err) },
+      { ok: false, error: "refresh failed" },
       { status: 500 }
     );
   }

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { rateLimitAll, requestIp } from "@/lib/auth/ratelimit";
 import { startPasswordReset } from "@/lib/auth/users";
 import { sendPasswordResetCode } from "@/lib/email/brevo";
 import { cn } from "@/lib/utils";
@@ -14,12 +15,30 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
+/** Mesma mensagem pra todo limite: não diz qual estourou nem quanto falta. */
+const TOO_MANY = "Muitas tentativas. Tente novamente em alguns minutos.";
+
 async function requestReset(formData: FormData) {
   "use server";
   const email = String(formData.get("email") ?? "");
+  // Teto por origem: `startPasswordReset` já limita 3 códigos por hora
+  // por e-mail. O que falta é segurar quem bombardeia várias caixas do
+  // domínio a partir do mesmo lugar — e junto a cota do Brevo.
+  const ip = await requestIp();
+  const limited = await rateLimitAll([
+    { bucket: `auth:rl:pwreset:ip:${ip}`, limit: 10, windowSeconds: 3600 },
+  ]);
+  if (!limited.ok) {
+    redirect("/recuperar?error=" + encodeURIComponent(TOO_MANY));
+  }
   const res = await startPasswordReset(email);
   if (!res.ok) {
     redirect("/recuperar?error=" + encodeURIComponent(res.error));
+  }
+  // Sem conta com senha não existe código gravado: a tela é a mesma, só
+  // que não sai e-mail. É o que impede descobrir quem tem conta aqui.
+  if (!res.send) {
+    redirect("/recuperar?verify=" + encodeURIComponent(res.email));
   }
   const sent = await sendPasswordResetCode(res.email, res.name, res.code);
   if (!sent.ok) {

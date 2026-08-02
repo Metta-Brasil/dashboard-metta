@@ -17,9 +17,22 @@ import { Input } from "@/components/ui/input";
 
 async function loginWithCredentials(formData: FormData) {
   "use server";
+  const email = String(formData.get("email") ?? "")
+    .trim()
+    .toLowerCase()
+    .slice(0, 254);
+  // Nenhum teto mora aqui. As TRÊS camadas (par e-mail+IP, IP sozinho e
+  // e-mail sozinho) vivem em `verifyUser`, que é o único ponto por onde
+  // passam também o endpoint público `/api/auth/callback/credentials` e a
+  // confirmação de senha da exclusão de conta. Limitar de novo aqui seria
+  // pior que redundante: este caminho conta TODA tentativa, inclusive as
+  // bem-sucedidas, e não é zerado no acerto — um escritório atrás de um
+  // único IP de saída (o caso normal depois de uma troca de senha, que
+  // desloga todo mundo de uma vez) estouraria o teto entrando certo.
+  // As camadas do `verifyUser` contam só falhas e são limpas no sucesso.
   try {
     await signIn("credentials", {
-      email: String(formData.get("email") ?? ""),
+      email,
       password: String(formData.get("password") ?? ""),
       redirectTo: "/",
     });
@@ -27,9 +40,15 @@ async function loginWithCredentials(formData: FormData) {
     // Credenciais inválidas → volta pro form com mensagem amigável.
     // O redirect de sucesso lança NEXT_REDIRECT e precisa propagar.
     if (error instanceof AuthError) {
+      // Mensagem única de propósito (não revela se a conta existe), mas
+      // cobrindo o bloqueio por tentativas: sem a segunda frase, quem
+      // estourou o limite vê "senha inválida" com a senha certa e conclui
+      // que a conta foi invadida.
       redirect(
         "/login?error=" +
-          encodeURIComponent("E-mail ou senha inválidos.")
+          encodeURIComponent(
+            "E-mail ou senha inválidos. Após várias tentativas seguidas, o acesso por senha fica bloqueado por alguns minutos — entre com o Google ou tente de novo mais tarde."
+          )
       );
     }
     throw error;

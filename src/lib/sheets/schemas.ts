@@ -57,6 +57,23 @@ const zString = z
 
 const zEmail = zString.transform((s) => s.toLowerCase());
 
+/**
+ * URL vinda da planilha → só sobrevive http(s). A planilha é compartilhada
+ * e esses campos viram `href`/`src` direto na UI: `javascript:...` numa
+ * célula seria XSS armazenado (o React só avisa no console, não bloqueia).
+ * Valor inválido vira "" — que os componentes já tratam como "sem link" /
+ * "sem thumbnail". Não lança: uma célula ruim não pode derrubar a aba toda.
+ */
+const zUrl = zString.transform((s) => {
+  if (s === "") return "";
+  try {
+    const { protocol } = new URL(s);
+    return protocol === "http:" || protocol === "https:" ? s : "";
+  } catch {
+    return "";
+  }
+});
+
 // ----- Schemas das abas -------------------------------------------------------
 
 export const FbTodosRowSchema = z.object({
@@ -361,8 +378,8 @@ export const METAS_COLUMN_MAP = {
 
 export const AdsLinkRowSchema = z.object({
   adName: zString,
-  instagramPermalink: zString,
-  imageUrl: zString,
+  instagramPermalink: zUrl,
+  imageUrl: zUrl,
 });
 export type AdsLinkRow = z.infer<typeof AdsLinkRowSchema>;
 
@@ -492,8 +509,8 @@ export const IgPostsRowSchema = z.object({
   data: zDate,
   tipo: zString,
   legenda: zString,
-  permalink: zString,
-  thumbnailUrl: zString,
+  permalink: zUrl,
+  thumbnailUrl: zUrl,
   curtidas: zInt,
   comentarios: zInt,
   views: zInt,
@@ -568,8 +585,8 @@ export const IgStoriesRowSchema = z.object({
   data: zDate,
   hora: zString,
   tipo: zString,
-  permalink: zString,
-  thumbnailUrl: zString,
+  permalink: zUrl,
+  thumbnailUrl: zUrl,
   views: zInt,
   alcance: zInt,
   navegacao: zInt,

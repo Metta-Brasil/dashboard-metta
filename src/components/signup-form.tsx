@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { signIn } from "@/auth";
+import { rateLimitAll, requestIp } from "@/lib/auth/ratelimit";
 import { startSignup } from "@/lib/auth/users";
 import { sendVerificationCode } from "@/lib/email/brevo";
 import { cn } from "@/lib/utils";
@@ -16,6 +17,9 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
+/** Mesma mensagem pra todo limite: não diz qual estourou nem quanto falta. */
+const TOO_MANY = "Muitas tentativas. Tente novamente em alguns minutos.";
+
 async function signUp(formData: FormData) {
   "use server";
   const name = String(formData.get("name") ?? "");
@@ -24,6 +28,17 @@ async function signUp(formData: FormData) {
   const confirm = String(formData.get("confirm") ?? "");
   if (password !== confirm) {
     redirect("/signup?error=" + encodeURIComponent("As senhas não conferem."));
+  }
+  // Teto por origem: `startSignup` já limita 3 códigos por hora por
+  // e-mail (e só depois de validar os campos, pra erro de digitação não
+  // queimar cota de quem está cadastrando de verdade). O que falta é
+  // segurar quem varre e-mails do domínio a partir do mesmo lugar.
+  const ip = await requestIp();
+  const limited = await rateLimitAll([
+    { bucket: `auth:rl:signup:ip:${ip}`, limit: 10, windowSeconds: 3600 },
+  ]);
+  if (!limited.ok) {
+    redirect("/signup?error=" + encodeURIComponent(TOO_MANY));
   }
   const res = await startSignup(email, name, password);
   if (!res.ok) {
