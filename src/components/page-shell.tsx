@@ -19,7 +19,14 @@ export function PageShell({
 }: PageShellProps) {
   return (
     <>
-      <header className="sticky top-0 z-20 shrink-0 border-b border-border bg-background/80 backdrop-blur-sm sm:h-(--header-height)">
+      {/* z-40 e não z-20: as tabelas têm cabeçalho e primeira coluna
+          fixos (até z-30 em metric-table-interactive). Com o header da
+          página empatado em z-20, a célula fixa da tabela vencia o
+          empate e era desenhada POR CIMA dos filtros — visível no
+          celular, onde tudo divide a mesma faixa de tela. Fica abaixo
+          dos overlays (popover/dropdown/sheet em z-50), então os
+          dropdowns dos filtros continuam por cima do header. */}
+      <header className="sticky top-0 z-40 shrink-0 border-b border-border bg-background/80 backdrop-blur-sm sm:h-(--header-height)">
         <div className="flex w-full flex-col gap-2 px-4 py-2.5 sm:h-full sm:flex-row sm:items-center sm:gap-2 sm:py-0 lg:px-6">
           <div className="flex items-center gap-2">
             <SidebarTrigger className="-ml-1" />
