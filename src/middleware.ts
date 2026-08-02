@@ -53,7 +53,11 @@ export const config = {
   // `/?$` cobre as duas formas do mesmo endpoint: só `$` deixava
   // `/api/cron/` (com barra final) de fora da exclusão e o cron levaria um
   // redirect pro /login. Continua sem pegar `/api/cronjobs`.
+  // O manifest e os ícones do PWA precisam ser públicos: o iOS busca os
+  // dois SEM cookie ao instalar na tela de início. Com eles atrás do
+  // guard, o Safari recebia 302 pro /login e o atalho nascia com ícone
+  // genérico e nome errado. São assets estáticos, sem dado nenhum.
   matcher: [
-    "/((?!api/auth/|api/auth$|api/cron/?$|api/revalidate/?$|_next/static/|_next/image$|favicon.ico$|fonts/|brand/).*)",
+    "/((?!api/auth/|api/auth$|api/cron/?$|api/revalidate/?$|_next/static/|_next/image$|favicon.ico$|manifest.webmanifest$|apple-icon.png$|icon.png$|icon-192.png$|icon-512.png$|icon-maskable.png$|fonts/|brand/).*)",
   ],
 };
