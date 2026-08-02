@@ -5,6 +5,7 @@ import type { Session } from "next-auth";
 import { auth } from "@/auth";
 import { getGoogleProfile, getProfile } from "@/lib/auth/users";
 import { AppSidebar } from "@/components/app-sidebar";
+import { InstallPrompt } from "@/components/install-prompt";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 const LOADING_USER = { name: "Carregando…", email: "", avatar: "" };
@@ -60,6 +61,8 @@ async function DashboardShell({ children }: { children: React.ReactNode }) {
       <SidebarInset>
         <div className="flex flex-1 flex-col">{children}</div>
       </SidebarInset>
+      {/* Só rende algo em celular fora do modo instalado; ver o componente. */}
+      <InstallPrompt />
     </>
   );
 }

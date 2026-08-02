@@ -181,9 +181,20 @@
     @apply bg-background text-foreground;
     font-feature-settings: "cv11", "ss01", "ss03";
     -webkit-font-smoothing: antialiased;
+    /* Instalado na tela de início (viewport-fit=cover), o app ocupa a
+       tela inteira: sem isso o topo some atrás do notch e o rodapé fica
+       embaixo da barra de gestos do iPhone. No navegador e no desktop os
+       insets são 0, então não muda nada. */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
   html {
     @apply font-sans;
+    /* Cor por trás do bounce do scroll — evita faixa branca no topo/rodapé
+       quando o app é puxado além do limite. */
+    background-color: var(--background);
   }
 }
 
