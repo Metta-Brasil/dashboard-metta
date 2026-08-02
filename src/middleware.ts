@@ -58,6 +58,6 @@ export const config = {
   // guard, o Safari recebia 302 pro /login e o atalho nascia com ícone
   // genérico e nome errado. São assets estáticos, sem dado nenhum.
   matcher: [
-    "/((?!api/auth/|api/auth$|api/cron/?$|api/revalidate/?$|_next/static/|_next/image$|favicon.ico$|manifest.webmanifest$|apple-icon.png$|icon.png$|icon-192.png$|icon-512.png$|icon-maskable.png$|fonts/|brand/).*)",
+    "/((?!api/auth/|api/auth$|api/cron/?$|api/revalidate/?$|_next/static/|_next/image$|favicon.ico$|manifest.webmanifest$|sw.js$|apple-icon.png$|icon.png$|icon-192.png$|icon-512.png$|icon-maskable.png$|fonts/|brand/).*)",
   ],
 };

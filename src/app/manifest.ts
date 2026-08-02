@@ -23,7 +23,10 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/",
     scope: "/",
     display: "standalone",
-    orientation: "portrait",
+    // Sem trava de orientação de propósito: as tabelas são largas e girar
+    // o aparelho é o que torna Ranking de mídia, Performance por SDR e a
+    // tabela diária legíveis no celular. `portrait` bloqueava isso no
+    // Android (o iOS ignora este campo).
     lang: "pt-BR",
     dir: "ltr",
     background_color: "#0c161b",
