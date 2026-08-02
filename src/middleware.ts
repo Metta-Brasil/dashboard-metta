@@ -1,4 +1,16 @@
-import { auth } from "@/auth";
+import NextAuth from "next-auth";
+
+import { authConfig } from "@/auth.config";
+
+/**
+ * Instância PRÓPRIA do Auth.js, montada só com a config edge-safe.
+ *
+ * Importar `auth` de `@/auth` puxaria o provider Credentials e, com ele,
+ * `@/lib/auth/users` (bcryptjs + node:crypto) para o rastro do bundle do
+ * Edge — o que quebra o build na Vercel. Aqui só é preciso validar o JWT
+ * da sessão, e os callbacks `jwt`/`session` vivem na config compartilhada.
+ */
+const { auth } = NextAuth(authConfig);
 
 /**
  * Protege tudo: sem sessão → /login. /api/auth e estáticos ficam livres
