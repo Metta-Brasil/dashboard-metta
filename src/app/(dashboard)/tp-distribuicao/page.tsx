@@ -37,6 +37,9 @@ function formatDayBr(d: Date): string {
 }
 
 function formatKpi(k: TpDistKpi): string {
+  // null = métrica ausente na fonte. Mostrar "—" em vez de 0/R$ 0,00:
+  // zero se lê como resultado medido, e aqui não houve medição.
+  if (k.value === null) return "—";
   if (k.format === "brl") return formatBRLCompact(k.value);
   if (k.format === "percent") return formatPercent(k.value);
   return formatInt(k.value);
@@ -117,6 +120,7 @@ async function TpDistKpis({ searchParams }: PageProps) {
   const kpis: Kpi[] = result.kpis.map((k) => ({
     label: k.label,
     value: formatKpi(k),
+    hint: k.hint,
   }));
   return (
     <KpiGrid kpis={kpis} cols="grid-cols-2 lg:grid-cols-3 xl:grid-cols-6" />

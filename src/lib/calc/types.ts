@@ -328,8 +328,11 @@ export type TrafegoResult = {
 
 export type TpDistKpi = {
   label: string;
-  value: number;
+  /** `null` = métrica sem dado na fonte (≠ zero). A UI mostra "—". */
+  value: number | null;
   format: "brl" | "int" | "percent";
+  /** Explicação curta exibida sob o número (ex.: por que está sem dado). */
+  hint?: string;
 };
 
 /** Superset com todos os campos numéricos usados pelas duas tabelas. */

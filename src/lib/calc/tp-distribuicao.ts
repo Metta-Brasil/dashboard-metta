@@ -47,22 +47,31 @@ export function calcTpDistribuicao(
   // ----- Pipeline de filtragem sobre fb_todos (na ordem) ------------------
 
   // 1+2. Qualificação de campanha por modo (trava DIST embutida):
-  //  - Vídeo: contém "DIST" E "VV".
   //  - Seguidores: (contém "DIST" E "SEGUIDORES") OU "POST DO INSTAGRAM".
   //    "Post do Instagram" tem naming próprio e é ISENTO da trava DIST.
+  //  - Vídeo: contém "DIST" e NÃO é de seguidores.
+  //
+  // A regra do Vídeo já exigiu "VV" no nome, e isso quebrava a página:
+  // a nomenclatura da distribuição mudou (VV → TURBINAR, IMPULSIONAR,
+  // CORREDOR) e o filtro ficou preso no marcador antigo. Efeito medido na
+  // base: R$ 81,6 mil de distribuição com 46 mil views 95% ficavam
+  // INVISÍVEIS no histórico, e em julho/agosto — 100% "TURBINAR" — a
+  // página inteira zerava.
+  //
+  // Definir Vídeo por exclusão (distribuição que não é de seguidores) em
+  // vez de por marcador de nome sobrevive à próxima troca de nomenclatura,
+  // que é o que já aconteceu duas vezes aqui.
+  const isSeguidores = (name: string) =>
+    (nameHas(name, "DIST") && nameHas(name, "SEGUIDORES")) ||
+    nameHas(name, "POST DO INSTAGRAM");
+
   let rows: FbTodosRow[];
   if (modo === "video") {
     rows = data.fb_todos.filter(
-      (r) =>
-        nameHas(r.campaignName, "DIST") && nameHas(r.campaignName, "VV")
+      (r) => nameHas(r.campaignName, "DIST") && !isSeguidores(r.campaignName)
     );
   } else {
-    rows = data.fb_todos.filter(
-      (r) =>
-        (nameHas(r.campaignName, "DIST") &&
-          nameHas(r.campaignName, "SEGUIDORES")) ||
-        nameHas(r.campaignName, "POST DO INSTAGRAM")
-    );
+    rows = data.fb_todos.filter((r) => isSeguidores(r.campaignName));
   }
 
   // 3. Contas: lista não-vazia mantém linhas cujo campaignName contém
@@ -106,16 +115,46 @@ export function calcTpDistribuicao(
       { label: "Hook rate", value: safeRate(v3s, impr), format: "percent" },
     ];
   } else {
+    /**
+     * A coluna "Seguidores" do fb_todos vem VAZIA — o export do
+     * Gerenciador não traz seguidores ganhos por campanha. Zerar os
+     * cards seria pior que não mostrar: "Custo por Seguidor R$ 0,00"
+     * se lê como seguidor de graça, e "Conversão de visitas 0,0%" como
+     * campanha fracassada, quando na verdade a métrica não existe.
+     *
+     * Critério: houve investimento e nenhum seguidor registrado ⇒ sem
+     * dado (null → "—" na UI), não zero. Se algum dia a fonte passar a
+     * trazer o número, os cards voltam a preencher sozinhos.
+     */
+    const semDadoSeguidores = spent > 0 && seguidores === 0;
+    const SEM_FONTE = "Sem dado na fonte (Meta não exporta)";
     kpis = [
       { label: "Investimento", value: spent, format: "brl" },
-      { label: "Seguidores", value: seguidores, format: "int" },
-      // Custo por Seguidor = Σspent / Σseguidores.
-      { label: "Custo por Seguidor", value: safeRate(spent, seguidores), format: "brl" },
+      // Visitas ao perfil vem preenchido e é a métrica útil aqui — sobe
+      // pra segunda posição, no lugar do card vazio.
       { label: "Visitas ao perfil", value: visitas, format: "int" },
       // Custo por visita = Σspent / Σvisitas.
       { label: "Custo por visita", value: safeRate(spent, visitas), format: "brl" },
+      {
+        label: "Seguidores",
+        value: semDadoSeguidores ? null : seguidores,
+        format: "int",
+        hint: semDadoSeguidores ? SEM_FONTE : undefined,
+      },
+      // Custo por Seguidor = Σspent / Σseguidores.
+      {
+        label: "Custo por Seguidor",
+        value: semDadoSeguidores ? null : safeRate(spent, seguidores),
+        format: "brl",
+        hint: semDadoSeguidores ? SEM_FONTE : undefined,
+      },
       // Conversão de visitas = Σseguidores / Σvisitas.
-      { label: "Conversão de visitas", value: safeRate(seguidores, visitas), format: "percent" },
+      {
+        label: "Conversão de visitas",
+        value: semDadoSeguidores ? null : safeRate(seguidores, visitas),
+        format: "percent",
+        hint: semDadoSeguidores ? SEM_FONTE : undefined,
+      },
     ];
   }
 
