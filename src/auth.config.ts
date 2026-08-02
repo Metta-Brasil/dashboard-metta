@@ -26,9 +26,20 @@ export type GoogleProfile = {
   picture?: string;
 };
 
-/** Sessão de 24 h; o middleware renova o cookie a cada navegação. */
-const SESSION_MAX_AGE = 60 * 60 * 24;
-const SESSION_UPDATE_AGE = 60 * 60;
+/**
+ * Sessão de 90 dias, ROLANDO: a cada dia de uso o cookie é reemitido e a
+ * validade recomeça. Na prática, quem abre o dashboard com alguma
+ * frequência (e no celular, via atalho na tela de início) nunca é
+ * deslogado sozinho.
+ *
+ * Prazo longo é aceitável AQUI por causa da revogação por versão de
+ * sessão (ver callback `jwt`): um token comprometido deixa de valer
+ * assim que a senha é trocada ou a conta é excluída — em até
+ * VERSION_CHECK_INTERVAL. Sem esse mecanismo, 90 dias seria um token
+ * eterno e impossível de matar, que era o estado anterior à blindagem.
+ */
+const SESSION_MAX_AGE = 60 * 60 * 24 * 90;
+const SESSION_UPDATE_AGE = 60 * 60 * 24;
 /** Intervalo mínimo entre duas leituras da versão de sessão no Redis. */
 const VERSION_CHECK_INTERVAL = 60 * 5;
 /** Leitura da versão não pode segurar a requisição se o Upstash travar. */
