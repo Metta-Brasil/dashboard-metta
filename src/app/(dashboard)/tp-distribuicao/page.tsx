@@ -17,7 +17,11 @@ import {
   safeRate,
   sumBy,
 } from "@/lib/calc/shared";
-import type { TpDistKpi, TpDistTableRow } from "@/lib/calc/types";
+import type {
+  TpDistImpulsionamentoRow,
+  TpDistKpi,
+  TpDistTableRow,
+} from "@/lib/calc/types";
 import { getFilters, getTpDistribuicao } from "@/lib/page-data";
 
 export const metadata: Metadata = {
@@ -82,6 +86,10 @@ export default function TpDistribuicaoPage({ searchParams }: PageProps) {
           </div>
         </Suspense>
       </div>
+
+      <Suspense fallback={<TableFallback rows={6} />}>
+        <TabelaImpulsionamentos searchParams={searchParams} />
+      </Suspense>
 
       <Suspense fallback={<TableFallback rows={6} />}>
         <TabelaDist searchParams={searchParams} />
@@ -199,6 +207,119 @@ async function FunilDist({ searchParams }: PageProps) {
       steps={result.funil}
       monetaryEtapas={[]}
       className="h-full w-full"
+    />
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Impulsionamentos de posts — só modo Seguidores. Transparência obrigatória:
+// cada linha mostra "casado" (dado real), "reels sem dado" (Meta não expõe
+// a métrica por mídia) ou "não casado" (post original não encontrado) —
+// nunca um zero disfarçado.
+// ---------------------------------------------------------------------------
+
+const IMPULSIONAMENTO_TIPO_LABEL: Record<string, string> = {
+  IMAGE: "Feed",
+  CAROUSEL_ALBUM: "Carrossel",
+  VIDEO: "Reels",
+};
+
+function situacaoHint(r: TpDistImpulsionamentoRow): string | undefined {
+  if (r.situacao === "reels_sem_dado") {
+    return "Reels — o Meta não expõe visitas/seguidores por mídia.";
+  }
+  if (r.situacao === "nao_casado") {
+    return "Post original não encontrado — confira se a campanha ou a legenda foram renomeadas.";
+  }
+  return undefined;
+}
+
+const SITUACAO_STYLE: Record<TpDistImpulsionamentoRow["situacao"], string> = {
+  casado: "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
+  reels_sem_dado: "bg-muted text-muted-foreground ring-border",
+  nao_casado: "bg-amber-50 text-amber-700 ring-amber-600/20",
+};
+
+const SITUACAO_LABEL: Record<TpDistImpulsionamentoRow["situacao"], string> = {
+  casado: "Casado",
+  reels_sem_dado: "Reels · sem dado",
+  nao_casado: "Não casado",
+};
+
+function SituacaoBadge({ row }: { row: TpDistImpulsionamentoRow }) {
+  return (
+    <span
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset ${SITUACAO_STYLE[row.situacao]}`}
+      title={situacaoHint(row)}
+    >
+      {SITUACAO_LABEL[row.situacao]}
+    </span>
+  );
+}
+
+async function TabelaImpulsionamentos({ searchParams }: PageProps) {
+  const result = await getTpDistribuicao(searchParams);
+  if (result.modo !== "seguidores") return null;
+
+  const { impulsionamentos, impulsionamentosResumo } = result;
+
+  const columns: Column<TpDistImpulsionamentoRow>[] = [
+    {
+      key: "postLabel",
+      header: "Post",
+      total: "none",
+      render: (r) => (
+        <span className="block max-w-[320px] truncate" title={r.postLabel}>
+          {r.postLabel}
+        </span>
+      ),
+    },
+    {
+      key: "tipo",
+      header: "Tipo",
+      total: "none",
+      render: (r) =>
+        r.tipo ? (IMPULSIONAMENTO_TIPO_LABEL[r.tipo.toUpperCase()] ?? r.tipo) : "—",
+    },
+    {
+      key: "investimento",
+      header: "Investimento",
+      align: "right",
+      render: (r) => formatBRL(r.investimento),
+    },
+    {
+      key: "visitasAnuncio",
+      header: "Visitas (anúncio)",
+      align: "right",
+      render: (r) => formatInt(r.visitasAnuncio),
+    },
+    {
+      key: "visitasPost",
+      header: "Visitas (post)",
+      align: "right",
+      render: (r) => (r.visitasPost !== null ? formatInt(r.visitasPost) : "—"),
+    },
+    {
+      key: "seguidores",
+      header: "Seguidores",
+      align: "right",
+      render: (r) => (r.seguidores !== null ? formatInt(r.seguidores) : "—"),
+    },
+    {
+      key: "situacao",
+      header: "Situação",
+      total: "none",
+      render: (r) => <SituacaoBadge row={r} />,
+    },
+  ];
+
+  return (
+    <MetricTable
+      title="Impulsionamentos de posts"
+      description={`${impulsionamentosResumo.casados} de ${impulsionamentosResumo.total} impulsionamentos casados com o post original · casamento por legenda.`}
+      columns={columns}
+      rows={impulsionamentos}
+      empty="Sem impulsionamentos de posts (Post do Instagram) no período."
     />
   );
 }

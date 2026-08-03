@@ -153,6 +153,11 @@ async function TrafegoKpis({ searchParams }: PageProps) {
       hint: "Investimento ÷ MQL",
     },
     {
+      label: "Negócios criados",
+      value: formatInt(k.negociosCriados),
+      hint: "Criados no CRM (jul+)",
+    },
+    {
       label: "Custo/negócio",
       value: formatBRL(k.custoPorNegocio),
       hint: "Investimento ÷ Negócios criados",

@@ -111,7 +111,7 @@ export const getTpDistribuicao = cache(async (sp: SP) => {
       : [];
   const modo =
     typeof spv.modo === "string" && spv.modo === "video" ? "video" : "seguidores";
-  const data = await readAllSheets(["fb_todos"]);
+  const data = await readAllSheets(["fb_todos", "ig_metta_posts", "ig_tiago_posts"]);
   return calcTpDistribuicao(data, { from: f.from, to: f.to, contas, modo });
 });
 

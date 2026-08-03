@@ -88,13 +88,18 @@ export default function VisaoGeralPage({ searchParams }: PageProps) {
         </div>
       </div>
 
-      {/* Linha 2 — duas roscas meio a meio: Funil + Segmento */}
-      <div className="grid items-stretch gap-6 lg:grid-cols-2">
+      {/* Linha 2 — três roscas, 1/3 cada: Negócios/funil + Vendas/funil + Segmento */}
+      <div className="grid items-stretch gap-6 lg:grid-cols-3">
         <div className="flex">
           <Suspense
             fallback={<SectionFallback label="Carregando distribuição…" />}
           >
             <DistribuicaoSection searchParams={searchParams} />
+          </Suspense>
+        </div>
+        <div className="flex">
+          <Suspense fallback={<SectionFallback label="Carregando vendas…" />}>
+            <VendasPorFunilSection searchParams={searchParams} />
           </Suspense>
         </div>
         <div className="flex">
@@ -290,6 +295,30 @@ async function DistribuicaoSection({ searchParams }: PageProps) {
       data={data}
       centerLabel="Total de negócios"
       centerValue={formatInt(totalNegocios)}
+      className="h-full w-full"
+    />
+  );
+}
+
+async function VendasPorFunilSection({ searchParams }: PageProps) {
+  const result = await loadVisaoGeral(searchParams);
+
+  const data = result.distribuicaoPorFunil
+    .map((r) => ({
+      name: FUNIL_LABELS[r.funil] ?? r.funil,
+      value: r.vendas,
+    }))
+    .filter((d) => d.value > 0);
+
+  const totalVendas = data.reduce((s, d) => s + d.value, 0);
+
+  return (
+    <DonutChart
+      title="Vendas por funil"
+      description="Vendas por funil dentro do período"
+      data={data}
+      centerLabel="Total de vendas"
+      centerValue={formatInt(totalVendas)}
       className="h-full w-full"
     />
   );

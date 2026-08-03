@@ -4,6 +4,7 @@ import type {
   ClintRow,
   FbAtRow,
   FbTodosRow,
+  IgPostsRow,
   LeadRow,
   MetaRow,
   SdrRow,
@@ -356,12 +357,52 @@ export type TpDistTableRow = {
   cpv95: number;
 };
 
+/** Como um impulsionamento "Post do Instagram: …" casou (ou não) com o
+ *  post orgânico correspondente nas abas ig_metta_posts/ig_tiago_posts. */
+export type TpDistImpulsionamentoSituacao =
+  | "casado" // achou o post e ele reporta visitas/seguidores (FEED/Carrossel)
+  | "reels_sem_dado" // achou o post, mas é Reels — Meta não expõe a métrica
+  | "nao_casado"; // não achou post orgânico com legenda compatível
+
+/**
+ * Uma linha por campanha de impulsionamento de seguidores ("Post do
+ * Instagram: <legenda>…"), casada por prefixo de legenda normalizada com
+ * o post orgânico real em ig_metta_posts/ig_tiago_posts.
+ */
+export type TpDistImpulsionamentoRow = {
+  campaignName: string;
+  /** Legenda do post casado; se não casou, o fragmento extraído do nome da campanha. */
+  postLabel: string;
+  /** media_type do post casado ("IMAGE" | "VIDEO" | "CAROUSEL_ALBUM"); null = não casou. */
+  tipo: string | null;
+  investimento: number;
+  /** Visitas ao perfil do ANÚNCIO (Meta Ads, fb_todos.visitasPerfil) — sempre disponível. */
+  visitasAnuncio: number;
+  /** Visitas ao perfil do POST orgânico. null = sem dado (Reels ou não casou), nunca 0 fingido. */
+  visitasPost: number | null;
+  /** Seguidores do POST orgânico. null = sem dado (Reels ou não casou), nunca 0 fingido. */
+  seguidores: number | null;
+  situacao: TpDistImpulsionamentoSituacao;
+};
+
+/** Input de calcTpDistribuicao: fb_todos + as duas abas de posts orgânicos
+ *  (fonte real de seguidores/visitas por post, usada no casamento). */
+export type TpDistribuicaoData = Pick<RawData, "fb_todos"> & {
+  ig_metta_posts: IgPostsRow[];
+  ig_tiago_posts: IgPostsRow[];
+};
+
 export type TpDistribuicaoResult = {
   modo: "video" | "seguidores";
   kpis: TpDistKpi[];
   serie: { dia: Date; [k: string]: Date | number | null }[];
   funil: FunnelStep[];
   tabela: TpDistTableRow[];
+  /** Impulsionamentos "Post do Instagram" casados com o post orgânico
+   *  (só modo seguidores; vazio no modo vídeo). */
+  impulsionamentos: TpDistImpulsionamentoRow[];
+  /** Resumo de transparência: "N de M impulsionamentos casados". */
+  impulsionamentosResumo: { casados: number; total: number };
 };
 
 // ---------------------------------------------------------------------------
