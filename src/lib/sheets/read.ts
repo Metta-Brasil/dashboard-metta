@@ -452,9 +452,14 @@ export async function refreshAllSheets(): Promise<{
       current.length > 100 &&
       rows.length < current.length * 0.5
     ) {
+      // Warn + `skipped` no retorno: quem chama (/api/revalidate, /api/cron)
+      // transforma isso em resposta não-200 pro cron alarmar. Encolhimento
+      // legítimo (aba que perdeu um dump de propósito) resolve apagando a
+      // chave `raw:<aba>` no Upstash — sem cache atual não há comparação.
       console.warn(
         `[refresh] ${tab}: fetch=${rows.length} << cache=${current.length} ` +
-          `(provável truncamento) — overwrite ABORTADO, mantendo cache`
+          `(provável truncamento) — overwrite ABORTADO, mantendo cache. ` +
+          `Se o encolhimento for real, apague a chave ${cacheKey(tab)}.`
       );
       persisted[tab] = { rows: current.length, ok: false, skipped: true };
       continue;

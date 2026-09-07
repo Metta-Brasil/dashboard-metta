@@ -1,4 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
+import {
+  hasProblems,
+  refreshProblems,
+} from "@/app/api/_lib/refresh-status";
 import { bearerToken, secretMatches } from "@/app/api/_lib/secret";
 import { refreshAllSheets } from "@/lib/sheets/read";
 
@@ -25,13 +29,26 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { refreshed, durationMs } = await refreshAllSheets();
-    return NextResponse.json({
-      ok: true,
-      refreshed,
-      durationMs,
-      at: new Date().toISOString(),
-    });
+    const { refreshed, persisted, durationMs } = await refreshAllSheets();
+    // Aba que não persistiu = cache velho servido em produção. Responder 200
+    // aqui deixava o cron horário verde enquanto o dashboard mostrava dado
+    // desatualizado; o 409 faz o workflow falhar e aparecer.
+    const problemas = refreshProblems(persisted);
+    const ruim = hasProblems(problemas);
+    if (ruim) {
+      console.error("[revalidate] abas com cache velho", problemas);
+    }
+    return NextResponse.json(
+      {
+        ok: !ruim,
+        refreshed,
+        persisted,
+        ...problemas,
+        durationMs,
+        at: new Date().toISOString(),
+      },
+      { status: ruim ? 409 : 200 }
+    );
   } catch (err) {
     // Detalhe só no log: erro da googleapis carrega spreadsheetId, range
     // e às vezes o e-mail da service account — nada disso vai na resposta.

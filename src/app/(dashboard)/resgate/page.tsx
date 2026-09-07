@@ -255,6 +255,7 @@ async function TabelaNegocios({ searchParams }: PageProps) {
       description={`${formatInt(r.total)} negócio(s) · ordenado por profundidade no funil e tempo parado.`}
       columns={columns}
       rows={r.negocios}
+      maxRows={15}
       empty="Nenhum negócio na pipeline Operação Resgate."
     />
   );

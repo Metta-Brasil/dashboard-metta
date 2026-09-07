@@ -1,4 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
+import {
+  hasProblems,
+  refreshProblems,
+} from "@/app/api/_lib/refresh-status";
 import { bearerToken, secretMatches } from "@/app/api/_lib/secret";
 import { refreshAllSheets } from "@/lib/sheets/read";
 
@@ -35,20 +39,24 @@ export async function GET(req: NextRequest) {
   }
   try {
     const { refreshed, persisted, durationMs } = await refreshAllSheets();
-    // fb_todos é a aba crítica (todo custo/tráfego depende dela). Se
-    // não persistiu, devolve 500 pro cron externo alarmar — em vez de
-    // “ok” mentiroso enquanto o cache fica velho silenciosamente.
-    const fb = persisted["fb_todos"];
-    const fbOk = Boolean(fb && (fb.ok || fb.skipped));
+    // Qualquer aba que não persistiu deixa o cache velho no ar. Antes só
+    // fb_todos era conferida e, pior, `skipped` contava como sucesso —
+    // exatamente o caso da trava anti-clobber, que é o mais silencioso.
+    const problemas = refreshProblems(persisted);
+    const ruim = hasProblems(problemas);
+    if (ruim) {
+      console.error("[cron] abas com cache velho", problemas);
+    }
     return NextResponse.json(
       {
-        ok: fbOk,
+        ok: !ruim,
         refreshed,
         persisted,
+        ...problemas,
         durationMs,
         at: new Date().toISOString(),
       },
-      { status: fbOk ? 200 : 500 }
+      { status: ruim ? 500 : 200 }
     );
   } catch (err) {
     // Detalhe só no log: erro da googleapis carrega spreadsheetId, range
