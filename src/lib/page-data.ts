@@ -1,7 +1,7 @@
 import { cache } from "react";
 
 import { calcAnuncios } from "@/lib/calc/anuncios";
-import { mergeClint } from "@/lib/calc/clint";
+import { listClintTags, mergeClint } from "@/lib/calc/clint";
 import { calcCloser } from "@/lib/calc/closer";
 import { calcInstagram } from "@/lib/calc/instagram";
 import { calcMetas } from "@/lib/calc/metas";
@@ -34,19 +34,19 @@ type SP = Promise<Record<string, string | string[] | undefined>>;
 export const getVisaoGeral = cache(async (sp: SP) => {
   const filters = parseFilters(await sp);
   const data = await readAllSheets(["fb_todos", "leads", "sdr", "vendas", "clint"]);
-  return calcVisaoGeral(mergeClint(data), filters);
+  return calcVisaoGeral(mergeClint(data, filters), filters);
 });
 
 export const getTrafego = cache(async (sp: SP) => {
   const filters = parseFilters(await sp);
   const data = await readAllSheets(["fb_todos", "leads", "clint"]);
-  return calcTrafego(mergeClint(data), filters);
+  return calcTrafego(mergeClint(data, filters), filters);
 });
 
 export const getSdr = cache(async (sp: SP) => {
   const filters = parseFilters(await sp);
   const data = await readAllSheets(["leads", "sdr", "vendas", "clint"]);
-  return calcSdr(mergeClint(data), filters);
+  return calcSdr(mergeClint(data, filters), filters);
 });
 
 export const getCloser = cache(async (sp: SP) => {
@@ -59,7 +59,7 @@ export const getCloser = cache(async (sp: SP) => {
     "clint",
     "Metas",
   ]);
-  return calcCloser(mergeClint(data), filters);
+  return calcCloser(mergeClint(data, filters), filters);
 });
 
 export const getAnuncios = cache(async (sp: SP) => {
@@ -77,13 +77,13 @@ export const getAnuncios = cache(async (sp: SP) => {
     "at_aph",
     "clint",
   ]);
-  return calcAnuncios(mergeClint(data), filters);
+  return calcAnuncios(mergeClint(data, filters), filters);
 });
 
 export const getOrigem = cache(async (sp: SP) => {
   const filters = parseFilters(await sp);
   const data = await readAllSheets(["leads", "sdr", "vendas", "clint"]);
-  return calcOrigem(mergeClint(data), filters);
+  return calcOrigem(mergeClint(data, filters), filters);
 });
 
 export const getMetas = cache(async (sp: SP) => {
@@ -96,7 +96,7 @@ export const getMetas = cache(async (sp: SP) => {
     "clint",
     "Metas",
   ]);
-  return calcMetas(mergeClint(data), filters);
+  return calcMetas(mergeClint(data, filters), filters);
 });
 
 export const getTpDistribuicao = cache(async (sp: SP) => {
@@ -113,6 +113,17 @@ export const getTpDistribuicao = cache(async (sp: SP) => {
     typeof spv.modo === "string" && spv.modo === "video" ? "video" : "seguidores";
   const data = await readAllSheets(["fb_todos", "ig_metta_posts", "ig_tiago_posts"]);
   return calcTpDistribuicao(data, { from: f.from, to: f.to, contas, modo });
+});
+
+/**
+ * Inventário de tags da Clint pro filtro "Tags Clint" do toolbar.
+ * De propósito NÃO passa por parseFilters: a lista de opções tem que ser
+ * a completa (sem corte de tag nem de período), senão a tag selecionada
+ * sumiria da lista e ficaria impossível desmarcar.
+ */
+export const getClintTags = cache(async () => {
+  const data = await readAllSheets(["clint"]);
+  return listClintTags(data);
 });
 
 /** Filtros parseados (memoizado) — pro toolbar não re-parsear. */

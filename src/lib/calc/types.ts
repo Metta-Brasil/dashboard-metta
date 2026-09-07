@@ -38,6 +38,18 @@ export type FilterState = {
   status?: string[];
   /** Modo de agrupamento da tabela "Performance por data" (Comercial SDR). */
   sdrDate?: "agendamento" | "reuniao";
+  /**
+   * Tags da Clint selecionadas. A coluna `Tag` da aba `clint` traz várias
+   * tags por negócio separadas por vírgula; aqui cada item é UMA tag
+   * atômica. `SEM_TAG` representa o negócio sem nenhuma tag.
+   * Vazio/undefined = sem corte.
+   */
+  tags?: string[];
+  /**
+   * Como `tags` age: "remover" (default) descarta os negócios que têm
+   * qualquer uma das tags; "somente" mantém apenas esses.
+   */
+  tagsMode?: "remover" | "somente";
   /** Busca client-side ou server (Tráfego/Anúncios). */
   busca?: string;
 };

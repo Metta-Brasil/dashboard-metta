@@ -57,6 +57,18 @@ export function parseFilters(
   const sdrDate: "agendamento" | "reuniao" =
     sdrDateRaw === "reuniao" ? "reuniao" : "agendamento";
 
+  // Tags da Clint: parser próprio (não usa `list`) porque uma tag pode
+  // legitimamente se chamar "Todos"/"Todas" e o `list` descartaria.
+  const tagsRaw = typeof searchParams.tags === "string" ? searchParams.tags : undefined;
+  const tags = tagsRaw
+    ? tagsRaw
+        .split(",")
+        .map((t) => t.trim())
+        .filter((t) => t !== "")
+    : undefined;
+  const tagsMode: "remover" | "somente" =
+    searchParams.tagsMode === "somente" ? "somente" : "remover";
+
   return {
     from: Number.isFinite(from.getTime()) ? from : defaultFrom,
     to: Number.isFinite(to.getTime()) ? to : now,
@@ -64,5 +76,7 @@ export function parseFilters(
     sdr: list("sdr"),
     status: list("status"),
     sdrDate,
+    tags: tags?.length ? tags : undefined,
+    tagsMode,
   };
 }

@@ -18,6 +18,8 @@ type MultiSelectFilterProps = {
    * - "plain": multiselect simples; param ausente == nada selecionado.
    */
   mode?: "todos" | "plain";
+  /** Bloco fixo no topo do dropdown (ex: toggle de modo). Opcional. */
+  header?: React.ReactNode;
 };
 
 const TODOS_VALUE = "todos";
@@ -27,6 +29,7 @@ export function MultiSelectFilter({
   label,
   options,
   mode = "plain",
+  header,
 }: MultiSelectFilterProps) {
   const router = useRouter();
   const sp = useSearchParams();
@@ -155,6 +158,9 @@ export function MultiSelectFilter({
             : "pointer-events-none -translate-y-1 opacity-0"
         )}
       >
+        {header && (
+          <div className="border-b border-border p-2">{header}</div>
+        )}
         <div className="max-h-[280px] overflow-y-auto p-1.5">
           {renderedOptions.map((o) => {
             const isTodos = mode === "todos" && o.value === TODOS_VALUE;

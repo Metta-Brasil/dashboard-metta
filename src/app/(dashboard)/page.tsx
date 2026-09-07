@@ -10,8 +10,10 @@ import {
   MetricTable,
   type Column,
 } from "@/components/dashboard/metric-table";
+import { TagsClintFilter } from "@/components/dashboard/tags-clint-filter";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
+import { SEM_TAG } from "@/lib/calc/clint";
 import {
   formatBRL,
   formatBRLCompact,
@@ -23,7 +25,7 @@ import type {
   TabelaDiariaRow,
   TabelaDiariaTotal,
 } from "@/lib/calc/types";
-import { getFilters, getVisaoGeral } from "@/lib/page-data";
+import { getClintTags, getFilters, getVisaoGeral } from "@/lib/page-data";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -128,7 +130,39 @@ export default function VisaoGeralPage({ searchParams }: PageProps) {
 
 async function VisaoGeralToolbar({ searchParams }: PageProps) {
   const filters = await getFilters(searchParams);
-  return <Toolbar from={filters.from} to={filters.to} />;
+  // O inventário de tags depende de ler a aba `clint`; fica em Suspense
+  // próprio pra não segurar o resto do toolbar (funil + datas) no ar.
+  return (
+    <Toolbar
+      from={filters.from}
+      to={filters.to}
+      leftExtras={
+        <Suspense fallback={<TagsFilterFallback />}>
+          <TagsFilterSlot />
+        </Suspense>
+      }
+    />
+  );
+}
+
+async function TagsFilterSlot() {
+  const tags = await getClintTags();
+  // Contagem no label = total do negócio na base Clint (não recorta pelo
+  // período nem pelo funil), justamente pra dar escala e denunciar a tag
+  // de importação em massa mesmo com a janela de datas curta.
+  const tagOptions = tags.map((t) => ({
+    value: t.value,
+    label: `${t.value === SEM_TAG ? "(sem tag)" : t.value} · ${t.count}`,
+  }));
+  return <TagsClintFilter options={tagOptions} />;
+}
+
+function TagsFilterFallback() {
+  return (
+    <div className="inline-flex h-9 items-center rounded-md border border-input bg-card px-3 text-[13px] font-medium text-muted-foreground">
+      Tags Clint
+    </div>
+  );
 }
 
 // ---------------------------------------------------------------------------
