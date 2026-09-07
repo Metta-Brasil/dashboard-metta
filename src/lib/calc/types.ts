@@ -764,3 +764,52 @@ export type SDRPorDataRow = {
   vendas: number;
   close: number;
 };
+
+// ---------------------------------------------------------------------------
+// Página — Funil de Resgate (pipeline Operação Resgate · Reativação de Base)
+// ---------------------------------------------------------------------------
+
+export type ResgateKpi = {
+  label: string;
+  /** null = métrica sem medição possível (renderiza "—", nunca 0). */
+  value: number | null;
+  format: "int" | "brl" | "percent";
+  hint?: string;
+};
+
+export type ResgateMovimentoDiaPoint = {
+  dia: Date;
+  movimentacoes: number;
+};
+
+export type ResgateNegocioRow = {
+  nome: string;
+  contato: string;
+  qualificacao: string;
+  faturamento: string;
+  funilOrigem: string;
+  utmCampaign: string;
+  etapa: string;
+  macroEtapa: string;
+  diasParado: number | null;
+  dono: string;
+  valor: number;
+};
+
+export type ResgateResult = {
+  /** false = a coluna Pipeline ainda não chegou na aba `clint`. */
+  temColunaPipeline: boolean;
+  total: number;
+  kpis: ResgateKpi[];
+  funil: FunnelStep[];
+  /** Perdidos saem do eixo: o Clint não guarda de que etapa saíram. */
+  perdidos: number;
+  noShow: number;
+  tempoEmEtapa: TimeInStagePoint[];
+  serieMovimentos: ResgateMovimentoDiaPoint[];
+  perfilQualificacao: NomeValor[];
+  perfilFaturamento: NomeValor[];
+  perfilFunil: NomeValor[];
+  perfilCampanha: NomeValor[];
+  negocios: ResgateNegocioRow[];
+};

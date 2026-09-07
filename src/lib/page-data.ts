@@ -6,6 +6,7 @@ import { calcCloser } from "@/lib/calc/closer";
 import { calcInstagram } from "@/lib/calc/instagram";
 import { calcMetas } from "@/lib/calc/metas";
 import { calcOrigem } from "@/lib/calc/origem";
+import { calcResgate } from "@/lib/calc/resgate";
 import { calcSdr } from "@/lib/calc/sdr";
 import { calcTpDistribuicao } from "@/lib/calc/tp-distribuicao";
 import { calcTrafego } from "@/lib/calc/trafego";
@@ -183,4 +184,16 @@ export const getInstagramTiago = cache(async (sp?: SP) => {
     },
     { from: filters.from, to: filters.to, criterio }
   );
+});
+
+/**
+ * Funil de Resgate — pipeline "Operação Resgate · Reativação de Base".
+ * Só a aba `clint`: não há mídia nem investimento atrelados. De propósito
+ * NÃO passa por `mergeClint` — esses negócios são base antiga reaquecida,
+ * não podem entrar nas métricas de SDR/Closer/Metas como lead novo.
+ */
+export const getResgate = cache(async (sp: SP) => {
+  const filters = parseFilters(await sp);
+  const data = await readAllSheets(["clint"]);
+  return calcResgate(data, { from: filters.from, to: filters.to });
 });

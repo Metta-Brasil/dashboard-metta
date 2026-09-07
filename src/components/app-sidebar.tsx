@@ -24,6 +24,7 @@ import {
   UserCheckIcon,
   HandshakeIcon,
   Share2Icon,
+  LifeBuoyIcon,
 } from "lucide-react";
 
 import { InstagramIcon } from "@/components/instagram-icon";
@@ -40,6 +41,7 @@ const navMain = [
   { title: "Anúncios", url: "/anuncios", icon: ImageIcon },
   { title: "Comercial SDR", url: "/sdr", icon: UserCheckIcon },
   { title: "Comercial Closer", url: "/closer", icon: HandshakeIcon },
+  { title: "Funil de Resgate", url: "/resgate", icon: LifeBuoyIcon },
   { title: "Origem", url: "/origem", icon: Share2Icon },
   { title: "Instagram", url: "/instagram", icon: InstagramIcon },
 ];

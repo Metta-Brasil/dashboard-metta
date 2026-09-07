@@ -160,11 +160,17 @@ export const LEADS_COLUMN_MAP = {
 
 /**
  * Aba `clint` — negócios vindos do CRM Clint (a partir de julho/2026).
- * A aba tem 37 colunas (A..AK); mapeamos só o que o dashboard consome.
+ * A aba tem 39 colunas (A..AM); mapeamos só o que o dashboard consome.
  * `fonte` distingue linhas nativas do Clint ("Clint") do dump histórico
  * do HubSpot ("HubsSpot") — só as de fonte Clint entram na migração.
  * Datas-guia por métrica: dataCriacao (B) = negócio criado,
  * dataReuniao (C) = reunião, dataVenda (E) = venda.
+ *
+ * `pipeline` (AM) é o quadro do CRM ("Operação Resgate · Reativação de
+ * Base"), NÃO a etapa: `etapa` diz em que coluna do quadro o card está e os
+ * nomes de etapa se repetem entre quadros. Só o par pipelineId/pipeline
+ * isola uma pipeline. Vem em branco nas linhas escritas antes de 07/09/2026
+ * e no dump histórico do HubSpot.
  */
 export const ClintRowSchema = z.object({
   fonte: zString,
@@ -193,6 +199,13 @@ export const ClintRowSchema = z.object({
   eSql: zString,
   tag: zString,
   valor: zCurrency,
+  telefone: zString,
+  instagram: zString,
+  dealId: zString,
+  dono: zString,
+  dataEntradaEtapa: zDate,
+  pipelineId: zString,
+  pipeline: zString,
 });
 export type ClintRow = z.infer<typeof ClintRowSchema>;
 
@@ -223,6 +236,13 @@ export const CLINT_COLUMN_MAP = {
   eSql: 32,
   tag: 35,
   valor: 36,
+  telefone: 7,
+  instagram: 8,
+  dealId: 24,
+  dono: 25,
+  dataEntradaEtapa: 28,
+  pipelineId: 37,
+  pipeline: 38,
 } as const;
 
 export const SdrRowSchema = z.object({
