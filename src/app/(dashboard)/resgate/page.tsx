@@ -3,10 +3,9 @@ import { Suspense } from "react";
 
 import { BarList } from "@/components/dashboard/bar-list";
 import { ComboBarLineChart } from "@/components/dashboard/charts";
-import { FunnelVertical } from "@/components/dashboard/funnel-vertical";
+import { FunnelHorizontal } from "@/components/dashboard/funnel-horizontal";
 import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
 import { MetricTable, type Column } from "@/components/dashboard/metric-table";
-import { TimeInStage } from "@/components/dashboard/time-in-stage";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
 import {
@@ -61,25 +60,13 @@ export default function ResgatePage({ searchParams }: PageProps) {
         <ResgateKpis searchParams={searchParams} />
       </Suspense>
 
-      <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-3">
-        <Suspense fallback={<FunilFallback />}>
-          <div className="flex flex-col lg:col-span-1">
-            <Funil searchParams={searchParams} />
-          </div>
-        </Suspense>
+      <Suspense fallback={<FunilFallback />}>
+        <Funil searchParams={searchParams} />
+      </Suspense>
 
-        <Suspense fallback={<FunilFallback />}>
-          <div className="flex flex-col lg:col-span-1">
-            <TempoParado searchParams={searchParams} />
-          </div>
-        </Suspense>
-
-        <Suspense fallback={<ChartCardFallback />}>
-          <div className="flex flex-col lg:col-span-1">
-            <Movimentacoes searchParams={searchParams} />
-          </div>
-        </Suspense>
-      </div>
+      <Suspense fallback={<ChartCardFallback />}>
+        <Movimentacoes searchParams={searchParams} />
+      </Suspense>
 
       <Suspense fallback={<TableFallback rows={4} />}>
         <PerfilDaBase searchParams={searchParams} />
@@ -133,41 +120,11 @@ async function Funil({ searchParams }: PageProps) {
     r.perdidos > 0
       ? `Posição atual dos ${formatInt(r.total)} negócios · ${formatInt(r.perdidos)} perdido(s) fora do eixo`
       : `Posição atual dos ${formatInt(r.total)} negócios`;
-  // Largura distribuída linearmente de 100% (topo) a 40% (base). O taper
-  // padrão do componente cai -15 por etapa e bate no piso de 20% já na 7ª:
-  // com 9 etapas as três últimas saíam idênticas e com o rótulo truncado.
-  const n = r.funil.length;
-  const widths = r.funil.map((_, i) =>
-    n <= 1 ? 100 : 100 - (i / (n - 1)) * 60
-  );
   return (
-    <FunnelVertical
+    <FunnelHorizontal
       title="Funil de resgate"
       description={desc}
       steps={r.funil}
-      monetaryEtapas={[]}
-      widths={widths}
-      className="h-full w-full"
-    />
-  );
-}
-
-async function TempoParado({ searchParams }: PageProps) {
-  const r = await getResgate(searchParams);
-  if (!r.tempoEmEtapa.length) {
-    return (
-      <div className="surface-card flex h-full flex-col gap-1 p-5 lg:p-6">
-        <h3 className="panel-title">Tempo parado na etapa</h3>
-        <span className="panel-desc">Sem data de entrada na etapa.</span>
-      </div>
-    );
-  }
-  return (
-    <TimeInStage
-      title="Tempo parado na etapa"
-      description="Dias corridos desde a última movimentação do card, por etapa atual."
-      points={r.tempoEmEtapa}
-      className="h-full"
     />
   );
 }

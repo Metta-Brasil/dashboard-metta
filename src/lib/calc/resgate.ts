@@ -1,11 +1,10 @@
 import { dayKey, eachDay, safeRate, startOfDayBrt, sumBy } from "@/lib/calc/shared";
 import type {
-  FunnelStep,
   NomeValor,
+  ResgateFunilEtapa,
   ResgateKpi,
   ResgateNegocioRow,
   ResgateResult,
-  TimeInStagePoint,
 } from "@/lib/calc/types";
 import type { ClintRow } from "@/lib/sheets/schemas";
 
@@ -124,13 +123,6 @@ function distribuicao(
   return [...resto.slice(0, limite), ...semInfo];
 }
 
-function mediana(ns: number[]): number {
-  if (!ns.length) return 0;
-  const s = [...ns].sort((a, b) => a - b);
-  const mid = Math.floor(s.length / 2);
-  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
-}
-
 /** O campo Instagram vem ora como handle, ora como URL do perfil. */
 function handleInstagram(raw: string): string {
   const s = (raw ?? "").trim();
@@ -138,6 +130,13 @@ function handleInstagram(raw: string): string {
   const m = s.match(/instagram\.com\/([^/?#]+)/i);
   const user = (m ? m[1] : s).replace(/^@/, "").replace(/\/$/, "");
   return user ? `@${user}` : "";
+}
+
+/** Posição da macro-etapa pro ordenamento da tabela. */
+function ordemLabel(l: string): number {
+  const i = (MACRO_ETAPAS as readonly string[]).indexOf(l);
+  if (i >= 0) return i;
+  return l === "No-show" ? 5.5 : 99;
 }
 
 const DIA_MS = 24 * 60 * 60 * 1000;
@@ -181,11 +180,27 @@ export function calcResgate(
     i === 0 ? total : profundidades.filter((p) => p >= i).length
   );
 
-  const funil: FunnelStep[] = MACRO_ETAPAS.map((etapa, i) => ({
-    etapa,
-    valor: contagem[i],
-    conversaoEtapa: i === 0 ? 1 : safeRate(contagem[i], contagem[i - 1]),
-  }));
+  // Parados = quem está NESTA etapa agora (não o cumulativo). Perdido não
+  // entra em nenhuma: não se sabe de que etapa saiu.
+  const naEtapa = MACRO_ETAPAS.map((_, i) =>
+    rows.filter((r) => profundidade(r.etapa) === i)
+  );
+
+  const funil: ResgateFunilEtapa[] = MACRO_ETAPAS.map((etapa, i) => {
+    const dias = naEtapa[i]
+      .map((r) => diasParado(r, hoje))
+      .filter((d): d is number => d !== null);
+    return {
+      etapa,
+      valor: contagem[i],
+      conversaoEtapa: i === 0 ? 1 : safeRate(contagem[i], contagem[i - 1]),
+      parados: naEtapa[i].length,
+      avancaram: i === MACRO_ETAPAS.length - 1 ? 0 : contagem[i + 1],
+      diasMedia: dias.length
+        ? dias.reduce((a, b) => a + b, 0) / dias.length
+        : null,
+    };
+  });
 
   // ---- KPIs ------------------------------------------------------------------
   const trabalhados = rows.filter((r) => norm(r.etapa) !== "base").length;
@@ -220,28 +235,6 @@ export function calcResgate(
       ).toFixed(1)}%.`,
     },
   ];
-
-  // ---- Tempo parado na etapa atual -------------------------------------------
-  const porMacro = new Map<string, number[]>();
-  for (const r of rows) {
-    const d = diasParado(r, hoje);
-    if (d === null) continue;
-    const label = macroLabel(r.etapa);
-    const arr = porMacro.get(label) ?? [];
-    arr.push(d);
-    porMacro.set(label, arr);
-  }
-  const ordemLabel = (l: string): number => {
-    const i = (MACRO_ETAPAS as readonly string[]).indexOf(l);
-    if (i >= 0) return i;
-    return l === "No-show" ? 5.5 : 99;
-  };
-  const tempoEmEtapa: TimeInStagePoint[] = Array.from(porMacro, ([label, ds]) => ({
-    label,
-    mediaDias: ds.reduce((a, b) => a + b, 0) / ds.length,
-    medianaDias: mediana(ds),
-    n: ds.length,
-  })).sort((a, b) => ordemLabel(a.label) - ordemLabel(b.label));
 
   // ---- Movimentações por dia (única série possível sem snapshot) --------------
   // `dataEntradaEtapa` guarda só a ÚLTIMA movimentação de cada card, então a
@@ -292,7 +285,6 @@ export function calcResgate(
     funil,
     perdidos,
     noShow,
-    tempoEmEtapa,
     serieMovimentos,
     perfilQualificacao,
     perfilFaturamento,

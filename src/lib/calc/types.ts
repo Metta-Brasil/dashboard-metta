@@ -777,6 +777,16 @@ export type ResgateKpi = {
   hint?: string;
 };
 
+/** Etapa do funil de resgate com o que ela mostra por dentro. */
+export type ResgateFunilEtapa = FunnelStep & {
+  /** Negócios parados NESTA etapa agora (não o cumulativo). */
+  parados: number;
+  /** Quantos seguiram para a etapa seguinte (= cumulativo da próxima). */
+  avancaram: number;
+  /** Dias médios parados, entre os que estão nesta etapa. null = ninguém. */
+  diasMedia: number | null;
+};
+
 export type ResgateMovimentoDiaPoint = {
   dia: Date;
   movimentacoes: number;
@@ -801,11 +811,10 @@ export type ResgateResult = {
   temColunaPipeline: boolean;
   total: number;
   kpis: ResgateKpi[];
-  funil: FunnelStep[];
+  funil: ResgateFunilEtapa[];
   /** Perdidos saem do eixo: o Clint não guarda de que etapa saíram. */
   perdidos: number;
   noShow: number;
-  tempoEmEtapa: TimeInStagePoint[];
   serieMovimentos: ResgateMovimentoDiaPoint[];
   perfilQualificacao: NomeValor[];
   perfilFaturamento: NomeValor[];
