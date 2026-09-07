@@ -133,12 +133,20 @@ async function Funil({ searchParams }: PageProps) {
     r.perdidos > 0
       ? `Posição atual dos ${formatInt(r.total)} negócios · ${formatInt(r.perdidos)} perdido(s) fora do eixo`
       : `Posição atual dos ${formatInt(r.total)} negócios`;
+  // Largura distribuída linearmente de 100% (topo) a 40% (base). O taper
+  // padrão do componente cai -15 por etapa e bate no piso de 20% já na 7ª:
+  // com 9 etapas as três últimas saíam idênticas e com o rótulo truncado.
+  const n = r.funil.length;
+  const widths = r.funil.map((_, i) =>
+    n <= 1 ? 100 : 100 - (i / (n - 1)) * 60
+  );
   return (
     <FunnelVertical
       title="Funil de resgate"
       description={desc}
       steps={r.funil}
       monetaryEtapas={[]}
+      widths={widths}
       className="h-full w-full"
     />
   );
