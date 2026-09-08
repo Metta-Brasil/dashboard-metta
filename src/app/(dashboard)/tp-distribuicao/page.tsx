@@ -17,11 +17,7 @@ import {
   safeRate,
   sumBy,
 } from "@/lib/calc/shared";
-import type {
-  TpDistImpulsionamentoRow,
-  TpDistKpi,
-  TpDistTableRow,
-} from "@/lib/calc/types";
+import type { TpDistKpi, TpDistTableRow } from "@/lib/calc/types";
 import { getFilters, getTpDistribuicao } from "@/lib/page-data";
 
 export const metadata: Metadata = {
@@ -86,10 +82,6 @@ export default function TpDistribuicaoPage({ searchParams }: PageProps) {
           </div>
         </Suspense>
       </div>
-
-      <Suspense fallback={<TableFallback rows={6} />}>
-        <TabelaImpulsionamentos searchParams={searchParams} />
-      </Suspense>
 
       <Suspense fallback={<TableFallback rows={6} />}>
         <TabelaDist searchParams={searchParams} />
@@ -171,8 +163,10 @@ async function EvolucaoDiaria({ searchParams }: PageProps) {
     dia: formatDayBr(r.dia),
     investimento:
       typeof r.investimento === "number" ? Math.round(r.investimento) : null,
-    seguidores: typeof r.seguidores === "number" ? r.seguidores : null,
-    visitasPerfil: typeof r.visitasPerfil === "number" ? r.visitasPerfil : null,
+    seguidoresPost:
+      typeof r.seguidoresPost === "number" ? r.seguidoresPost : null,
+    visitasPost: typeof r.visitasPost === "number" ? r.visitasPost : null,
+    visitasAds: typeof r.visitasAds === "number" ? r.visitasAds : null,
     custoSeguidor:
       typeof r.custoSeguidor === "number"
         ? Math.round(r.custoSeguidor * 100) / 100
@@ -180,14 +174,15 @@ async function EvolucaoDiaria({ searchParams }: PageProps) {
   }));
   return (
     <ComboBarLineChart
-      title="Investimento, Seguidores e Custo · diário"
-      description="Barras (Investimento) + linhas (Seguidores/Visitas; Custo p/ seguidor no eixo direito)"
+      title="Investimento, seguidores e custo · diário"
+      description="Visitas do anúncio e do post medem coisas diferentes e nunca se somam. Seguidor só existe no post."
       data={data}
       xKey="dia"
       bars={[{ key: "investimento", label: "Investimento" }]}
       lines={[
-        { key: "seguidores", label: "Seguidores", axis: "left" },
-        { key: "visitasPerfil", label: "Visitas ao perfil", axis: "left" },
+        { key: "seguidoresPost", label: "Seguidores (post)", axis: "left" },
+        { key: "visitasPost", label: "Visitas ao perfil (post)", axis: "left" },
+        { key: "visitasAds", label: "Visitas ao perfil (ads)", axis: "left" },
         { key: "custoSeguidor", label: "Custo p/ seguidor", axis: "right" },
       ]}
       className="h-full"
@@ -207,119 +202,6 @@ async function FunilDist({ searchParams }: PageProps) {
       steps={result.funil}
       monetaryEtapas={[]}
       className="h-full w-full"
-    />
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Impulsionamentos de posts — só modo Seguidores. Transparência obrigatória:
-// cada linha mostra "casado" (dado real), "reels sem dado" (Meta não expõe
-// a métrica por mídia) ou "não casado" (post original não encontrado) —
-// nunca um zero disfarçado.
-// ---------------------------------------------------------------------------
-
-const IMPULSIONAMENTO_TIPO_LABEL: Record<string, string> = {
-  IMAGE: "Feed",
-  CAROUSEL_ALBUM: "Carrossel",
-  VIDEO: "Reels",
-};
-
-function situacaoHint(r: TpDistImpulsionamentoRow): string | undefined {
-  if (r.situacao === "reels_sem_dado") {
-    return "Reels — o Meta não expõe visitas/seguidores por mídia.";
-  }
-  if (r.situacao === "nao_casado") {
-    return "Post original não encontrado — confira se a campanha ou a legenda foram renomeadas.";
-  }
-  return undefined;
-}
-
-const SITUACAO_STYLE: Record<TpDistImpulsionamentoRow["situacao"], string> = {
-  casado: "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
-  reels_sem_dado: "bg-muted text-muted-foreground ring-border",
-  nao_casado: "bg-amber-50 text-amber-700 ring-amber-600/20",
-};
-
-const SITUACAO_LABEL: Record<TpDistImpulsionamentoRow["situacao"], string> = {
-  casado: "Casado",
-  reels_sem_dado: "Reels · sem dado",
-  nao_casado: "Não casado",
-};
-
-function SituacaoBadge({ row }: { row: TpDistImpulsionamentoRow }) {
-  return (
-    <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset ${SITUACAO_STYLE[row.situacao]}`}
-      title={situacaoHint(row)}
-    >
-      {SITUACAO_LABEL[row.situacao]}
-    </span>
-  );
-}
-
-async function TabelaImpulsionamentos({ searchParams }: PageProps) {
-  const result = await getTpDistribuicao(searchParams);
-  if (result.modo !== "seguidores") return null;
-
-  const { impulsionamentos, impulsionamentosResumo } = result;
-
-  const columns: Column<TpDistImpulsionamentoRow>[] = [
-    {
-      key: "postLabel",
-      header: "Post",
-      total: "none",
-      render: (r) => (
-        <span className="block max-w-[320px] truncate" title={r.postLabel}>
-          {r.postLabel}
-        </span>
-      ),
-    },
-    {
-      key: "tipo",
-      header: "Tipo",
-      total: "none",
-      render: (r) =>
-        r.tipo ? (IMPULSIONAMENTO_TIPO_LABEL[r.tipo.toUpperCase()] ?? r.tipo) : "—",
-    },
-    {
-      key: "investimento",
-      header: "Investimento",
-      align: "right",
-      render: (r) => formatBRL(r.investimento),
-    },
-    {
-      key: "visitasAnuncio",
-      header: "Visitas (anúncio)",
-      align: "right",
-      render: (r) => formatInt(r.visitasAnuncio),
-    },
-    {
-      key: "visitasPost",
-      header: "Visitas (post)",
-      align: "right",
-      render: (r) => (r.visitasPost !== null ? formatInt(r.visitasPost) : "—"),
-    },
-    {
-      key: "seguidores",
-      header: "Seguidores",
-      align: "right",
-      render: (r) => (r.seguidores !== null ? formatInt(r.seguidores) : "—"),
-    },
-    {
-      key: "situacao",
-      header: "Situação",
-      total: "none",
-      render: (r) => <SituacaoBadge row={r} />,
-    },
-  ];
-
-  return (
-    <MetricTable
-      title="Impulsionamentos de posts"
-      description={`${impulsionamentosResumo.casados} de ${impulsionamentosResumo.total} impulsionamentos casados com o post original · casamento por legenda.`}
-      columns={columns}
-      rows={impulsionamentos}
-      empty="Sem impulsionamentos de posts (Post do Instagram) no período."
     />
   );
 }
@@ -477,10 +359,10 @@ async function TabelaDist({ searchParams }: PageProps) {
               ),
           },
           {
-            key: "visitasPerfil",
-            header: "Visitas ao perfil",
+            key: "visitasPerfilAds",
+            header: "Visitas ao perfil (ads)",
             align: "right",
-            render: (r) => formatInt(r.visitasPerfil),
+            render: (r) => formatInt(r.visitasPerfilAds),
           },
           {
             key: "custoVisita",
@@ -491,39 +373,7 @@ async function TabelaDist({ searchParams }: PageProps) {
               formatBRL(
                 safeRate(
                   sumBy(rs, (r) => r.investimento),
-                  sumBy(rs, (r) => r.visitasPerfil)
-                )
-              ),
-          },
-          {
-            key: "seguidores",
-            header: "Seguidores",
-            align: "right",
-            render: (r) => formatInt(r.seguidores),
-          },
-          {
-            key: "custoSeguidor",
-            header: "Custo p/ seguidor",
-            align: "right",
-            render: (r) => formatBRL(r.custoSeguidor),
-            total: (rs) =>
-              formatBRL(
-                safeRate(
-                  sumBy(rs, (r) => r.investimento),
-                  sumBy(rs, (r) => r.seguidores)
-                )
-              ),
-          },
-          {
-            key: "visitasSeguidores",
-            header: "Visitas > Seguidores",
-            align: "right",
-            render: (r) => formatPercent(r.visitasSeguidores),
-            total: (rs) =>
-              formatPercent(
-                safeRate(
-                  sumBy(rs, (r) => r.seguidores),
-                  sumBy(rs, (r) => r.visitasPerfil)
+                  sumBy(rs, (r) => r.visitasPerfilAds)
                 )
               ),
           },

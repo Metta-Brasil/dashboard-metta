@@ -166,6 +166,36 @@ function boostDelta(
   };
 }
 
+/**
+ * Ganho por DIA, somado entre campanhas: para cada par de fechamentos
+ * consecutivos da série, a diferença é creditada ao dia do fechamento mais
+ * recente. Dia sem leitura fica de fora (não vira zero: não foi medido).
+ */
+function boostDailyDeltas(
+  series: Map<string, BoostSerie>,
+  campanhas: Set<string>
+): Map<number, { seguidores: number; visitas: number }> {
+  const out = new Map<number, { seguidores: number; visitas: number }>();
+  for (const [chave, serie] of series) {
+    if (!campanhas.has(chave)) continue;
+    const pts = serie.pontos.filter(
+      (p) => p.visitas !== null || p.seguidores !== null
+    );
+    for (let i = 1; i < pts.length; i += 1) {
+      const a = pts[i - 1];
+      const b = pts[i];
+      const k = b.dia.getTime();
+      const acc = out.get(k) ?? { seguidores: 0, visitas: 0 };
+      const dif = (x: number | null, y: number | null) =>
+        x === null || y === null ? 0 : Math.max(x - y, 0);
+      acc.seguidores += dif(b.seguidores, a.seguidores);
+      acc.visitas += dif(b.visitas, a.visitas);
+      out.set(k, acc);
+    }
+  }
+  return out;
+}
+
 export function calcTpDistribuicao(
   data: TpDistribuicaoData,
   filters: Filters
@@ -222,7 +252,10 @@ export function calcTpDistribuicao(
   const impr = sumBy(rows, (r) => r.impressions);
   const cliques = sumBy(rows, (r) => r.linkClicks);
   const visitas = sumBy(rows, (r) => r.visitasPerfil);
-  const seguidores = sumBy(rows, (r) => r.seguidores);
+  // NOTA: a coluna `seguidores` do fb_todos NÃO é lida em lugar nenhum.
+  // Ela guarda o action_type `like` do Meta — curtida de Página do
+  // Facebook, não seguidor do Instagram (14 registros em 4 meses). Seguidor
+  // real só existe na série do post, em ig_impulsionados_hist.
   const v3s = sumBy(rows, (r) => r.video3s);
   const v25 = sumBy(rows, (r) => r.video25);
   const v95 = sumBy(rows, (r) => r.video95);
@@ -235,17 +268,21 @@ export function calcTpDistribuicao(
   // pior que "sem dado") e procura nas DUAS contas (a legenda já
   // discrimina o suficiente entre Metta e Tiago).
   const impulsionamentos: TpDistImpulsionamentoRow[] = [];
+  // Campanhas de impulsionamento presentes no recorte — usadas também na
+  // série diária, pra o gráfico somar o mesmo conjunto dos KPIs.
+  const campanhasNoRecorte = new Set<string>();
+  const seriesBoost = boostSeriesByCampaign(data.ig_impulsionados_hist ?? []);
   if (modo === "seguidores") {
     const postCampaignRows = rows.filter((r) =>
       nameHas(r.campaignName, "POST DO INSTAGRAM")
     );
     const byCampaign = groupBy(postCampaignRows, (r) => r.campaignName);
-    const series = boostSeriesByCampaign(data.ig_impulsionados_hist ?? []);
-
     for (const [campaignName, campRows] of byCampaign) {
       const cInvestimento = sumBy(campRows, (r) => r.amountSpent);
       const cVisitasAnuncio = sumBy(campRows, (r) => r.visitasPerfil);
-      const serie = series.get(normCampaign(campaignName)) ?? null;
+      const chave = normCampaign(campaignName);
+      campanhasNoRecorte.add(chave);
+      const serie = seriesBoost.get(chave) ?? null;
 
       if (!serie) {
         impulsionamentos.push({
@@ -286,6 +323,14 @@ export function calcTpDistribuicao(
   // Dois numeros distintos de proposito: "achou o post" e "tem metrica".
   // Contar reels como casado no resumo dava a entender que havia dado de
   // seguidor onde nao ha — o Meta nao expoe a metrica para reels.
+  // Agregados do lado POST (série do Instagram). Fora do bloco de KPIs
+  // porque funil e série diária consomem os mesmos números.
+  const casadosDoRecorte = impulsionamentos.filter(
+    (i) => i.situacao === "casado"
+  );
+  const seguidoresPosts = sumBy(casadosDoRecorte, (i) => i.seguidores ?? 0);
+  const visitasPostsSum = sumBy(casadosDoRecorte, (i) => i.visitasPost ?? 0);
+
   const impulsionamentosResumo = {
     casados: impulsionamentos.filter((i) => i.situacao === "casado").length,
     total: impulsionamentos.length,
@@ -319,8 +364,6 @@ export function calcTpDistribuicao(
      * métricas DISTINTAS e nunca são somadas entre si.
      */
     const casadosComDado = impulsionamentos.filter((i) => i.situacao === "casado");
-    const seguidoresPosts = sumBy(casadosComDado, (i) => i.seguidores ?? 0);
-    const visitasPostsSum = sumBy(casadosComDado, (i) => i.visitasPost ?? 0);
     // Custo por seguidor = investimento de TODOS os impulsionamentos que
     // casaram (inclui Reels, que gastou mas não tem seguidor mensurável)
     // ÷ seguidores só dos que reportam o dado.
@@ -337,25 +380,29 @@ export function calcTpDistribuicao(
       { label: "Investimento", value: spent, format: "brl" },
       // Visitas do ANÚNCIO (Meta Ads, profile_visit_view) — ver "Visitas
       // (post)" abaixo pra a métrica orgânica equivalente do post real.
-      { label: "Visitas (anúncio)", value: visitas, format: "int" },
+      { label: "Visitas ao perfil (ads)", value: visitas, format: "int" },
       // Custo por visita = Σspent / Σvisitas (anúncio).
-      { label: "Custo por visita", value: safeRate(spent, visitas), format: "brl" },
       {
-        label: "Seguidores",
+        label: "Custo por visita (ads)",
+        value: safeRate(spent, visitas),
+        format: "brl",
+      },
+      {
+        label: "Seguidores (post)",
         value: semPostComDado ? null : seguidoresPosts,
         format: "int",
         hint: semPostComDado ? SEM_POST_HINT : undefined,
       },
       // Visitas do POST orgânico casado — NUNCA somar com "Visitas (anúncio)".
       {
-        label: "Visitas (post)",
+        label: "Visitas ao perfil (post)",
         value: semPostComDado ? null : visitasPostsSum,
         format: "int",
         hint: semPostComDado ? SEM_POST_HINT : undefined,
       },
       // Custo por Seguidor = Σinvestimento (casados) / Σseguidores (posts).
       {
-        label: "Custo por Seguidor",
+        label: "Custo por seguidor (post)",
         value: seguidoresPosts > 0 ? safeRate(investimentoCasados, seguidoresPosts) : null,
         format: "brl",
         hint: seguidoresPosts > 0 ? undefined : SEM_SEGUIDOR_HINT,
@@ -367,6 +414,7 @@ export function calcTpDistribuicao(
 
   type SeriePoint = { dia: Date; [k: string]: Date | number | null };
   const days = eachDay(from, to);
+  const deltasDia = boostDailyDeltas(seriesBoost, campanhasNoRecorte);
   const serie: SeriePoint[] = days.map((dia): SeriePoint => {
     const dayStart = startOfDayBrt(dia).getTime();
     const dayEnd = dayStart + 24 * 60 * 60 * 1000;
@@ -387,14 +435,23 @@ export function calcTpDistribuicao(
       };
     }
 
-    const dSeg = sumBy(dr, (r) => r.seguidores);
+    // Lado ADS (fb_todos) e lado POST (série do Instagram) nunca se somam:
+    // a visita do anúncio é a que o Meta atribui ao clique; a do post é a
+    // que o Instagram contou no post original. Grandezas diferentes.
+    //
+    // A coluna `seguidores` do fb_todos NÃO entra: ela carrega o action_type
+    // `like` do Meta, que é curtida de Página do Facebook, não seguidor do
+    // Instagram — 14 registros em 4 meses. Seguidor real vem da série.
+    const dBoost = deltasDia.get(dayStart) ?? { seguidores: 0, visitas: 0 };
     return {
       dia,
       investimento: dSpent,
-      seguidores: dSeg,
-      visitasPerfil: sumBy(dr, (r) => r.visitasPerfil),
-      // Custo por seguidor diário = Σspent_dia / Σseguidores_dia.
-      custoSeguidor: dSeg > 0 ? safeRate(dSpent, dSeg) : null,
+      seguidoresPost: dBoost.seguidores,
+      visitasPost: dBoost.visitas,
+      visitasAds: sumBy(dr, (r) => r.visitasPerfil),
+      // Custo por seguidor diário = Σspent_dia / Σseguidores_post_dia.
+      custoSeguidor:
+        dBoost.seguidores > 0 ? safeRate(dSpent, dBoost.seguidores) : null,
     };
   });
 
@@ -419,8 +476,10 @@ export function calcTpDistribuicao(
       : buildFunil([
           { etapa: "Impressões", valor: impr },
           { etapa: "Cliques", valor: cliques },
-          { etapa: "Visitas ao perfil", valor: visitas },
-          { etapa: "Seguidores", valor: seguidores },
+          // Rótulo diz a fonte de propósito: as duas visitas medem coisas
+          // diferentes e já foram somadas por engano.
+          { etapa: "Visitas ao perfil (ads)", valor: visitas },
+          { etapa: "Seguidores (post)", valor: seguidoresPosts },
         ]);
 
   // ----- Tabela agregada por adName (pula adName vazio) -------------------
@@ -433,7 +492,6 @@ export function calcTpDistribuicao(
     const aImpr = sumBy(adRows, (r) => r.impressions);
     const aCliques = sumBy(adRows, (r) => r.linkClicks);
     const aVisitas = sumBy(adRows, (r) => r.visitasPerfil);
-    const aSeg = sumBy(adRows, (r) => r.seguidores);
     const a3s = sumBy(adRows, (r) => r.video3s);
     const a25 = sumBy(adRows, (r) => r.video25);
     const a95 = sumBy(adRows, (r) => r.video95);
@@ -448,14 +506,13 @@ export function calcTpDistribuicao(
       ctr: safeRate(aCliques, aImpr),
       // CPM = spent / impressões * 1000.
       cpm: safeRate(aSpent, aImpr) * 1000,
-      visitasPerfil: aVisitas,
-      // Custo p/ visita = spent / visitas.
+      // Lado ADS. Seguidor não existe por anúncio: a métrica só existe no
+      // post, e o post é de N anúncios. Por isso a tabela por anúncio não
+      // tem coluna de seguidor — antes tinha, alimentada pela coluna `like`
+      // do fb_todos, que é curtida de Página do Facebook.
+      visitasPerfilAds: aVisitas,
+      // Custo p/ visita = spent / visitas (ads).
       custoVisita: safeRate(aSpent, aVisitas),
-      seguidores: aSeg,
-      // Custo p/ seguidor = spent / seguidores.
-      custoSeguidor: safeRate(aSpent, aSeg),
-      // Visitas > Seguidores = seguidores / visitas.
-      visitasSeguidores: safeRate(aSeg, aVisitas),
       // Hook rate = video3s / impressões.
       hookRate: safeRate(a3s, aImpr),
       video3s: a3s,

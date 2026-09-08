@@ -359,11 +359,10 @@ export type TpDistTableRow = {
   cpc: number;
   ctr: number;
   cpm: number;
-  visitasPerfil: number;
+  /** Visitas ao perfil atribuídas ao ANÚNCIO (profile_visit_view do Meta).
+   *  Nunca somar com as visitas do post — grandezas diferentes. */
+  visitasPerfilAds: number;
   custoVisita: number;
-  seguidores: number;
-  custoSeguidor: number;
-  visitasSeguidores: number;
   hookRate: number;
   video3s: number;
   video25: number;
