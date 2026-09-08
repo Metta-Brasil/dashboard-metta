@@ -442,6 +442,7 @@ export async function refreshAllSheets(): Promise<{
     "ig_tiago_demograficos",
     "ig_metta_stories",
     "ig_tiago_stories",
+    "ig_impulsionados_hist",
   ];
   const fetched = await fetchTabs(tabs);
 
