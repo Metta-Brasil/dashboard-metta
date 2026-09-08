@@ -245,6 +245,54 @@ export const CLINT_COLUMN_MAP = {
   pipeline: 38,
 } as const;
 
+/**
+ * Aba `ig_impulsionados_hist` — série DIÁRIA dos posts impulsionados
+ * (12 colunas, A..L). Uma linha por (dia, post), escrita pelo metta-ig-sync
+ * a cada hora; a última do dia é o fechamento dele.
+ *
+ * `visitasPerfil`/`seguidores` são LIFETIME do post, não do dia: a Insights
+ * API do Instagram só devolve acumulado e ignora since/until em silêncio.
+ * O ganho de uma janela é a diferença entre dois fechamentos — é para isso
+ * que esta aba existe. Reels vêm vazios (o Meta não expõe a métrica).
+ *
+ * `campanha` é o nome do anúncio no Meta ("Post do Instagram: <legenda>"),
+ * a chave que liga o post ao investimento no `fb_todos`, que não tem
+ * media_id. Vazia nas linhas escritas antes de 07/09/2026.
+ */
+export const IgBoostHistRowSchema = z.object({
+  data: zDate,
+  mediaId: zString,
+  conta: zString,
+  link: zString,
+  legenda: zString,
+  tipo: zString,
+  visitasPerfil: zInt,
+  seguidores: zInt,
+  alcance: zInt,
+  views: zInt,
+  campanha: zString,
+  /** "" quando a célula está vazia — distingue Reels (sem dado) de zero. */
+  visitasRaw: zString,
+  seguidoresRaw: zString,
+});
+export type IgBoostHistRow = z.infer<typeof IgBoostHistRowSchema>;
+
+export const IG_BOOST_HIST_COLUMN_MAP = {
+  data: 0,
+  mediaId: 1,
+  conta: 2,
+  link: 3,
+  legenda: 4,
+  tipo: 5,
+  visitasPerfil: 6,
+  seguidores: 7,
+  alcance: 8,
+  views: 9,
+  campanha: 11,
+  visitasRaw: 6,
+  seguidoresRaw: 7,
+} as const;
+
 export const SdrRowSchema = z.object({
   dataAgendamento: zDate,
   dataReuniao: zDate,

@@ -33,6 +33,9 @@ import {
   IgPostsRowSchema,
   IgProfileRow,
   IgProfileRowSchema,
+  IgBoostHistRow,
+  IgBoostHistRowSchema,
+  IG_BOOST_HIST_COLUMN_MAP,
   IgStoriesRow,
   IgStoriesRowSchema,
   LEADS_COLUMN_MAP,
@@ -77,7 +80,8 @@ export type SheetTab =
   | "ig_metta_demograficos"
   | "ig_tiago_demograficos"
   | "ig_metta_stories"
-  | "ig_tiago_stories";
+  | "ig_tiago_stories"
+  | "ig_impulsionados_hist";
 
 /**
  * Cache aplicacional manual no Upstash (NÃO `'use cache'`).
@@ -115,6 +119,7 @@ const RANGES: Record<SheetTab, string> = {
   ig_tiago_demograficos: "ig_tiago_demograficos!A:D",
   ig_metta_stories: "ig_metta_stories!A:O",
   ig_tiago_stories: "ig_tiago_stories!A:O",
+  ig_impulsionados_hist: "ig_impulsionados_hist!A:L",
 };
 
 type TabRowMap = {
@@ -138,6 +143,7 @@ type TabRowMap = {
   ig_tiago_demograficos: IgDemograficosRow;
   ig_metta_stories: IgStoriesRow;
   ig_tiago_stories: IgStoriesRow;
+  ig_impulsionados_hist: IgBoostHistRow;
 };
 
 /** TTL do snapshot cru. Maior que o intervalo do cron (1h) — assim o
@@ -180,6 +186,13 @@ function parseTab<T extends SheetTab>(
       return parseSheetData(MetaRowSchema, values, METAS_COLUMN_MAP, {
         tab,
       }) as TabRowMap[T][];
+    case "ig_impulsionados_hist":
+      return parseSheetData(
+        IgBoostHistRowSchema,
+        values,
+        IG_BOOST_HIST_COLUMN_MAP,
+        { tab }
+      ) as TabRowMap[T][];
     case "ads_links":
       return parseSheetData(AdsLinkRowSchema, values, ADS_LINKS_COLUMN_MAP, {
         tab,

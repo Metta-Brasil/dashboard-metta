@@ -14,7 +14,7 @@ import type {
   TpDistribuicaoResult,
   TpDistTableRow,
 } from "./types";
-import type { FbTodosRow, IgPostsRow } from "@/lib/sheets/schemas";
+import type { FbTodosRow, IgBoostHistRow } from "@/lib/sheets/schemas";
 
 /**
  * TP Distribuição de conteúdo — página 2-em-1 condicionada a `modo`.
@@ -39,84 +39,131 @@ function nameHas(name: string, marker: string): boolean {
   return name.toUpperCase().includes(marker);
 }
 
-// ----- Casamento impulsionamento ↔ post orgânico (modo Seguidores) --------
+// ----- Casamento impulsionamento ↔ série do post (modo Seguidores) -------
 //
 // Quando um post é turbinado, o Meta clona a mídia pro anúncio (id e
 // permalink próprios, media_product_type "AD") e a API de Insights RECUSA
 // profile_visits/follows nessa cópia. O post ORIGINAL no perfil continua
-// reportando normal — é ele que tem o dado real. A campanha de
-// impulsionamento nomeia a si mesma "Post do Instagram: <início da
-// legenda>…"; usamos esse fragmento pra achar o post original nas abas
-// ig_metta_posts/ig_tiago_posts.
+// reportando — é ele que tem o dado.
+//
+// O casamento era por FRAGMENTO DE LEGENDA contra as abas ig_*_posts, e
+// falhava por construção: essas abas são uma janela dos 100 posts mais
+// recentes de cada conta, então impulsionamento de post antigo simplesmente
+// não achava par (15 dos 28 caíam como "não casado"). Agora o par vem do
+// nome do anúncio, que o metta-ig-sync grava na coluna Campanha do
+// `ig_impulsionados_hist` desde 07/09/2026 — chave exata, sem heurística.
+//
+// E o número deixa de ser lifetime. A Insights API do Instagram só devolve
+// acumulado desde a publicação e ignora since/until em silêncio; somar isso
+// num filtro de período dava o total histórico do post travestido de
+// resultado da janela. O ganho da janela é a diferença entre dois
+// fechamentos diários da série.
 
 const CAMPAIGN_PREFIX_RE = /^\s*post do instagram\s*:\s*/i;
 
-/** Mínimo de chars normalizados no fragmento pra tentar casar — abaixo
- *  disso, qualquer legenda casaria (falso positivo). Preferimos não casar
- *  a casar errado. */
-const MIN_FRAGMENT_LEN = 20;
-
-/**
- * Normaliza pra casamento: minúsculas, sem acento (NFD + strip de
- * diacríticos), tudo que não for [a-z0-9 ] vira espaço, espaços
- * colapsados, trim. Reticências finais (`...`/`…`) somem sozinhas aqui —
- * não são [a-z0-9 ], viram espaço e são aparadas no trim.
- */
-function normalizeText(s: string): string {
-  const semAcento = s
+/** Nome de campanha normalizado pra chave de casamento. */
+function normCampaign(name: string): string {
+  return (name ?? "")
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "");
-  return semAcento.replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
-/** Remove o prefixo "Post do Instagram:" e normaliza o resto do nome. */
-function campaignCaptionFragment(campaignName: string): string {
-  return normalizeText(campaignName.replace(CAMPAIGN_PREFIX_RE, ""));
-}
+type BoostPoint = {
+  dia: Date;
+  visitas: number | null;
+  seguidores: number | null;
+};
+
+type BoostSerie = {
+  campanha: string;
+  legenda: string;
+  tipo: string;
+  /** Fechamentos diários, em ordem crescente de data. */
+  pontos: BoostPoint[];
+};
 
 /**
- * Acha o post orgânico (Metta ou Tiago, ambas as contas — a legenda já é
- * discriminante o bastante) cuja legenda normalizada contém o fragmento
- * da campanha. Exige `fragment.length >= MIN_FRAGMENT_LEN` (chamador já
- * garante). Se mais de um post casar, fica com o de `data` mais próxima
- * de `campaignRefDate` (1º dia de veiculação da campanha — proxy razoável
- * pra "por volta de quando esse post foi publicado/turbinado").
+ * Agrupa a série diária por campanha, guardando UM ponto por dia: o último
+ * do dia (o sync roda de hora em hora e reescreve a linha do dia, mas a aba
+ * pode conter mais de uma leitura se a chave de upsert mudar).
+ * Célula vazia vira null, não 0 — Reels não têm a métrica, e zero mediria
+ * uma coisa que não foi medida.
  */
+function boostSeriesByCampaign(hist: IgBoostHistRow[]): Map<string, BoostSerie> {
+  const porCampanha = new Map<string, Map<number, BoostPoint>>();
+  const meta = new Map<string, { legenda: string; tipo: string; campanha: string }>();
+
+  for (const r of hist) {
+    const chave = normCampaign(r.campanha);
+    if (!chave || !r.data) continue;
+    const dias = porCampanha.get(chave) ?? new Map<number, BoostPoint>();
+    dias.set(startOfDayBrt(r.data).getTime(), {
+      dia: startOfDayBrt(r.data),
+      visitas: r.visitasRaw.trim() === "" ? null : r.visitasPerfil,
+      seguidores: r.seguidoresRaw.trim() === "" ? null : r.seguidores,
+    });
+    porCampanha.set(chave, dias);
+    meta.set(chave, { legenda: r.legenda, tipo: r.tipo, campanha: r.campanha });
+  }
+
+  const out = new Map<string, BoostSerie>();
+  for (const [chave, dias] of porCampanha) {
+    const m = meta.get(chave)!;
+    out.set(chave, {
+      campanha: m.campanha,
+      legenda: m.legenda,
+      tipo: m.tipo,
+      pontos: Array.from(dias.values()).sort(
+        (a, b) => a.dia.getTime() - b.dia.getTime()
+      ),
+    });
+  }
+  return out;
+}
+
 /**
- * Acha o post organico de um impulsionamento pelo fragmento de legenda.
+ * Ganho da janela [from, to] = último fechamento dentro dela menos a linha
+ * de base.
  *
- * Devolve tambem `ambiguo`: quando mais de um post casa (legendas que
- * comecam igual — gancho reaproveitado), a escolha pela data mais
- * proxima e um palpite, nao um fato. Sem esse sinal, o dashboard
- * atribuiria seguidores do post errado com a mesma cara de certeza de
- * um casamento unico.
+ * A base é o último fechamento ANTES de `from`. Sem leitura anterior (post
+ * que entrou na série dentro da janela), a base é o primeiro fechamento
+ * dentro dela — o que já é conservador: o acumulado que o post trouxe de
+ * antes não é creditado à janela.
+ *
+ * null quando não há leitura nenhuma no período, ou quando a métrica não
+ * existe (Reels).
  */
-function matchPost(
-  fragment: string,
-  campaignRefDate: Date | null,
-  posts: IgPostsRow[]
-): { post: IgPostsRow; ambiguo: boolean } | null {
-  const candidates = posts.filter((p) =>
-    normalizeText(p.legenda).includes(fragment)
+function boostDelta(
+  serie: BoostSerie,
+  from: Date,
+  to: Date
+): { visitas: number; seguidores: number } | null {
+  const f = startOfDayBrt(from).getTime();
+  const t = startOfDayBrt(to).getTime();
+  const comDado = serie.pontos.filter(
+    (p) => p.visitas !== null || p.seguidores !== null
   );
-  if (candidates.length === 0) return null;
-  const ambiguo = candidates.length > 1;
-  if (candidates.length === 1 || !campaignRefDate) {
-    return { post: candidates[0], ambiguo };
-  }
+  const dentro = comDado.filter(
+    (p) => p.dia.getTime() >= f && p.dia.getTime() <= t
+  );
+  if (dentro.length === 0) return null;
 
-  let best = candidates[0];
-  let bestDiff = Infinity;
-  for (const c of candidates) {
-    if (!c.data) continue;
-    const diff = Math.abs(c.data.getTime() - campaignRefDate.getTime());
-    if (diff < bestDiff) {
-      bestDiff = diff;
-      best = c;
-    }
-  }
-  return { post: best, ambiguo };
+  const anteriores = comDado.filter((p) => p.dia.getTime() < f);
+  const base = anteriores.length
+    ? anteriores[anteriores.length - 1]
+    : dentro[0];
+  const fim = dentro[dentro.length - 1];
+
+  const dif = (a: number | null, b: number | null): number =>
+    a === null || b === null ? 0 : Math.max(a - b, 0);
+
+  return {
+    visitas: dif(fim.visitas, base.visitas),
+    seguidores: dif(fim.seguidores, base.seguidores),
+  };
 }
 
 export function calcTpDistribuicao(
@@ -193,29 +240,14 @@ export function calcTpDistribuicao(
       nameHas(r.campaignName, "POST DO INSTAGRAM")
     );
     const byCampaign = groupBy(postCampaignRows, (r) => r.campaignName);
-    const allPosts = [...data.ig_metta_posts, ...data.ig_tiago_posts];
+    const series = boostSeriesByCampaign(data.ig_impulsionados_hist ?? []);
 
     for (const [campaignName, campRows] of byCampaign) {
       const cInvestimento = sumBy(campRows, (r) => r.amountSpent);
       const cVisitasAnuncio = sumBy(campRows, (r) => r.visitasPerfil);
-      const dias = campRows
-        .map((r) => r.day)
-        .filter((d): d is Date => d != null);
-      // 1º dia de veiculação da campanha — proxy pra desempate quando o
-      // fragmento casa com mais de um post.
-      const refDate =
-        dias.length > 0
-          ? new Date(Math.min(...dias.map((d) => d.getTime())))
-          : null;
+      const serie = series.get(normCampaign(campaignName)) ?? null;
 
-      const fragment = campaignCaptionFragment(campaignName);
-      const matched =
-        fragment.length >= MIN_FRAGMENT_LEN
-          ? matchPost(fragment, refDate, allPosts)
-          : null;
-      const post = matched?.post ?? null;
-
-      if (!post) {
+      if (!serie) {
         impulsionamentos.push({
           campaignName,
           postLabel:
@@ -232,16 +264,21 @@ export function calcTpDistribuicao(
 
       // Reels não suporta profile_visits/follows por mídia (limitação do
       // Meta) — o dado não existe, nunca é 0 disfarçado.
-      const isReels = post.tipo.trim().toUpperCase() === "VIDEO";
+      const isReels = serie.tipo.trim().toUpperCase() !== "FEED";
+      const delta = isReels ? null : boostDelta(serie, from, to);
       impulsionamentos.push({
         campaignName,
-        postLabel: post.legenda || campaignName,
-        tipo: post.tipo,
+        postLabel: serie.legenda || campaignName,
+        tipo: serie.tipo,
         investimento: cInvestimento,
         visitasAnuncio: cVisitasAnuncio,
-        visitasPost: isReels ? null : post.visitasPerfil,
-        seguidores: isReels ? null : post.seguidores,
-        situacao: isReels ? "reels_sem_dado" : "casado",
+        visitasPost: delta?.visitas ?? null,
+        seguidores: delta?.seguidores ?? null,
+        situacao: isReels
+          ? "reels_sem_dado"
+          : delta
+            ? "casado"
+            : "nao_casado",
       });
     }
   }

@@ -4,7 +4,7 @@ import type {
   ClintRow,
   FbAtRow,
   FbTodosRow,
-  IgPostsRow,
+  IgBoostHistRow,
   LeadRow,
   MetaRow,
   SdrRow,
@@ -72,6 +72,8 @@ export type RawData = {
   at_sala?: AtLeadRow[];
   at_se?: AtLeadRow[];
   at_aph?: AtLeadRow[];
+  /** Série diária dos posts impulsionados (metta-ig-sync). */
+  ig_impulsionados_hist?: IgBoostHistRow[];
 };
 
 export type RawSubset<K extends keyof RawData> = Pick<RawData, K>;
@@ -81,6 +83,7 @@ export type {
   AdsLinkRow,
   AtLeadRow,
   ClintRow,
+  IgBoostHistRow,
   FbAtRow,
   FbTodosRow,
   LeadRow,
@@ -399,9 +402,14 @@ export type TpDistImpulsionamentoRow = {
 
 /** Input de calcTpDistribuicao: fb_todos + as duas abas de posts orgânicos
  *  (fonte real de seguidores/visitas por post, usada no casamento). */
+/**
+ * A página não lê mais `ig_metta_posts`/`ig_tiago_posts`: aquelas abas são
+ * uma janela dos 100 posts mais recentes de cada conta e não alcançavam
+ * impulsionamento de post antigo. A fonte agora é a série diária dos
+ * próprios impulsionados.
+ */
 export type TpDistribuicaoData = Pick<RawData, "fb_todos"> & {
-  ig_metta_posts: IgPostsRow[];
-  ig_tiago_posts: IgPostsRow[];
+  ig_impulsionados_hist: IgBoostHistRow[];
 };
 
 export type TpDistribuicaoResult = {
