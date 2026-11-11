@@ -24,7 +24,7 @@ export function AtvVisaoToggle() {
       const params = new URLSearchParams(sp?.toString() ?? "");
       if (value === "todas") params.delete("pipeline");
       else params.set("pipeline", value);
-      params.delete("sdr");
+      params.delete("pessoa");
       params.delete("canal");
       router.replace(`?${params.toString()}`, { scroll: false });
     },

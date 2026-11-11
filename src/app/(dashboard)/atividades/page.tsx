@@ -77,7 +77,7 @@ async function AtividadesToolbar({ searchParams }: PageProps) {
       leftExtras={<AtvVisaoToggle />}
       extras={
         <>
-          <FilterSelect param="sdr" label="Pessoa" options={result.pessoas} />
+          <FilterSelect param="pessoa" label="Pessoa" options={result.pessoas} />
           <FilterSelect param="canal" label="Canal" options={result.canais} />
         </>
       }

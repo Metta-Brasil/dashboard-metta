@@ -209,9 +209,12 @@ export const getResgate = cache(async (sp: SP) => {
 export const getAtividades = cache(async (sp: SP) => {
   const spv = await sp;
   const filters = parseFilters(spv);
-  const canais =
-    typeof spv.canal === "string"
-      ? spv.canal
+  // Params próprios (`pessoa`, `canal`), e não o `sdr` das outras páginas: o
+  // menu leva a query string de uma página para a outra, e os nomes daqui
+  // (usuário do Clint ou dono do canal) não são os mesmos do filtro de SDR.
+  const lista = (v: string | string[] | undefined): string[] =>
+    typeof v === "string"
+      ? v
           .split(",")
           .map((c) => c.trim())
           .filter((c) => c !== "")
@@ -227,7 +230,7 @@ export const getAtividades = cache(async (sp: SP) => {
     from: filters.from,
     to: filters.to,
     visao: parseAtvVisao(spv.pipeline),
-    pessoas: filters.sdr,
-    canais,
+    pessoas: lista(spv.pessoa),
+    canais: lista(spv.canal),
   });
 });
