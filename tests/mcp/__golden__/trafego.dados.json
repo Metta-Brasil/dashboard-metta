@@ -1,0 +1,952 @@
+{
+  "kpis": {
+    "investimento": 23192.5,
+    "impressoes": 508338,
+    "cliques": 5164,
+    "ctr": 0.01015859526535494,
+    "cpc": 4.491189000774593,
+    "cpm": 45.624171319082976,
+    "leads": 30,
+    "cpl": 773.0833333333334,
+    "txLpLead": 0.0094846664558963,
+    "mql": 22,
+    "cmql": 1054.2045454545455,
+    "txLeadMql": 0.7333333333333333,
+    "negociosCriados": 22,
+    "custoPorNegocio": 1054.2045454545455
+  },
+  "serieCombo": [
+    {
+      "dia": "2026-10-11T03:00:00.000Z",
+      "investimento": 732.5,
+      "cliques": 159,
+      "leads": 1,
+      "mql": 1,
+      "cmql": 732.5,
+      "negociosCriados": 1,
+      "custoPorNegocio": 732.5
+    },
+    {
+      "dia": "2026-10-12T03:00:00.000Z",
+      "investimento": 693.5,
+      "cliques": 144,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-10-13T03:00:00.000Z",
+      "investimento": 794.5,
+      "cliques": 129,
+      "leads": 1,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 1,
+      "custoPorNegocio": 794.5
+    },
+    {
+      "dia": "2026-10-14T03:00:00.000Z",
+      "investimento": 755.5,
+      "cliques": 184,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-10-15T03:00:00.000Z",
+      "investimento": 716.5,
+      "cliques": 204,
+      "leads": 2,
+      "mql": 2,
+      "cmql": 358.25,
+      "negociosCriados": 1,
+      "custoPorNegocio": 716.5
+    },
+    {
+      "dia": "2026-10-16T03:00:00.000Z",
+      "investimento": 817.5,
+      "cliques": 189,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-10-17T03:00:00.000Z",
+      "investimento": 778.5,
+      "cliques": 174,
+      "leads": 2,
+      "mql": 1,
+      "cmql": 778.5,
+      "negociosCriados": 1,
+      "custoPorNegocio": 778.5
+    },
+    {
+      "dia": "2026-10-18T03:00:00.000Z",
+      "investimento": 739.5,
+      "cliques": 159,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-10-19T03:00:00.000Z",
+      "investimento": 700.5,
+      "cliques": 144,
+      "leads": 2,
+      "mql": 2,
+      "cmql": 350.25,
+      "negociosCriados": 1,
+      "custoPorNegocio": 700.5
+    },
+    {
+      "dia": "2026-10-20T03:00:00.000Z",
+      "investimento": 801.5,
+      "cliques": 129,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-10-21T03:00:00.000Z",
+      "investimento": 762.5,
+      "cliques": 184,
+      "leads": 2,
+      "mql": 1,
+      "cmql": 762.5,
+      "negociosCriados": 1,
+      "custoPorNegocio": 762.5
+    },
+    {
+      "dia": "2026-10-22T03:00:00.000Z",
+      "investimento": 723.5,
+      "cliques": 204,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-10-23T03:00:00.000Z",
+      "investimento": 684.5,
+      "cliques": 189,
+      "leads": 2,
+      "mql": 2,
+      "cmql": 342.25,
+      "negociosCriados": 1,
+      "custoPorNegocio": 684.5
+    },
+    {
+      "dia": "2026-10-24T03:00:00.000Z",
+      "investimento": 785.5,
+      "cliques": 174,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-10-25T03:00:00.000Z",
+      "investimento": 746.5,
+      "cliques": 159,
+      "leads": 2,
+      "mql": 1,
+      "cmql": 746.5,
+      "negociosCriados": 1,
+      "custoPorNegocio": 746.5
+    },
+    {
+      "dia": "2026-10-26T03:00:00.000Z",
+      "investimento": 707.5,
+      "cliques": 144,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-10-27T03:00:00.000Z",
+      "investimento": 808.5,
+      "cliques": 129,
+      "leads": 2,
+      "mql": 2,
+      "cmql": 404.25,
+      "negociosCriados": 1,
+      "custoPorNegocio": 808.5
+    },
+    {
+      "dia": "2026-10-28T03:00:00.000Z",
+      "investimento": 769.5,
+      "cliques": 184,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-10-29T03:00:00.000Z",
+      "investimento": 730.5,
+      "cliques": 204,
+      "leads": 2,
+      "mql": 1,
+      "cmql": 730.5,
+      "negociosCriados": 1,
+      "custoPorNegocio": 730.5
+    },
+    {
+      "dia": "2026-10-30T03:00:00.000Z",
+      "investimento": 691.5,
+      "cliques": 189,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-10-31T03:00:00.000Z",
+      "investimento": 792.5,
+      "cliques": 174,
+      "leads": 2,
+      "mql": 2,
+      "cmql": 396.25,
+      "negociosCriados": 2,
+      "custoPorNegocio": 396.25
+    },
+    {
+      "dia": "2026-11-01T03:00:00.000Z",
+      "investimento": 753.5,
+      "cliques": 159,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-11-02T03:00:00.000Z",
+      "investimento": 714.5,
+      "cliques": 144,
+      "leads": 2,
+      "mql": 1,
+      "cmql": 714.5,
+      "negociosCriados": 2,
+      "custoPorNegocio": 357.25
+    },
+    {
+      "dia": "2026-11-03T03:00:00.000Z",
+      "investimento": 815.5,
+      "cliques": 129,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-11-04T03:00:00.000Z",
+      "investimento": 776.5,
+      "cliques": 184,
+      "leads": 2,
+      "mql": 2,
+      "cmql": 388.25,
+      "negociosCriados": 2,
+      "custoPorNegocio": 388.25
+    },
+    {
+      "dia": "2026-11-05T03:00:00.000Z",
+      "investimento": 737.5,
+      "cliques": 204,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-11-06T03:00:00.000Z",
+      "investimento": 698.5,
+      "cliques": 189,
+      "leads": 2,
+      "mql": 1,
+      "cmql": 698.5,
+      "negociosCriados": 2,
+      "custoPorNegocio": 349.25
+    },
+    {
+      "dia": "2026-11-07T03:00:00.000Z",
+      "investimento": 799.5,
+      "cliques": 174,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-11-08T03:00:00.000Z",
+      "investimento": 760.5,
+      "cliques": 159,
+      "leads": 2,
+      "mql": 2,
+      "cmql": 380.25,
+      "negociosCriados": 2,
+      "custoPorNegocio": 380.25
+    },
+    {
+      "dia": "2026-11-09T03:00:00.000Z",
+      "investimento": 721.5,
+      "cliques": 144,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-11-10T03:00:00.000Z",
+      "investimento": 682.5,
+      "cliques": 129,
+      "leads": 2,
+      "mql": 1,
+      "cmql": 682.5,
+      "negociosCriados": 2,
+      "custoPorNegocio": 341.25
+    }
+  ],
+  "mqlCmqlPorFunil": [
+    {
+      "funil": "sala",
+      "mql": 7,
+      "cmql": 1119.2142857142858,
+      "investimento": 7834.5
+    },
+    {
+      "funil": "aplica",
+      "mql": 8,
+      "cmql": 947.5625,
+      "investimento": 7580.5
+    },
+    {
+      "funil": "sessao",
+      "mql": 7,
+      "cmql": 1111.0714285714287,
+      "investimento": 7777.5
+    },
+    {
+      "funil": "isca",
+      "mql": 0,
+      "cmql": null,
+      "investimento": 0
+    },
+    {
+      "funil": "reality",
+      "mql": 0,
+      "cmql": null,
+      "investimento": 0
+    }
+  ],
+  "mqlPorTemperatura": [
+    {
+      "temperatura": "Advantage",
+      "mql": 7
+    },
+    {
+      "temperatura": "Quente",
+      "mql": 8
+    },
+    {
+      "temperatura": "Frio",
+      "mql": 7
+    }
+  ],
+  "funilTrafego": [
+    {
+      "etapa": "Impressões",
+      "valor": 508338,
+      "conversaoEtapa": 1
+    },
+    {
+      "etapa": "Cliques",
+      "valor": 5164,
+      "conversaoEtapa": 0.01015859526535494
+    },
+    {
+      "etapa": "Visualizações de página",
+      "valor": 3163,
+      "conversaoEtapa": 0.6125096824167312
+    },
+    {
+      "etapa": "Leads",
+      "valor": 30,
+      "conversaoEtapa": 0.0094846664558963
+    },
+    {
+      "etapa": "MQL",
+      "valor": 22,
+      "conversaoEtapa": 0.7333333333333333
+    },
+    {
+      "etapa": "Negócios criados",
+      "valor": 22,
+      "conversaoEtapa": 1
+    }
+  ],
+  "funilTrafegoResumo": {
+    "impressoes": 508338,
+    "cliques": 5164,
+    "lpViews": 3163,
+    "leads": 30,
+    "mql": 22,
+    "cpm": 45.624171319082976,
+    "cpc": 4.491189000774593,
+    "ctr": 0.01015859526535494,
+    "cpl": 773.0833333333334,
+    "cmql": 1054.2045454545455,
+    "txLpLead": 0.0094846664558963
+  },
+  "conversoesTrafego": [
+    {
+      "metrica": "CTR",
+      "valor": 0.01015859526535494
+    },
+    {
+      "metrica": "Conexão LP",
+      "valor": 0.6125096824167312
+    },
+    {
+      "metrica": "Conversão LP",
+      "valor": 0.0094846664558963
+    },
+    {
+      "metrica": "Conversão cliques",
+      "valor": 0.005809450038729667
+    }
+  ],
+  "custosTrafego": [
+    {
+      "metrica": "CPC",
+      "valor": 4.491189000774593
+    },
+    {
+      "metrica": "CPM",
+      "valor": 45.624171319082976
+    },
+    {
+      "metrica": "CPL",
+      "valor": 773.0833333333334
+    },
+    {
+      "metrica": "CMQL",
+      "valor": 1054.2045454545455
+    },
+    {
+      "metrica": "Custo/negócio",
+      "valor": 1054.2045454545455
+    }
+  ],
+  "serieConversoesDia": [
+    {
+      "dia": "2026-10-11T03:00:00.000Z",
+      "ctr": 0.008802524497591762,
+      "conexaoLp": 0.6792452830188679,
+      "conversaoLp": 0.009259259259259259,
+      "conversaoCliques": 0.006289308176100629
+    },
+    {
+      "dia": "2026-10-12T03:00:00.000Z",
+      "ctr": 0.008021390374331552,
+      "conexaoLp": 0.6875,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-10-13T03:00:00.000Z",
+      "ctr": 0.007230536404910039,
+      "conexaoLp": 0.6976744186046512,
+      "conversaoLp": 0.011111111111111112,
+      "conversaoCliques": 0.007751937984496124
+    },
+    {
+      "dia": "2026-10-14T03:00:00.000Z",
+      "ctr": 0.010377890580936267,
+      "conexaoLp": 0.44021739130434784,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-10-15T03:00:00.000Z",
+      "ctr": 0.01157840967137749,
+      "conexaoLp": 0.5490196078431373,
+      "conversaoLp": 0.017857142857142856,
+      "conversaoCliques": 0.00980392156862745
+    },
+    {
+      "dia": "2026-10-16T03:00:00.000Z",
+      "ctr": 0.010795065113091157,
+      "conexaoLp": 0.6507936507936508,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-10-17T03:00:00.000Z",
+      "ctr": 0.010001724435247456,
+      "conexaoLp": 0.6551724137931034,
+      "conversaoLp": 0.017543859649122806,
+      "conversaoCliques": 0.011494252873563218
+    },
+    {
+      "dia": "2026-10-18T03:00:00.000Z",
+      "ctr": 0.009198195071155848,
+      "conexaoLp": 0.660377358490566,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-10-19T03:00:00.000Z",
+      "ctr": 0.008384279475982533,
+      "conexaoLp": 0.6666666666666666,
+      "conversaoLp": 0.020833333333333332,
+      "conversaoCliques": 0.013888888888888888
+    },
+    {
+      "dia": "2026-10-20T03:00:00.000Z",
+      "ctr": 0.007559774964838256,
+      "conexaoLp": 0.6744186046511628,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-10-21T03:00:00.000Z",
+      "ctr": 0.01085353624727187,
+      "conexaoLp": 0.42391304347826086,
+      "conversaoLp": 0.02564102564102564,
+      "conversaoCliques": 0.010869565217391304
+    },
+    {
+      "dia": "2026-10-22T03:00:00.000Z",
+      "ctr": 0.012112575703598147,
+      "conexaoLp": 0.6323529411764706,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-10-23T03:00:00.000Z",
+      "ctr": 0.011296395911780527,
+      "conexaoLp": 0.6349206349206349,
+      "conversaoLp": 0.016666666666666666,
+      "conversaoCliques": 0.010582010582010581
+    },
+    {
+      "dia": "2026-10-24T03:00:00.000Z",
+      "ctr": 0.010469314079422382,
+      "conexaoLp": 0.6379310344827587,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-10-25T03:00:00.000Z",
+      "ctr": 0.009631110303470834,
+      "conexaoLp": 0.6415094339622641,
+      "conversaoLp": 0.0196078431372549,
+      "conversaoCliques": 0.012578616352201259
+    },
+    {
+      "dia": "2026-10-26T03:00:00.000Z",
+      "ctr": 0.008781558726673985,
+      "conexaoLp": 0.6458333333333334,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-10-27T03:00:00.000Z",
+      "ctr": 0.007920427334684104,
+      "conexaoLp": 0.6511627906976745,
+      "conversaoLp": 0.023809523809523808,
+      "conversaoCliques": 0.015503875968992248
+    },
+    {
+      "dia": "2026-10-28T03:00:00.000Z",
+      "ctr": 0.011374876360039565,
+      "conexaoLp": 0.5163043478260869,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-10-29T03:00:00.000Z",
+      "ctr": 0.012698412698412698,
+      "conexaoLp": 0.6176470588235294,
+      "conversaoLp": 0.015873015873015872,
+      "conversaoCliques": 0.00980392156862745
+    },
+    {
+      "dia": "2026-10-30T03:00:00.000Z",
+      "ctr": 0.01184655885671305,
+      "conexaoLp": 0.6190476190476191,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-10-31T03:00:00.000Z",
+      "ctr": 0.010982768415072904,
+      "conexaoLp": 0.6206896551724138,
+      "conversaoLp": 0.018518518518518517,
+      "conversaoCliques": 0.011494252873563218
+    },
+    {
+      "dia": "2026-11-01T03:00:00.000Z",
+      "ctr": 0.010106788710907704,
+      "conexaoLp": 0.6226415094339622,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-11-02T03:00:00.000Z",
+      "ctr": 0.009218359900134435,
+      "conexaoLp": 0.625,
+      "conversaoLp": 0.022222222222222223,
+      "conversaoCliques": 0.013888888888888888
+    },
+    {
+      "dia": "2026-11-03T03:00:00.000Z",
+      "ctr": 0.008317214700193424,
+      "conexaoLp": 0.627906976744186,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-11-04T03:00:00.000Z",
+      "ctr": 0.011948827845964023,
+      "conexaoLp": 0.6086956521739131,
+      "conversaoLp": 0.017857142857142856,
+      "conversaoCliques": 0.010869565217391304
+    },
+    {
+      "dia": "2026-11-05T03:00:00.000Z",
+      "ctr": 0.013343799058084773,
+      "conexaoLp": 0.6029411764705882,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-11-06T03:00:00.000Z",
+      "ctr": 0.01245305396323384,
+      "conexaoLp": 0.6031746031746031,
+      "conversaoLp": 0.017543859649122806,
+      "conversaoCliques": 0.010582010582010581
+    },
+    {
+      "dia": "2026-11-07T03:00:00.000Z",
+      "ctr": 0.011549183592194345,
+      "conexaoLp": 0.603448275862069,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-11-08T03:00:00.000Z",
+      "ctr": 0.010631895687061183,
+      "conexaoLp": 0.6037735849056604,
+      "conversaoLp": 0.020833333333333332,
+      "conversaoCliques": 0.012578616352201259
+    },
+    {
+      "dia": "2026-11-09T03:00:00.000Z",
+      "ctr": 0.009700889248181084,
+      "conexaoLp": 0.6041666666666666,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-11-10T03:00:00.000Z",
+      "ctr": 0.008755854204846264,
+      "conexaoLp": 0.6046511627906976,
+      "conversaoLp": 0.02564102564102564,
+      "conversaoCliques": 0.015503875968992248
+    }
+  ],
+  "serieCustosDia": [
+    {
+      "dia": "2026-10-11T03:00:00.000Z",
+      "cpc": 4.6069182389937104,
+      "cpm": 40.55251065714444,
+      "cpl": 732.5,
+      "cmql": 732.5
+    },
+    {
+      "dia": "2026-10-12T03:00:00.000Z",
+      "cpc": 4.815972222222222,
+      "cpm": 38.63079322638146,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-10-13T03:00:00.000Z",
+      "cpc": 6.158914728682171,
+      "cpm": 44.532257160473065,
+      "cpl": 794.5,
+      "cmql": null
+    },
+    {
+      "dia": "2026-10-14T03:00:00.000Z",
+      "cpc": 4.105978260869565,
+      "cpm": 42.61139311900733,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-10-15T03:00:00.000Z",
+      "cpc": 3.5122549019607843,
+      "cpm": 40.66632612520574,
+      "cpl": 358.25,
+      "cmql": 358.25
+    },
+    {
+      "dia": "2026-10-16T03:00:00.000Z",
+      "cpc": 4.325396825396825,
+      "cpm": 46.69294037011652,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-10-17T03:00:00.000Z",
+      "cpc": 4.474137931034483,
+      "cpm": 44.74909467149509,
+      "cpl": 389.25,
+      "cmql": 778.5
+    },
+    {
+      "dia": "2026-10-18T03:00:00.000Z",
+      "cpc": 4.650943396226415,
+      "cpm": 42.78028462339466,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-10-19T03:00:00.000Z",
+      "cpc": 4.864583333333333,
+      "cpm": 40.786026200873366,
+      "cpl": 350.25,
+      "cmql": 350.25
+    },
+    {
+      "dia": "2026-10-20T03:00:00.000Z",
+      "cpc": 6.213178294573644,
+      "cpm": 46.97022972339428,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-10-21T03:00:00.000Z",
+      "cpc": 4.144021739130435,
+      "cpm": 44.97729015513478,
+      "cpl": 381.25,
+      "cmql": 762.5
+    },
+    {
+      "dia": "2026-10-22T03:00:00.000Z",
+      "cpc": 3.5465686274509802,
+      "cpm": 42.958080988006174,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-10-23T03:00:00.000Z",
+      "cpc": 3.621693121693122,
+      "cpm": 40.912079373617836,
+      "cpl": 342.25,
+      "cmql": 342.25
+    },
+    {
+      "dia": "2026-10-24T03:00:00.000Z",
+      "cpc": 4.514367816091954,
+      "cpm": 47.26233453670277,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-10-25T03:00:00.000Z",
+      "cpc": 4.69496855345912,
+      "cpm": 45.21776000969168,
+      "cpl": 373.25,
+      "cmql": 746.5
+    },
+    {
+      "dia": "2026-10-26T03:00:00.000Z",
+      "cpc": 4.913194444444445,
+      "cpm": 43.14550554945725,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-10-27T03:00:00.000Z",
+      "cpc": 6.267441860465116,
+      "cpm": 49.6408178301713,
+      "cpl": 404.25,
+      "cmql": 404.25
+    },
+    {
+      "dia": "2026-10-28T03:00:00.000Z",
+      "cpc": 4.182065217391305,
+      "cpm": 47.57047477744807,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-10-29T03:00:00.000Z",
+      "cpc": 3.5808823529411766,
+      "cpm": 45.47152194211018,
+      "cpl": 365.25,
+      "cmql": 730.5
+    },
+    {
+      "dia": "2026-10-30T03:00:00.000Z",
+      "cpc": 3.6587301587301586,
+      "cpm": 43.343362166227905,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-10-31T03:00:00.000Z",
+      "cpc": 4.554597701149425,
+      "cpm": 50.02209177554756,
+      "cpl": 396.25,
+      "cmql": 396.25
+    },
+    {
+      "dia": "2026-11-01T03:00:00.000Z",
+      "cpc": 4.738993710691824,
+      "cpm": 47.89600813628274,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-11-02T03:00:00.000Z",
+      "cpc": 4.961805555555555,
+      "cpm": 45.73970936559759,
+      "cpl": 357.25,
+      "cmql": 714.5
+    },
+    {
+      "dia": "2026-11-03T03:00:00.000Z",
+      "cpc": 6.321705426356589,
+      "cpm": 52.57898130238556,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-11-04T03:00:00.000Z",
+      "cpc": 4.220108695652174,
+      "cpm": 50.42535229560361,
+      "cpl": 388.25,
+      "cmql": 388.25
+    },
+    {
+      "dia": "2026-11-05T03:00:00.000Z",
+      "cpc": 3.6151960784313726,
+      "cpm": 48.24045002616431,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-11-06T03:00:00.000Z",
+      "cpc": 3.695767195767196,
+      "cpm": 46.02358832443829,
+      "cpl": 349.25,
+      "cmql": 698.5
+    },
+    {
+      "dia": "2026-11-07T03:00:00.000Z",
+      "cpc": 4.594827586206897,
+      "cpm": 53.06650736758264,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-11-08T03:00:00.000Z",
+      "cpc": 4.783018867924528,
+      "cpm": 50.85255767301906,
+      "cpl": 380.25,
+      "cmql": 380.25
+    },
+    {
+      "dia": "2026-11-09T03:00:00.000Z",
+      "cpc": 5.010416666666667,
+      "cpm": 48.60549717057397,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-11-10T03:00:00.000Z",
+      "cpc": 5.290697674418604,
+      "cpm": 46.324577479128486,
+      "cpl": 341.25,
+      "cmql": 682.5
+    }
+  ],
+  "ranking": [
+    {
+      "nome": "CONTA01|PERPETUO|APLICACAO|CAPTACAO|QUENTE_campanha_um",
+      "agrupamento": "campanha",
+      "investimento": 7580.5,
+      "impressoes": 141205,
+      "cliques": 1675,
+      "ctr": 0.01186218618320881,
+      "cpc": 4.525671641791045,
+      "cpm": 53.68435961899366,
+      "lpViews": 1050,
+      "leads": 10,
+      "cpl": 758.05,
+      "mql": 8,
+      "cmql": 947.5625,
+      "negociosCriados": 8,
+      "custoPorNegocio": 947.5625
+    },
+    {
+      "nome": "CONTA01|PERPETUO|SESSAO|CAPTACAO|FRIO_campanha_dois",
+      "agrupamento": "campanha",
+      "investimento": 7777.5,
+      "impressoes": 169446,
+      "cliques": 1768,
+      "ctr": 0.010434002573091133,
+      "cpc": 4.399038461538462,
+      "cpm": 45.899578626819164,
+      "lpViews": 1061,
+      "leads": 10,
+      "cpl": 777.75,
+      "mql": 7,
+      "cmql": 1111.0714285714287,
+      "negociosCriados": 7,
+      "custoPorNegocio": 1111.0714285714287
+    },
+    {
+      "nome": "CONTA02|PERPETUO|SALA|CAPTACAO|ADVANTAGE_campanha_tres",
+      "agrupamento": "campanha",
+      "investimento": 7834.5,
+      "impressoes": 197687,
+      "cliques": 1721,
+      "ctr": 0.008705681203114013,
+      "cpc": 4.552295177222545,
+      "cpm": 39.63083055537289,
+      "lpViews": 1052,
+      "leads": 10,
+      "cpl": 783.45,
+      "mql": 7,
+      "cmql": 1119.2142857142858,
+      "negociosCriados": 7,
+      "custoPorNegocio": 1119.2142857142858
+    }
+  ]
+}

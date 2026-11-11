@@ -1,0 +1,103 @@
+{
+  "visao": "todas",
+  "temDados": true,
+  "cobertura": {
+    "de": "2026-10-30",
+    "ate": "2026-11-10"
+  },
+  "pessoas": [
+    "Sdr Alfa",
+    "Sdr Beta"
+  ],
+  "canais": [
+    "Canal Alfa",
+    "Canal Beta"
+  ],
+  "resumo": {
+    "ligFeitas": 30,
+    "ligAtendidas": 0,
+    "ligAte10": 0,
+    "lig30": 0,
+    "lig120": 0,
+    "unicos30": 0,
+    "duracaoMedia30": 0,
+    "msgClint": 0,
+    "msgCelular": 27,
+    "msgEnviadas": 27,
+    "abordados": 3,
+    "abordadosClint": 0,
+    "responderam": 3,
+    "responderamAgendaram": 2,
+    "responderamNaoAgendaram": 1,
+    "msgAutomaticas": 0,
+    "msgRecebidas": 0,
+    "reunioes": 0,
+    "contatosAgendados": 0,
+    "conexoesAgendaram": 0,
+    "conexoesNaoAgendaram": 0
+  },
+  "porPessoa": [
+    {
+      "pessoa": "Sdr Beta",
+      "ligFeitas": 30,
+      "ligAtendidas": 0,
+      "ligAte10": 0,
+      "lig30": 0,
+      "lig120": 0,
+      "unicos30": 0,
+      "duracaoMedia30": 0,
+      "msgClint": 0,
+      "msgCelular": 27,
+      "msgEnviadas": 27,
+      "abordados": 3,
+      "abordadosClint": 0,
+      "responderam": 3,
+      "responderamAgendaram": 2,
+      "responderamNaoAgendaram": 1,
+      "msgAutomaticas": 0,
+      "msgRecebidas": 0,
+      "reunioes": 0,
+      "contatosAgendados": 0,
+      "conexoesAgendaram": 0,
+      "conexoesNaoAgendaram": 0
+    }
+  ],
+  "serie": [
+    {
+      "dia": "2026-11-05T03:00:00.000Z",
+      "ligacoes": 6,
+      "ligacoes30": 0,
+      "mensagens": 9,
+      "reunioes": 0
+    },
+    {
+      "dia": "2026-11-06T03:00:00.000Z",
+      "ligacoes": 6,
+      "ligacoes30": 0,
+      "mensagens": 0,
+      "reunioes": 0
+    },
+    {
+      "dia": "2026-11-07T03:00:00.000Z",
+      "ligacoes": 6,
+      "ligacoes30": 0,
+      "mensagens": 9,
+      "reunioes": 0
+    },
+    {
+      "dia": "2026-11-08T03:00:00.000Z",
+      "ligacoes": 6,
+      "ligacoes30": 0,
+      "mensagens": 0,
+      "reunioes": 0
+    },
+    {
+      "dia": "2026-11-09T03:00:00.000Z",
+      "ligacoes": 6,
+      "ligacoes30": 0,
+      "mensagens": 9,
+      "reunioes": 0
+    }
+  ],
+  "consultoria": null
+}

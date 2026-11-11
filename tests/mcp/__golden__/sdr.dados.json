@@ -1,0 +1,3869 @@
+{
+  "kpis": {
+    "negociosCriados": 22,
+    "sal": 8,
+    "sql": 6,
+    "agendamentos": 12,
+    "reunioesAgendadas": 12,
+    "realizadas": 7,
+    "taxaShow": 0.5833333333333334,
+    "propostas": 5,
+    "taxaProposta": 0.7142857142857143,
+    "valorPropostas": 240000,
+    "vendas": 3,
+    "faturamento": 144000,
+    "leadsRecebidos": 30,
+    "tentativasContato": 10,
+    "taxaContato": 0.3333333333333333,
+    "taxaAgendamento": 1.2
+  },
+  "funilSdr": [
+    {
+      "etapa": "Negócios criados",
+      "valor": 22,
+      "conversaoEtapa": 1
+    },
+    {
+      "etapa": "Agendamentos",
+      "valor": 12,
+      "conversaoEtapa": 0.5454545454545454
+    },
+    {
+      "etapa": "Reuniões marcadas",
+      "valor": 12,
+      "conversaoEtapa": 1
+    },
+    {
+      "etapa": "Realizadas",
+      "valor": 7,
+      "conversaoEtapa": 0.5833333333333334
+    },
+    {
+      "etapa": "Propostas",
+      "valor": 5,
+      "conversaoEtapa": 0.7142857142857143
+    },
+    {
+      "etapa": "Vendas",
+      "valor": 3,
+      "conversaoEtapa": 0.6
+    }
+  ],
+  "porSdr": [
+    {
+      "sdr": "Sdr Alfa",
+      "negociosCriados": 12,
+      "taxaAgendamento": 0.5833333333333334,
+      "agendou": 7,
+      "realizou": 7,
+      "show": 1,
+      "noShow": 0,
+      "propostas": 5,
+      "txProposta": 0.7142857142857143,
+      "valorProp": 240000,
+      "vendas": 3,
+      "close": 0.6,
+      "leadsAtribuidos": 5,
+      "tentativas": 5,
+      "taxaContato": 1
+    },
+    {
+      "sdr": "Sdr Beta",
+      "negociosCriados": 10,
+      "taxaAgendamento": 0.5,
+      "agendou": 5,
+      "realizou": 0,
+      "show": 0,
+      "noShow": 1,
+      "propostas": 0,
+      "txProposta": 0,
+      "valorProp": 0,
+      "vendas": 0,
+      "close": 0,
+      "leadsAtribuidos": 5,
+      "tentativas": 5,
+      "taxaContato": 1
+    }
+  ],
+  "sdrNames": [
+    "Sdr Alfa",
+    "Sdr Beta"
+  ],
+  "timeInStage": [
+    {
+      "label": "Agendamento → Reunião agendada",
+      "mediaDias": 0,
+      "medianaDias": 0,
+      "n": 12
+    },
+    {
+      "label": "Reunião agendada → Realizada",
+      "mediaDias": 0,
+      "medianaDias": 0,
+      "n": 7
+    },
+    {
+      "label": "Realizada → Proposta",
+      "mediaDias": 0,
+      "medianaDias": 0,
+      "n": 5
+    },
+    {
+      "label": "Proposta → Vendas",
+      "mediaDias": 0,
+      "medianaDias": 0,
+      "n": 3
+    }
+  ],
+  "heatmapAgendadas": [
+    {
+      "diaSemana": 0,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 9,
+      "total": 1
+    },
+    {
+      "diaSemana": 0,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 11,
+      "total": 1
+    },
+    {
+      "diaSemana": 0,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 13,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 15,
+      "total": 1
+    },
+    {
+      "diaSemana": 0,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 9,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 13,
+      "total": 1
+    },
+    {
+      "diaSemana": 1,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 9,
+      "total": 2
+    },
+    {
+      "diaSemana": 2,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 13,
+      "total": 1
+    },
+    {
+      "diaSemana": 2,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 9,
+      "total": 1
+    },
+    {
+      "diaSemana": 3,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 13,
+      "total": 1
+    },
+    {
+      "diaSemana": 3,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 9,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 13,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 15,
+      "total": 1
+    },
+    {
+      "diaSemana": 4,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 9,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 11,
+      "total": 1
+    },
+    {
+      "diaSemana": 5,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 13,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 9,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 13,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 15,
+      "total": 1
+    },
+    {
+      "diaSemana": 6,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 23,
+      "total": 0
+    }
+  ],
+  "heatmapRealizadas": [
+    {
+      "diaSemana": 0,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 9,
+      "total": 1
+    },
+    {
+      "diaSemana": 0,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 13,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 9,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 13,
+      "total": 1
+    },
+    {
+      "diaSemana": 1,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 9,
+      "total": 2
+    },
+    {
+      "diaSemana": 2,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 13,
+      "total": 1
+    },
+    {
+      "diaSemana": 2,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 9,
+      "total": 1
+    },
+    {
+      "diaSemana": 3,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 13,
+      "total": 1
+    },
+    {
+      "diaSemana": 3,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 9,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 13,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 9,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 13,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 9,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 13,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 23,
+      "total": 0
+    }
+  ],
+  "heatmapPropostas": [
+    {
+      "diaSemana": 0,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 9,
+      "total": 1
+    },
+    {
+      "diaSemana": 0,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 13,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 9,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 13,
+      "total": 1
+    },
+    {
+      "diaSemana": 1,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 9,
+      "total": 2
+    },
+    {
+      "diaSemana": 2,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 13,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 9,
+      "total": 1
+    },
+    {
+      "diaSemana": 3,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 13,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 9,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 13,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 9,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 13,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 9,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 13,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 23,
+      "total": 0
+    }
+  ],
+  "heatmapVendas": [
+    {
+      "diaSemana": 0,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 9,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 13,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 0,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 9,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 13,
+      "total": 1
+    },
+    {
+      "diaSemana": 1,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 1,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 9,
+      "total": 1
+    },
+    {
+      "diaSemana": 2,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 13,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 2,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 9,
+      "total": 1
+    },
+    {
+      "diaSemana": 3,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 13,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 3,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 9,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 13,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 4,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 9,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 13,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 5,
+      "hora": 23,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 0,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 1,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 2,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 3,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 4,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 5,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 6,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 7,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 8,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 9,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 10,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 11,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 12,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 13,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 14,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 15,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 16,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 17,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 18,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 19,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 20,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 21,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 22,
+      "total": 0
+    },
+    {
+      "diaSemana": 6,
+      "hora": 23,
+      "total": 0
+    }
+  ],
+  "serieReunioesDia": [
+    {
+      "dia": "2026-10-11T03:00:00.000Z",
+      "agendadas": 1,
+      "realizadas": 1
+    },
+    {
+      "dia": "2026-10-12T03:00:00.000Z",
+      "agendadas": 0,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-10-13T03:00:00.000Z",
+      "agendadas": 0,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-10-14T03:00:00.000Z",
+      "agendadas": 0,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-10-15T03:00:00.000Z",
+      "agendadas": 1,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-10-16T03:00:00.000Z",
+      "agendadas": 0,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-10-17T03:00:00.000Z",
+      "agendadas": 0,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-10-18T03:00:00.000Z",
+      "agendadas": 0,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-10-19T03:00:00.000Z",
+      "agendadas": 1,
+      "realizadas": 1
+    },
+    {
+      "dia": "2026-10-20T03:00:00.000Z",
+      "agendadas": 0,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-10-21T03:00:00.000Z",
+      "agendadas": 0,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-10-22T03:00:00.000Z",
+      "agendadas": 0,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-10-23T03:00:00.000Z",
+      "agendadas": 1,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-10-24T03:00:00.000Z",
+      "agendadas": 0,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-10-25T03:00:00.000Z",
+      "agendadas": 0,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-10-26T03:00:00.000Z",
+      "agendadas": 0,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-10-27T03:00:00.000Z",
+      "agendadas": 1,
+      "realizadas": 1
+    },
+    {
+      "dia": "2026-10-28T03:00:00.000Z",
+      "agendadas": 0,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-10-29T03:00:00.000Z",
+      "agendadas": 0,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-10-30T03:00:00.000Z",
+      "agendadas": 0,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-10-31T03:00:00.000Z",
+      "agendadas": 1,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-11-01T03:00:00.000Z",
+      "agendadas": 0,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-11-02T03:00:00.000Z",
+      "agendadas": 0,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-11-03T03:00:00.000Z",
+      "agendadas": 0,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-11-04T03:00:00.000Z",
+      "agendadas": 2,
+      "realizadas": 2
+    },
+    {
+      "dia": "2026-11-05T03:00:00.000Z",
+      "agendadas": 0,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-11-06T03:00:00.000Z",
+      "agendadas": 0,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-11-07T03:00:00.000Z",
+      "agendadas": 0,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-11-08T03:00:00.000Z",
+      "agendadas": 2,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-11-09T03:00:00.000Z",
+      "agendadas": 0,
+      "realizadas": 0
+    },
+    {
+      "dia": "2026-11-10T03:00:00.000Z",
+      "agendadas": 2,
+      "realizadas": 2
+    }
+  ],
+  "porData": [
+    {
+      "dia": "2026-11-10T03:00:00.000Z",
+      "negociosCriados": 2,
+      "taxaAgendamento": 1,
+      "agendou": 2,
+      "realizou": 2,
+      "show": 1,
+      "noShow": 0,
+      "propostas": 1,
+      "txProposta": 0.5,
+      "valorProp": 42000,
+      "vendas": 1,
+      "close": 1
+    },
+    {
+      "dia": "2026-11-08T03:00:00.000Z",
+      "negociosCriados": 2,
+      "taxaAgendamento": 1,
+      "agendou": 2,
+      "realizou": 0,
+      "show": 0,
+      "noShow": 1,
+      "propostas": 0,
+      "txProposta": 0,
+      "valorProp": 0,
+      "vendas": 0,
+      "close": 0
+    },
+    {
+      "dia": "2026-11-06T15:00:00.000Z",
+      "negociosCriados": 2,
+      "taxaAgendamento": 0,
+      "agendou": 0,
+      "realizou": 0,
+      "show": 0,
+      "noShow": 0,
+      "propostas": 0,
+      "txProposta": 0,
+      "valorProp": 0,
+      "vendas": 0,
+      "close": 0
+    },
+    {
+      "dia": "2026-11-04T03:00:00.000Z",
+      "negociosCriados": 2,
+      "taxaAgendamento": 1,
+      "agendou": 2,
+      "realizou": 2,
+      "show": 1,
+      "noShow": 0,
+      "propostas": 1,
+      "txProposta": 0.5,
+      "valorProp": 54000,
+      "vendas": 1,
+      "close": 1
+    },
+    {
+      "dia": "2026-11-02T15:00:00.000Z",
+      "negociosCriados": 2,
+      "taxaAgendamento": 0,
+      "agendou": 0,
+      "realizou": 0,
+      "show": 0,
+      "noShow": 0,
+      "propostas": 0,
+      "txProposta": 0,
+      "valorProp": 0,
+      "vendas": 0,
+      "close": 0
+    },
+    {
+      "dia": "2026-10-31T03:00:00.000Z",
+      "negociosCriados": 2,
+      "taxaAgendamento": 0.5,
+      "agendou": 1,
+      "realizou": 0,
+      "show": 0,
+      "noShow": 1,
+      "propostas": 0,
+      "txProposta": 0,
+      "valorProp": 0,
+      "vendas": 0,
+      "close": 0
+    },
+    {
+      "dia": "2026-10-29T15:00:00.000Z",
+      "negociosCriados": 1,
+      "taxaAgendamento": 0,
+      "agendou": 0,
+      "realizou": 0,
+      "show": 0,
+      "noShow": 0,
+      "propostas": 0,
+      "txProposta": 0,
+      "valorProp": 0,
+      "vendas": 0,
+      "close": 0
+    },
+    {
+      "dia": "2026-10-27T03:00:00.000Z",
+      "negociosCriados": 1,
+      "taxaAgendamento": 1,
+      "agendou": 1,
+      "realizou": 1,
+      "show": 1,
+      "noShow": 0,
+      "propostas": 1,
+      "txProposta": 1,
+      "valorProp": 46000,
+      "vendas": 0,
+      "close": 0
+    },
+    {
+      "dia": "2026-10-25T15:00:00.000Z",
+      "negociosCriados": 1,
+      "taxaAgendamento": 0,
+      "agendou": 0,
+      "realizou": 0,
+      "show": 0,
+      "noShow": 0,
+      "propostas": 0,
+      "txProposta": 0,
+      "valorProp": 0,
+      "vendas": 0,
+      "close": 0
+    },
+    {
+      "dia": "2026-10-23T03:00:00.000Z",
+      "negociosCriados": 1,
+      "taxaAgendamento": 1,
+      "agendou": 1,
+      "realizou": 0,
+      "show": 0,
+      "noShow": 1,
+      "propostas": 0,
+      "txProposta": 0,
+      "valorProp": 0,
+      "vendas": 0,
+      "close": 0
+    },
+    {
+      "dia": "2026-10-21T15:00:00.000Z",
+      "negociosCriados": 1,
+      "taxaAgendamento": 0,
+      "agendou": 0,
+      "realizou": 0,
+      "show": 0,
+      "noShow": 0,
+      "propostas": 0,
+      "txProposta": 0,
+      "valorProp": 0,
+      "vendas": 0,
+      "close": 0
+    },
+    {
+      "dia": "2026-10-19T03:00:00.000Z",
+      "negociosCriados": 1,
+      "taxaAgendamento": 1,
+      "agendou": 1,
+      "realizou": 1,
+      "show": 1,
+      "noShow": 0,
+      "propostas": 1,
+      "txProposta": 1,
+      "valorProp": 48000,
+      "vendas": 1,
+      "close": 1
+    },
+    {
+      "dia": "2026-10-17T15:00:00.000Z",
+      "negociosCriados": 1,
+      "taxaAgendamento": 0,
+      "agendou": 0,
+      "realizou": 0,
+      "show": 0,
+      "noShow": 0,
+      "propostas": 0,
+      "txProposta": 0,
+      "valorProp": 0,
+      "vendas": 0,
+      "close": 0
+    },
+    {
+      "dia": "2026-10-15T03:00:00.000Z",
+      "negociosCriados": 1,
+      "taxaAgendamento": 1,
+      "agendou": 1,
+      "realizou": 0,
+      "show": 0,
+      "noShow": 1,
+      "propostas": 0,
+      "txProposta": 0,
+      "valorProp": 0,
+      "vendas": 0,
+      "close": 0
+    },
+    {
+      "dia": "2026-10-13T15:00:00.000Z",
+      "negociosCriados": 1,
+      "taxaAgendamento": 0,
+      "agendou": 0,
+      "realizou": 0,
+      "show": 0,
+      "noShow": 0,
+      "propostas": 0,
+      "txProposta": 0,
+      "valorProp": 0,
+      "vendas": 0,
+      "close": 0
+    },
+    {
+      "dia": "2026-10-11T03:00:00.000Z",
+      "negociosCriados": 1,
+      "taxaAgendamento": 1,
+      "agendou": 1,
+      "realizou": 1,
+      "show": 1,
+      "noShow": 0,
+      "propostas": 1,
+      "txProposta": 1,
+      "valorProp": 50000,
+      "vendas": 0,
+      "close": 0
+    }
+  ]
+}

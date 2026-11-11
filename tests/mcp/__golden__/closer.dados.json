@@ -1,0 +1,143 @@
+{
+  "kpis": {
+    "vendas": 3,
+    "faturamento": 144000,
+    "ticketMedio": 48000,
+    "roas": 6.20890374043333,
+    "cicloMedio": 1,
+    "cicloMedioReuniaoVenda": 0,
+    "reunioes": 7,
+    "propostas": 5,
+    "taxaProposta": 0.7142857142857143,
+    "taxaFechamento": 0.6
+  },
+  "receitaPorFunil": [
+    {
+      "funil": "aplica",
+      "receita": 144000,
+      "pct": 1
+    }
+  ],
+  "evolucao12Meses": [
+    {
+      "mes": "2025-12-01T03:00:00.000Z",
+      "receita": 0,
+      "meta": null
+    },
+    {
+      "mes": "2026-01-01T03:00:00.000Z",
+      "receita": 101000,
+      "meta": null
+    },
+    {
+      "mes": "2026-02-01T03:00:00.000Z",
+      "receita": 49000,
+      "meta": null
+    },
+    {
+      "mes": "2026-03-01T03:00:00.000Z",
+      "receita": 50000,
+      "meta": null
+    },
+    {
+      "mes": "2026-04-01T03:00:00.000Z",
+      "receita": 51000,
+      "meta": null
+    },
+    {
+      "mes": "2026-05-01T03:00:00.000Z",
+      "receita": 52000,
+      "meta": null
+    },
+    {
+      "mes": "2026-06-01T03:00:00.000Z",
+      "receita": 0,
+      "meta": null
+    },
+    {
+      "mes": "2026-07-01T03:00:00.000Z",
+      "receita": 0,
+      "meta": null
+    },
+    {
+      "mes": "2026-08-01T03:00:00.000Z",
+      "receita": 0,
+      "meta": null
+    },
+    {
+      "mes": "2026-09-01T03:00:00.000Z",
+      "receita": 0,
+      "meta": 300000
+    },
+    {
+      "mes": "2026-10-01T03:00:00.000Z",
+      "receita": 48000,
+      "meta": 300000
+    },
+    {
+      "mes": "2026-11-01T03:00:00.000Z",
+      "receita": 96000,
+      "meta": 300000
+    }
+  ],
+  "vendasDoPeriodo": [
+    {
+      "data": "2026-11-10T15:00:00.000Z",
+      "comprador": "Xantipa01 Quorvale01",
+      "funil": "Aplicação",
+      "produto": "Mentoria",
+      "valor": 42000,
+      "sdr": "Sdr Alfa",
+      "pagamento": "",
+      "ciclo": 0
+    },
+    {
+      "data": "2026-11-04T15:00:00.000Z",
+      "comprador": "Xantipa25 Quorvale25",
+      "funil": "Aplicação",
+      "produto": "Mentoria",
+      "valor": 54000,
+      "sdr": "Sdr Alfa",
+      "pagamento": "",
+      "ciclo": null
+    },
+    {
+      "data": "2026-10-19T15:00:00.000Z",
+      "comprador": "Xantipa13 Quorvale13",
+      "funil": "Aplicação",
+      "produto": "Mentoria",
+      "valor": 48000,
+      "sdr": "Sdr Alfa",
+      "pagamento": "",
+      "ciclo": 2
+    }
+  ],
+  "porCloser": [
+    {
+      "closer": "Closer Gama",
+      "agendou": 7,
+      "realizou": 7,
+      "show": 1,
+      "propostas": 5,
+      "txProposta": 0.7142857142857143,
+      "valorProp": 240000,
+      "vendas": 3,
+      "close": 0.6,
+      "faturamento": 144000,
+      "ticketMedio": 48000
+    },
+    {
+      "closer": "Closer Delta",
+      "agendou": 5,
+      "realizou": 0,
+      "show": 0,
+      "propostas": 0,
+      "txProposta": 0,
+      "valorProp": 0,
+      "vendas": 0,
+      "close": 0,
+      "faturamento": 0,
+      "ticketMedio": 0
+    }
+  ]
+}

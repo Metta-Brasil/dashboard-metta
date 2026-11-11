@@ -1,0 +1,495 @@
+{
+  "hero": {
+    "realFaturamento": 144000,
+    "metaFaturamentoMtd": 100000,
+    "pctAtingimento": 1.44,
+    "gap": 44000,
+    "projecaoFimDoMes": 432000
+  },
+  "tabelaFunil": [
+    {
+      "nome": "Investimento",
+      "realValor": 23192.5,
+      "metaMtdValor": 6666.666666666666,
+      "pctAtingimento": 3.4788750000000004,
+      "gap": 16525.833333333336
+    },
+    {
+      "nome": "MQL",
+      "realValor": 22,
+      "metaMtdValor": 20,
+      "pctAtingimento": 1.1,
+      "gap": 2
+    },
+    {
+      "nome": "Negócios criados",
+      "realValor": 22,
+      "metaMtdValor": null,
+      "pctAtingimento": null,
+      "gap": null
+    },
+    {
+      "nome": "Agendamentos",
+      "realValor": 12,
+      "metaMtdValor": null,
+      "pctAtingimento": null,
+      "gap": null
+    },
+    {
+      "nome": "Reuniões agendadas",
+      "realValor": 12,
+      "metaMtdValor": null,
+      "pctAtingimento": null,
+      "gap": null
+    },
+    {
+      "nome": "Reuniões realizadas",
+      "realValor": 7,
+      "metaMtdValor": null,
+      "pctAtingimento": null,
+      "gap": null
+    },
+    {
+      "nome": "Vendas",
+      "realValor": 3,
+      "metaMtdValor": 2,
+      "pctAtingimento": 1.5,
+      "gap": 1
+    },
+    {
+      "nome": "Faturamento",
+      "realValor": 144000,
+      "metaMtdValor": 100000,
+      "pctAtingimento": 1.44,
+      "gap": 44000
+    }
+  ],
+  "cardsTaxa": [
+    {
+      "nome": "CMQL",
+      "realValor": 1054.2045454545455,
+      "metaValor": 350,
+      "isInverse": true
+    },
+    {
+      "nome": "Custo/negócio",
+      "realValor": 1054.2045454545455,
+      "metaValor": null,
+      "isInverse": true
+    },
+    {
+      "nome": "Tx MQL / Negócio",
+      "realValor": 1,
+      "metaValor": null
+    },
+    {
+      "nome": "Tx Agendamento / MQL",
+      "realValor": 0.5454545454545454,
+      "metaValor": null
+    },
+    {
+      "nome": "Tx Reun. realizada / Reun. agendada",
+      "realValor": 0.5833333333333334,
+      "metaValor": null
+    },
+    {
+      "nome": "Conversão Vendas / Reun. realizada",
+      "realValor": 0.42857142857142855,
+      "metaValor": null
+    }
+  ],
+  "pacingChart": [
+    {
+      "date": "2026-11-01T00:00:00.000Z",
+      "realAcumulado": 0,
+      "metaAcumulada": 10000,
+      "projecao": null
+    },
+    {
+      "date": "2026-11-02T00:00:00.000Z",
+      "realAcumulado": 0,
+      "metaAcumulada": 20000,
+      "projecao": null
+    },
+    {
+      "date": "2026-11-03T00:00:00.000Z",
+      "realAcumulado": 0,
+      "metaAcumulada": 30000,
+      "projecao": null
+    },
+    {
+      "date": "2026-11-04T00:00:00.000Z",
+      "realAcumulado": 54000,
+      "metaAcumulada": 40000,
+      "projecao": null
+    },
+    {
+      "date": "2026-11-05T00:00:00.000Z",
+      "realAcumulado": 54000,
+      "metaAcumulada": 50000,
+      "projecao": null
+    },
+    {
+      "date": "2026-11-06T00:00:00.000Z",
+      "realAcumulado": 54000,
+      "metaAcumulada": 60000,
+      "projecao": null
+    },
+    {
+      "date": "2026-11-07T00:00:00.000Z",
+      "realAcumulado": 54000,
+      "metaAcumulada": 70000,
+      "projecao": null
+    },
+    {
+      "date": "2026-11-08T00:00:00.000Z",
+      "realAcumulado": 54000,
+      "metaAcumulada": 80000,
+      "projecao": null
+    },
+    {
+      "date": "2026-11-09T00:00:00.000Z",
+      "realAcumulado": 54000,
+      "metaAcumulada": 90000,
+      "projecao": null
+    },
+    {
+      "date": "2026-11-10T00:00:00.000Z",
+      "realAcumulado": 96000,
+      "metaAcumulada": 100000,
+      "projecao": 96000
+    },
+    {
+      "date": "2026-11-11T00:00:00.000Z",
+      "realAcumulado": null,
+      "metaAcumulada": 110000,
+      "projecao": 112800
+    },
+    {
+      "date": "2026-11-12T00:00:00.000Z",
+      "realAcumulado": null,
+      "metaAcumulada": 120000,
+      "projecao": 129600
+    },
+    {
+      "date": "2026-11-13T00:00:00.000Z",
+      "realAcumulado": null,
+      "metaAcumulada": 130000,
+      "projecao": 146400
+    },
+    {
+      "date": "2026-11-14T00:00:00.000Z",
+      "realAcumulado": null,
+      "metaAcumulada": 140000,
+      "projecao": 163200
+    },
+    {
+      "date": "2026-11-15T00:00:00.000Z",
+      "realAcumulado": null,
+      "metaAcumulada": 150000,
+      "projecao": 180000
+    },
+    {
+      "date": "2026-11-16T00:00:00.000Z",
+      "realAcumulado": null,
+      "metaAcumulada": 160000,
+      "projecao": 196800
+    },
+    {
+      "date": "2026-11-17T00:00:00.000Z",
+      "realAcumulado": null,
+      "metaAcumulada": 170000,
+      "projecao": 213600
+    },
+    {
+      "date": "2026-11-18T00:00:00.000Z",
+      "realAcumulado": null,
+      "metaAcumulada": 180000,
+      "projecao": 230400
+    },
+    {
+      "date": "2026-11-19T00:00:00.000Z",
+      "realAcumulado": null,
+      "metaAcumulada": 190000,
+      "projecao": 247200
+    },
+    {
+      "date": "2026-11-20T00:00:00.000Z",
+      "realAcumulado": null,
+      "metaAcumulada": 200000,
+      "projecao": 264000
+    },
+    {
+      "date": "2026-11-21T00:00:00.000Z",
+      "realAcumulado": null,
+      "metaAcumulada": 210000,
+      "projecao": 280800
+    },
+    {
+      "date": "2026-11-22T00:00:00.000Z",
+      "realAcumulado": null,
+      "metaAcumulada": 220000,
+      "projecao": 297600
+    },
+    {
+      "date": "2026-11-23T00:00:00.000Z",
+      "realAcumulado": null,
+      "metaAcumulada": 230000,
+      "projecao": 314400
+    },
+    {
+      "date": "2026-11-24T00:00:00.000Z",
+      "realAcumulado": null,
+      "metaAcumulada": 240000,
+      "projecao": 331200
+    },
+    {
+      "date": "2026-11-25T00:00:00.000Z",
+      "realAcumulado": null,
+      "metaAcumulada": 250000,
+      "projecao": 348000
+    },
+    {
+      "date": "2026-11-26T00:00:00.000Z",
+      "realAcumulado": null,
+      "metaAcumulada": 260000,
+      "projecao": 364800
+    },
+    {
+      "date": "2026-11-27T00:00:00.000Z",
+      "realAcumulado": null,
+      "metaAcumulada": 270000,
+      "projecao": 381600
+    },
+    {
+      "date": "2026-11-28T00:00:00.000Z",
+      "realAcumulado": null,
+      "metaAcumulada": 280000,
+      "projecao": 398400
+    },
+    {
+      "date": "2026-11-29T00:00:00.000Z",
+      "realAcumulado": null,
+      "metaAcumulada": 290000,
+      "projecao": 415200
+    },
+    {
+      "date": "2026-11-30T00:00:00.000Z",
+      "realAcumulado": null,
+      "metaAcumulada": 300000,
+      "projecao": 432000
+    }
+  ],
+  "pacingDiaAtual": 10,
+  "pacingNecessario": [
+    {
+      "metrica": "Faturamento/dia necessário",
+      "valorPorDia": 7800,
+      "pctAvancado": 0.48
+    },
+    {
+      "metrica": "Vendas/dia necessária",
+      "valorPorDia": 0.15,
+      "pctAvancado": 0.5
+    },
+    {
+      "metrica": "MQL/dia necessário",
+      "valorPorDia": 1.9,
+      "pctAvancado": 0.36666666666666664
+    },
+    {
+      "metrica": "Investimento/dia necessário",
+      "valorPorDia": 0,
+      "pctAvancado": 1
+    }
+  ],
+  "historicoMensal": [
+    {
+      "mes": "2025-12-01T00:00:00.000Z",
+      "investimento": 0,
+      "mql": 0,
+      "cmql": null,
+      "agendamentos": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "conversao": null,
+      "faturamento": 0,
+      "pctMeta": null
+    },
+    {
+      "mes": "2026-01-01T00:00:00.000Z",
+      "investimento": 0,
+      "mql": 0,
+      "cmql": null,
+      "agendamentos": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 2,
+      "conversao": null,
+      "faturamento": 101000,
+      "pctMeta": null
+    },
+    {
+      "mes": "2026-02-01T00:00:00.000Z",
+      "investimento": 0,
+      "mql": 0,
+      "cmql": null,
+      "agendamentos": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 1,
+      "conversao": null,
+      "faturamento": 49000,
+      "pctMeta": null
+    },
+    {
+      "mes": "2026-03-01T00:00:00.000Z",
+      "investimento": 0,
+      "mql": 0,
+      "cmql": null,
+      "agendamentos": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 1,
+      "conversao": null,
+      "faturamento": 50000,
+      "pctMeta": null
+    },
+    {
+      "mes": "2026-04-01T00:00:00.000Z",
+      "investimento": 0,
+      "mql": 0,
+      "cmql": null,
+      "agendamentos": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 1,
+      "conversao": null,
+      "faturamento": 51000,
+      "pctMeta": null
+    },
+    {
+      "mes": "2026-05-01T00:00:00.000Z",
+      "investimento": 0,
+      "mql": 0,
+      "cmql": null,
+      "agendamentos": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 1,
+      "conversao": null,
+      "faturamento": 52000,
+      "pctMeta": null
+    },
+    {
+      "mes": "2026-06-01T00:00:00.000Z",
+      "investimento": 0,
+      "mql": 0,
+      "cmql": null,
+      "agendamentos": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "conversao": null,
+      "faturamento": 0,
+      "pctMeta": null
+    },
+    {
+      "mes": "2026-07-01T00:00:00.000Z",
+      "investimento": 0,
+      "mql": 0,
+      "cmql": null,
+      "agendamentos": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "conversao": null,
+      "faturamento": 0,
+      "pctMeta": null
+    },
+    {
+      "mes": "2026-08-01T00:00:00.000Z",
+      "investimento": 0,
+      "mql": 0,
+      "cmql": null,
+      "agendamentos": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "conversao": null,
+      "faturamento": 0,
+      "pctMeta": null
+    },
+    {
+      "mes": "2026-09-01T00:00:00.000Z",
+      "investimento": 14317.5,
+      "mql": 1,
+      "cmql": 14317.5,
+      "agendamentos": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "conversao": null,
+      "faturamento": 0,
+      "pctMeta": 0
+    },
+    {
+      "mes": "2026-10-01T00:00:00.000Z",
+      "investimento": 23242.5,
+      "mql": 19,
+      "cmql": 1223.2894736842106,
+      "agendamentos": 7,
+      "reunioesRealizadas": 3,
+      "vendas": 1,
+      "conversao": 0.3333333333333333,
+      "faturamento": 48000,
+      "pctMeta": 0.16
+    },
+    {
+      "mes": "2026-11-01T00:00:00.000Z",
+      "investimento": 7460,
+      "mql": 7,
+      "cmql": 1065.7142857142858,
+      "agendamentos": 6,
+      "reunioesRealizadas": 4,
+      "vendas": 2,
+      "conversao": 0.5,
+      "faturamento": 96000,
+      "pctMeta": 0.32
+    }
+  ],
+  "rows": [
+    {
+      "funil": "Todos",
+      "metrica": "Faturamento",
+      "mes": "2026-11",
+      "metaValor": 100000,
+      "realizadoValor": 144000,
+      "atingimento": 1.44
+    },
+    {
+      "funil": "Todos",
+      "metrica": "Vendas",
+      "mes": "2026-11",
+      "metaValor": 2,
+      "realizadoValor": 3,
+      "atingimento": 1.5
+    },
+    {
+      "funil": "Todos",
+      "metrica": "MQL",
+      "mes": "2026-11",
+      "metaValor": 20,
+      "realizadoValor": 22,
+      "atingimento": 1.1
+    },
+    {
+      "funil": "Todos",
+      "metrica": "Investimento",
+      "mes": "2026-11",
+      "metaValor": 6666.666666666666,
+      "realizadoValor": 23192.5,
+      "atingimento": 3.4788750000000004
+    },
+    {
+      "funil": "Todos",
+      "metrica": "CMQL",
+      "mes": "2026-11",
+      "metaValor": 116.66666666666666,
+      "realizadoValor": 1054.2045454545455,
+      "atingimento": 9.036038961038962
+    }
+  ],
+  "resumoPorFunil": []
+}

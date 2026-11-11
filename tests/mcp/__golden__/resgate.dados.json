@@ -1,0 +1,433 @@
+{
+  "temColunaPipeline": true,
+  "total": 10,
+  "kpis": [
+    {
+      "label": "Base carregada",
+      "value": 10,
+      "format": "int",
+      "hint": "Negócios na pipeline Operação Resgate."
+    },
+    {
+      "label": "Trabalhados",
+      "value": 7,
+      "format": "int",
+      "hint": "70.0% da base saiu da etapa Base."
+    },
+    {
+      "label": "Conexões",
+      "value": 4,
+      "format": "int"
+    },
+    {
+      "label": "Reuniões realizadas",
+      "value": 1,
+      "format": "int"
+    },
+    {
+      "label": "Propostas",
+      "value": 0,
+      "format": "int"
+    },
+    {
+      "label": "Valor resgatado",
+      "value": 0,
+      "format": "brl",
+      "hint": "0 negócio(s) fechado(s) · taxa de resgate 0.0%."
+    }
+  ],
+  "funil": [
+    {
+      "etapa": "Base carregada",
+      "valor": 10,
+      "conversaoEtapa": 1,
+      "parados": 3,
+      "avancaram": 5,
+      "diasMedia": 7
+    },
+    {
+      "etapa": "Prospecção",
+      "valor": 5,
+      "conversaoEtapa": 0.5,
+      "parados": 1,
+      "avancaram": 4,
+      "diasMedia": 15
+    },
+    {
+      "etapa": "Conexão",
+      "valor": 4,
+      "conversaoEtapa": 0.8,
+      "parados": 1,
+      "avancaram": 3,
+      "diasMedia": 19
+    },
+    {
+      "etapa": "Follow-up",
+      "valor": 3,
+      "conversaoEtapa": 0.75,
+      "parados": 0,
+      "avancaram": 3,
+      "diasMedia": null
+    },
+    {
+      "etapa": "Qualificação",
+      "valor": 3,
+      "conversaoEtapa": 1,
+      "parados": 1,
+      "avancaram": 2,
+      "diasMedia": 27
+    },
+    {
+      "etapa": "Reunião agendada",
+      "valor": 2,
+      "conversaoEtapa": 0.6666666666666666,
+      "parados": 1,
+      "avancaram": 1,
+      "diasMedia": 31
+    },
+    {
+      "etapa": "Reunião realizada",
+      "valor": 1,
+      "conversaoEtapa": 0.5,
+      "parados": 1,
+      "avancaram": 0,
+      "diasMedia": 35
+    },
+    {
+      "etapa": "Proposta",
+      "valor": 0,
+      "conversaoEtapa": 0,
+      "parados": 0,
+      "avancaram": 0,
+      "diasMedia": null
+    },
+    {
+      "etapa": "Resgatado",
+      "valor": 0,
+      "conversaoEtapa": 0,
+      "parados": 0,
+      "avancaram": 0,
+      "diasMedia": null
+    }
+  ],
+  "perdidos": 1,
+  "noShow": 0,
+  "serieMovimentos": [
+    {
+      "dia": "2026-10-11T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-12T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-13T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-14T03:00:00.000Z",
+      "movimentacoes": 1
+    },
+    {
+      "dia": "2026-10-15T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-16T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-17T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-18T03:00:00.000Z",
+      "movimentacoes": 1
+    },
+    {
+      "dia": "2026-10-19T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-20T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-21T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-22T03:00:00.000Z",
+      "movimentacoes": 1
+    },
+    {
+      "dia": "2026-10-23T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-24T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-25T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-26T03:00:00.000Z",
+      "movimentacoes": 1
+    },
+    {
+      "dia": "2026-10-27T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-28T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-29T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-30T03:00:00.000Z",
+      "movimentacoes": 1
+    },
+    {
+      "dia": "2026-10-31T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-11-01T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-11-02T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-11-03T03:00:00.000Z",
+      "movimentacoes": 1
+    },
+    {
+      "dia": "2026-11-04T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-11-05T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-11-06T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-11-07T03:00:00.000Z",
+      "movimentacoes": 1
+    },
+    {
+      "dia": "2026-11-08T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-11-09T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-11-10T03:00:00.000Z",
+      "movimentacoes": 0
+    }
+  ],
+  "perfilQualificacao": [
+    {
+      "name": "MQL 1",
+      "value": 3
+    },
+    {
+      "name": "MQL 2",
+      "value": 3
+    },
+    {
+      "name": "Interprise",
+      "value": 2
+    },
+    {
+      "name": "Não qualificado",
+      "value": 2
+    }
+  ],
+  "perfilFaturamento": [
+    {
+      "name": "De 201 mil a 300 mil",
+      "value": 3
+    },
+    {
+      "name": "De 301 mil a 500 mil",
+      "value": 3
+    },
+    {
+      "name": "De 1 a 4 milhões",
+      "value": 2
+    },
+    {
+      "name": "De 501 mil a 700 mil",
+      "value": 2
+    }
+  ],
+  "perfilFunil": [
+    {
+      "name": "Aplicação direta",
+      "value": 5
+    },
+    {
+      "name": "Sessão estratégica",
+      "value": 5
+    }
+  ],
+  "perfilCampanha": [
+    {
+      "name": "CONTA01|PERPETUO|APLICACAO|CAPTACAO|QUENTE_campanha_um",
+      "value": 4
+    },
+    {
+      "name": "CONTA01|PERPETUO|SESSAO|CAPTACAO|FRIO_campanha_dois",
+      "value": 3
+    },
+    {
+      "name": "CONTA02|PERPETUO|SALA|CAPTACAO|ADVANTAGE_campanha_tres",
+      "value": 3
+    }
+  ],
+  "negocios": [
+    {
+      "nome": "Xantipa36 Quorvale36",
+      "contato": "+55 11 90000-1036",
+      "qualificacao": "MQL 2",
+      "faturamento": "De 301 mil a 500 mil",
+      "funilOrigem": "Sessão estratégica",
+      "utmCampaign": "CONTA01|PERPETUO|APLICACAO|CAPTACAO|QUENTE_campanha_um",
+      "etapa": "Negócio perdido",
+      "macroEtapa": "Perdido",
+      "diasParado": 39,
+      "dono": "Dono Zeta",
+      "valor": 0
+    },
+    {
+      "nome": "Xantipa32 Quorvale32",
+      "contato": "+55 11 90000-1032",
+      "qualificacao": "MQL 2",
+      "faturamento": "De 301 mil a 500 mil",
+      "funilOrigem": "Sessão estratégica",
+      "utmCampaign": "CONTA02|PERPETUO|SALA|CAPTACAO|ADVANTAGE_campanha_tres",
+      "etapa": "Follow-up 1",
+      "macroEtapa": "Follow-up 1",
+      "diasParado": 23,
+      "dono": "Dono Zeta",
+      "valor": 0
+    },
+    {
+      "nome": "Xantipa35 Quorvale35",
+      "contato": "@perfil_ficticio_35",
+      "qualificacao": "MQL 1",
+      "faturamento": "De 201 mil a 300 mil",
+      "funilOrigem": "Aplicação direta",
+      "utmCampaign": "CONTA02|PERPETUO|SALA|CAPTACAO|ADVANTAGE_campanha_tres",
+      "etapa": "Reunião realizada",
+      "macroEtapa": "Reunião realizada",
+      "diasParado": 35,
+      "dono": "Dono Epsilon",
+      "valor": 0
+    },
+    {
+      "nome": "Xantipa34 Quorvale34",
+      "contato": "+55 11 90000-1034",
+      "qualificacao": "Interprise",
+      "faturamento": "De 1 a 4 milhões",
+      "funilOrigem": "Sessão estratégica",
+      "utmCampaign": "CONTA01|PERPETUO|SESSAO|CAPTACAO|FRIO_campanha_dois",
+      "etapa": "Reunião agendada",
+      "macroEtapa": "Reunião agendada",
+      "diasParado": 31,
+      "dono": "Dono Zeta",
+      "valor": 0
+    },
+    {
+      "nome": "Xantipa33 Quorvale33",
+      "contato": "@perfil_ficticio_33",
+      "qualificacao": "Não qualificado",
+      "faturamento": "De 501 mil a 700 mil",
+      "funilOrigem": "Aplicação direta",
+      "utmCampaign": "CONTA01|PERPETUO|APLICACAO|CAPTACAO|QUENTE_campanha_um",
+      "etapa": "Qualificação",
+      "macroEtapa": "Qualificação",
+      "diasParado": 27,
+      "dono": "Dono Epsilon",
+      "valor": 0
+    },
+    {
+      "nome": "Xantipa31 Quorvale31",
+      "contato": "@perfil_ficticio_31",
+      "qualificacao": "MQL 1",
+      "faturamento": "De 201 mil a 300 mil",
+      "funilOrigem": "Aplicação direta",
+      "utmCampaign": "CONTA01|PERPETUO|SESSAO|CAPTACAO|FRIO_campanha_dois",
+      "etapa": "Conexão",
+      "macroEtapa": "Conexão",
+      "diasParado": 19,
+      "dono": "Dono Epsilon",
+      "valor": 0
+    },
+    {
+      "nome": "Xantipa30 Quorvale30",
+      "contato": "+55 11 90000-1030",
+      "qualificacao": "Interprise",
+      "faturamento": "De 1 a 4 milhões",
+      "funilOrigem": "Sessão estratégica",
+      "utmCampaign": "CONTA01|PERPETUO|APLICACAO|CAPTACAO|QUENTE_campanha_um",
+      "etapa": "Prospecção",
+      "macroEtapa": "Prospecção",
+      "diasParado": 15,
+      "dono": "Dono Zeta",
+      "valor": 0
+    },
+    {
+      "nome": "Xantipa29 Quorvale29",
+      "contato": "@perfil_ficticio_29",
+      "qualificacao": "Não qualificado",
+      "faturamento": "De 501 mil a 700 mil",
+      "funilOrigem": "Aplicação direta",
+      "utmCampaign": "CONTA02|PERPETUO|SALA|CAPTACAO|ADVANTAGE_campanha_tres",
+      "etapa": "Base",
+      "macroEtapa": "Base carregada",
+      "diasParado": 11,
+      "dono": "Dono Epsilon",
+      "valor": 0
+    },
+    {
+      "nome": "Xantipa28 Quorvale28",
+      "contato": "+55 11 90000-1028",
+      "qualificacao": "MQL 2",
+      "faturamento": "De 301 mil a 500 mil",
+      "funilOrigem": "Sessão estratégica",
+      "utmCampaign": "CONTA01|PERPETUO|SESSAO|CAPTACAO|FRIO_campanha_dois",
+      "etapa": "Base",
+      "macroEtapa": "Base carregada",
+      "diasParado": 7,
+      "dono": "Dono Zeta",
+      "valor": 0
+    },
+    {
+      "nome": "Xantipa27 Quorvale27",
+      "contato": "@perfil_ficticio_27",
+      "qualificacao": "MQL 1",
+      "faturamento": "De 201 mil a 300 mil",
+      "funilOrigem": "Aplicação direta",
+      "utmCampaign": "CONTA01|PERPETUO|APLICACAO|CAPTACAO|QUENTE_campanha_um",
+      "etapa": "Base",
+      "macroEtapa": "Base carregada",
+      "diasParado": 3,
+      "dono": "Dono Epsilon",
+      "valor": 0
+    }
+  ]
+}

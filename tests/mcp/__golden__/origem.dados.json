@@ -1,0 +1,388 @@
+{
+  "porUtmSource": [
+    {
+      "dimensao": "quente",
+      "leadsQualif": 8,
+      "mql": 8,
+      "negociosCriados": 8,
+      "agendamentos": 4,
+      "reunioesAgendadas": 4,
+      "reunioesRealizadas": 3,
+      "vendas": 3,
+      "faturamento": 144000
+    },
+    {
+      "dimensao": "advantage",
+      "leadsQualif": 7,
+      "mql": 7,
+      "negociosCriados": 7,
+      "agendamentos": 4,
+      "reunioesAgendadas": 4,
+      "reunioesRealizadas": 2,
+      "vendas": 0,
+      "faturamento": 0
+    },
+    {
+      "dimensao": "frio",
+      "leadsQualif": 7,
+      "mql": 7,
+      "negociosCriados": 7,
+      "agendamentos": 4,
+      "reunioesAgendadas": 4,
+      "reunioesRealizadas": 2,
+      "vendas": 0,
+      "faturamento": 0
+    }
+  ],
+  "porUtmMedium": [
+    {
+      "dimensao": "pago",
+      "leadsQualif": 22,
+      "mql": 22,
+      "negociosCriados": 22,
+      "agendamentos": 12,
+      "reunioesAgendadas": 12,
+      "reunioesRealizadas": 7,
+      "vendas": 3,
+      "faturamento": 144000
+    }
+  ],
+  "porUtmContent": [
+    {
+      "dimensao": "AD-APLI-004-estatico-teste-quatro",
+      "leadsQualif": 8,
+      "mql": 8,
+      "negociosCriados": 5,
+      "agendamentos": 0,
+      "reunioesAgendadas": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "faturamento": 0
+    },
+    {
+      "dimensao": "AD-APLI-001-estatico-teste-um",
+      "leadsQualif": 7,
+      "mql": 7,
+      "negociosCriados": 6,
+      "agendamentos": 7,
+      "reunioesAgendadas": 7,
+      "reunioesRealizadas": 7,
+      "vendas": 3,
+      "faturamento": 144000
+    },
+    {
+      "dimensao": "AD-SE-002-carrossel-teste-dois",
+      "leadsQualif": 7,
+      "mql": 7,
+      "negociosCriados": 6,
+      "agendamentos": 0,
+      "reunioesAgendadas": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "faturamento": 0
+    },
+    {
+      "dimensao": "AD-SALA-003-video-teste-tres",
+      "leadsQualif": 0,
+      "mql": 0,
+      "negociosCriados": 5,
+      "agendamentos": 5,
+      "reunioesAgendadas": 5,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "faturamento": 0
+    }
+  ],
+  "porUtmCampaign": [
+    {
+      "dimensao": "CONTA01|PERPETUO|APLICACAO|CAPTACAO|QUENTE_campanha_um",
+      "leadsQualif": 8,
+      "mql": 8,
+      "negociosCriados": 8,
+      "agendamentos": 4,
+      "reunioesAgendadas": 4,
+      "reunioesRealizadas": 3,
+      "vendas": 3,
+      "faturamento": 144000
+    },
+    {
+      "dimensao": "CONTA01|PERPETUO|SESSAO|CAPTACAO|FRIO_campanha_dois",
+      "leadsQualif": 7,
+      "mql": 7,
+      "negociosCriados": 7,
+      "agendamentos": 4,
+      "reunioesAgendadas": 4,
+      "reunioesRealizadas": 2,
+      "vendas": 0,
+      "faturamento": 0
+    },
+    {
+      "dimensao": "CONTA02|PERPETUO|SALA|CAPTACAO|ADVANTAGE_campanha_tres",
+      "leadsQualif": 7,
+      "mql": 7,
+      "negociosCriados": 7,
+      "agendamentos": 4,
+      "reunioesAgendadas": 4,
+      "reunioesRealizadas": 2,
+      "vendas": 0,
+      "faturamento": 0
+    }
+  ],
+  "porQualificacao": [
+    {
+      "dimensao": "Enterprise",
+      "leadsQualif": 8,
+      "mql": 8,
+      "negociosCriados": 5,
+      "agendamentos": 0,
+      "reunioesAgendadas": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "faturamento": 0
+    },
+    {
+      "dimensao": "MQL 1",
+      "leadsQualif": 7,
+      "mql": 7,
+      "negociosCriados": 6,
+      "agendamentos": 7,
+      "reunioesAgendadas": 7,
+      "reunioesRealizadas": 7,
+      "vendas": 3,
+      "faturamento": 144000
+    },
+    {
+      "dimensao": "MQL 2",
+      "leadsQualif": 7,
+      "mql": 7,
+      "negociosCriados": 6,
+      "agendamentos": 0,
+      "reunioesAgendadas": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "faturamento": 0
+    }
+  ],
+  "porCargo": [
+    {
+      "dimensao": "Empresário",
+      "leadsQualif": 2,
+      "mql": 2,
+      "negociosCriados": 4,
+      "agendamentos": 4,
+      "reunioesAgendadas": 4,
+      "reunioesRealizadas": 2,
+      "vendas": 0,
+      "faturamento": 0
+    },
+    {
+      "dimensao": "Sócio",
+      "leadsQualif": 3,
+      "mql": 3,
+      "negociosCriados": 4,
+      "agendamentos": 4,
+      "reunioesAgendadas": 4,
+      "reunioesRealizadas": 3,
+      "vendas": 3,
+      "faturamento": 144000
+    },
+    {
+      "dimensao": "CEO",
+      "leadsQualif": 5,
+      "mql": 5,
+      "negociosCriados": 4,
+      "agendamentos": 0,
+      "reunioesAgendadas": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "faturamento": 0
+    },
+    {
+      "dimensao": "Diretor de vendas",
+      "leadsQualif": 2,
+      "mql": 2,
+      "negociosCriados": 3,
+      "agendamentos": 4,
+      "reunioesAgendadas": 4,
+      "reunioesRealizadas": 2,
+      "vendas": 0,
+      "faturamento": 0
+    },
+    {
+      "dimensao": "Gerente",
+      "leadsQualif": 5,
+      "mql": 5,
+      "negociosCriados": 4,
+      "agendamentos": 0,
+      "reunioesAgendadas": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "faturamento": 0
+    },
+    {
+      "dimensao": "Outros",
+      "leadsQualif": 5,
+      "mql": 5,
+      "negociosCriados": 3,
+      "agendamentos": 0,
+      "reunioesAgendadas": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "faturamento": 0
+    }
+  ],
+  "porFaturamento": [
+    {
+      "dimensao": "Acima de 4 milhões",
+      "leadsQualif": 0,
+      "mql": 0,
+      "negociosCriados": 0,
+      "agendamentos": 0,
+      "reunioesAgendadas": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "faturamento": 0,
+      "qualif": "Enterprise"
+    },
+    {
+      "dimensao": "De 1 milhão a 4 milhões",
+      "leadsQualif": 0,
+      "mql": 0,
+      "negociosCriados": 0,
+      "agendamentos": 0,
+      "reunioesAgendadas": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "faturamento": 0,
+      "qualif": "MQL 1"
+    },
+    {
+      "dimensao": "De 701 mil a 1 milhão",
+      "leadsQualif": 0,
+      "mql": 0,
+      "negociosCriados": 0,
+      "agendamentos": 0,
+      "reunioesAgendadas": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "faturamento": 0,
+      "qualif": "MQL 1"
+    },
+    {
+      "dimensao": "De 501 mil a 700 mil",
+      "leadsQualif": 0,
+      "mql": 0,
+      "negociosCriados": 5,
+      "agendamentos": 5,
+      "reunioesAgendadas": 5,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "faturamento": 0,
+      "qualif": "MQL 1"
+    },
+    {
+      "dimensao": "De 301 mil a 500 mil",
+      "leadsQualif": 7,
+      "mql": 7,
+      "negociosCriados": 6,
+      "agendamentos": 0,
+      "reunioesAgendadas": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "faturamento": 0,
+      "qualif": "MQL 1"
+    },
+    {
+      "dimensao": "De 201 mil a 300 mil",
+      "leadsQualif": 7,
+      "mql": 7,
+      "negociosCriados": 6,
+      "agendamentos": 7,
+      "reunioesAgendadas": 7,
+      "reunioesRealizadas": 7,
+      "vendas": 3,
+      "faturamento": 144000,
+      "qualif": "MQL 1"
+    },
+    {
+      "dimensao": "De 101 mil a 200 mil",
+      "leadsQualif": 0,
+      "mql": 0,
+      "negociosCriados": 0,
+      "agendamentos": 0,
+      "reunioesAgendadas": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "faturamento": 0,
+      "qualif": "MQL 2"
+    }
+  ],
+  "porSegmento": [
+    {
+      "dimensao": "Indústria",
+      "leadsQualif": 7,
+      "mql": 7,
+      "negociosCriados": 6,
+      "agendamentos": 0,
+      "reunioesAgendadas": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "faturamento": 0
+    },
+    {
+      "dimensao": "Varejo",
+      "leadsQualif": 7,
+      "mql": 7,
+      "negociosCriados": 6,
+      "agendamentos": 7,
+      "reunioesAgendadas": 7,
+      "reunioesRealizadas": 7,
+      "vendas": 3,
+      "faturamento": 144000
+    },
+    {
+      "dimensao": "Serviços",
+      "leadsQualif": 0,
+      "mql": 0,
+      "negociosCriados": 5,
+      "agendamentos": 5,
+      "reunioesAgendadas": 5,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "faturamento": 0
+    },
+    {
+      "dimensao": "Tecnologia",
+      "leadsQualif": 0,
+      "mql": 0,
+      "negociosCriados": 0,
+      "agendamentos": 0,
+      "reunioesAgendadas": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "faturamento": 0
+    },
+    {
+      "dimensao": "Agronegócio",
+      "leadsQualif": 8,
+      "mql": 8,
+      "negociosCriados": 5,
+      "agendamentos": 0,
+      "reunioesAgendadas": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "faturamento": 0
+    },
+    {
+      "dimensao": "Marketing",
+      "leadsQualif": 0,
+      "mql": 0,
+      "negociosCriados": 0,
+      "agendamentos": 0,
+      "reunioesAgendadas": 0,
+      "reunioesRealizadas": 0,
+      "vendas": 0,
+      "faturamento": 0
+    }
+  ]
+}

@@ -1,0 +1,551 @@
+{
+  "kpis": {
+    "investimento": 7380,
+    "impressoes": 170625,
+    "cliques": 1735,
+    "ctr": 0.010168498168498168,
+    "cpc": 4.253602305475504,
+    "cpm": 43.252747252747255,
+    "leads": 7,
+    "cpl": 1054.2857142857142,
+    "txLpLead": 0.006829268292682927,
+    "mql": 6,
+    "cmql": 1230,
+    "txLeadMql": 0.8571428571428571,
+    "negociosCriados": 5,
+    "custoPorNegocio": 1476
+  },
+  "serieCombo": [
+    {
+      "dia": "2026-10-01T03:00:00.000Z",
+      "investimento": 422,
+      "cliques": 139,
+      "leads": 1,
+      "mql": 1,
+      "cmql": 422,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-10-02T03:00:00.000Z",
+      "investimento": 536,
+      "cliques": 129,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-10-03T03:00:00.000Z",
+      "investimento": 510,
+      "cliques": 119,
+      "leads": 1,
+      "mql": 1,
+      "cmql": 510,
+      "negociosCriados": 1,
+      "custoPorNegocio": 510
+    },
+    {
+      "dia": "2026-10-04T03:00:00.000Z",
+      "investimento": 484,
+      "cliques": 109,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-10-05T03:00:00.000Z",
+      "investimento": 458,
+      "cliques": 99,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-10-06T03:00:00.000Z",
+      "investimento": 572,
+      "cliques": 89,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-10-07T03:00:00.000Z",
+      "investimento": 546,
+      "cliques": 114,
+      "leads": 1,
+      "mql": 1,
+      "cmql": 546,
+      "negociosCriados": 1,
+      "custoPorNegocio": 546
+    },
+    {
+      "dia": "2026-10-08T03:00:00.000Z",
+      "investimento": 520,
+      "cliques": 139,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-10-09T03:00:00.000Z",
+      "investimento": 494,
+      "cliques": 129,
+      "leads": 1,
+      "mql": 1,
+      "cmql": 494,
+      "negociosCriados": 1,
+      "custoPorNegocio": 494
+    },
+    {
+      "dia": "2026-10-10T03:00:00.000Z",
+      "investimento": 468,
+      "cliques": 119,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-10-11T03:00:00.000Z",
+      "investimento": 442,
+      "cliques": 109,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-10-12T03:00:00.000Z",
+      "investimento": 416,
+      "cliques": 99,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-10-13T03:00:00.000Z",
+      "investimento": 530,
+      "cliques": 89,
+      "leads": 1,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 1,
+      "custoPorNegocio": 530
+    },
+    {
+      "dia": "2026-10-14T03:00:00.000Z",
+      "investimento": 504,
+      "cliques": 114,
+      "leads": 0,
+      "mql": 0,
+      "cmql": null,
+      "negociosCriados": 0,
+      "custoPorNegocio": null
+    },
+    {
+      "dia": "2026-10-15T03:00:00.000Z",
+      "investimento": 478,
+      "cliques": 139,
+      "leads": 2,
+      "mql": 2,
+      "cmql": 239,
+      "negociosCriados": 1,
+      "custoPorNegocio": 478
+    }
+  ],
+  "mqlCmqlPorFunil": [
+    {
+      "funil": "sala",
+      "mql": 3,
+      "cmql": 1184.1666666666667,
+      "investimento": 3552.5
+    },
+    {
+      "funil": "aplica",
+      "mql": 1,
+      "cmql": 3822.5,
+      "investimento": 3822.5
+    },
+    {
+      "funil": "sessao",
+      "mql": 3,
+      "cmql": 1275.8333333333333,
+      "investimento": 3827.5
+    },
+    {
+      "funil": "isca",
+      "mql": 0,
+      "cmql": null,
+      "investimento": 0
+    },
+    {
+      "funil": "reality",
+      "mql": 0,
+      "cmql": null,
+      "investimento": 0
+    }
+  ],
+  "mqlPorTemperatura": [
+    {
+      "temperatura": "Advantage",
+      "mql": 3
+    },
+    {
+      "temperatura": "Quente",
+      "mql": 0
+    },
+    {
+      "temperatura": "Frio",
+      "mql": 3
+    }
+  ],
+  "funilTrafego": [
+    {
+      "etapa": "Impressões",
+      "valor": 170625,
+      "conversaoEtapa": 1
+    },
+    {
+      "etapa": "Cliques",
+      "valor": 1735,
+      "conversaoEtapa": 0.010168498168498168
+    },
+    {
+      "etapa": "Visualizações de página",
+      "valor": 1025,
+      "conversaoEtapa": 0.590778097982709
+    },
+    {
+      "etapa": "Leads",
+      "valor": 7,
+      "conversaoEtapa": 0.006829268292682927
+    },
+    {
+      "etapa": "MQL",
+      "valor": 6,
+      "conversaoEtapa": 0.8571428571428571
+    },
+    {
+      "etapa": "Negócios criados",
+      "valor": 5,
+      "conversaoEtapa": 0.8333333333333334
+    }
+  ],
+  "funilTrafegoResumo": {
+    "impressoes": 170625,
+    "cliques": 1735,
+    "lpViews": 1025,
+    "leads": 7,
+    "mql": 6,
+    "cpm": 43.252747252747255,
+    "cpc": 4.253602305475504,
+    "ctr": 0.010168498168498168,
+    "cpl": 1054.2857142857142,
+    "cmql": 1230,
+    "txLpLead": 0.006829268292682927
+  },
+  "conversoesTrafego": [
+    {
+      "metrica": "CTR",
+      "valor": 0.010168498168498168
+    },
+    {
+      "metrica": "Conexão LP",
+      "valor": 0.590778097982709
+    },
+    {
+      "metrica": "Conversão LP",
+      "valor": 0.006829268292682927
+    },
+    {
+      "metrica": "Conversão cliques",
+      "valor": 0.004034582132564841
+    }
+  ],
+  "custosTrafego": [
+    {
+      "metrica": "CPC",
+      "valor": 4.253602305475504
+    },
+    {
+      "metrica": "CPM",
+      "valor": 43.252747252747255
+    },
+    {
+      "metrica": "CPL",
+      "valor": 1054.2857142857142
+    },
+    {
+      "metrica": "CMQL",
+      "valor": 1230
+    },
+    {
+      "metrica": "Custo/negócio",
+      "valor": 1476
+    }
+  ],
+  "serieConversoesDia": [
+    {
+      "dia": "2026-10-01T03:00:00.000Z",
+      "ctr": 0.012999158327878051,
+      "conexaoLp": 0.381294964028777,
+      "conversaoLp": 0.018867924528301886,
+      "conversaoCliques": 0.007194244604316547
+    },
+    {
+      "dia": "2026-10-02T03:00:00.000Z",
+      "ctr": 0.01214803653828044,
+      "conexaoLp": 0.6744186046511628,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-10-03T03:00:00.000Z",
+      "ctr": 0.011284969179706021,
+      "conexaoLp": 0.680672268907563,
+      "conversaoLp": 0.012345679012345678,
+      "conversaoCliques": 0.008403361344537815
+    },
+    {
+      "dia": "2026-10-04T03:00:00.000Z",
+      "ctr": 0.01040970298920829,
+      "conexaoLp": 0.6880733944954128,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-10-05T03:00:00.000Z",
+      "ctr": 0.009521977493507743,
+      "conexaoLp": 0.696969696969697,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-10-06T03:00:00.000Z",
+      "ctr": 0.008621524750557009,
+      "conexaoLp": 0.7078651685393258,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-10-07T03:00:00.000Z",
+      "ctr": 0.011123036393794517,
+      "conexaoLp": 0.5,
+      "conversaoLp": 0.017543859649122806,
+      "conversaoCliques": 0.008771929824561403
+    },
+    {
+      "dia": "2026-10-08T03:00:00.000Z",
+      "ctr": 0.01366093366093366,
+      "conexaoLp": 0.3669064748201439,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-10-09T03:00:00.000Z",
+      "ctr": 0.012771012771012771,
+      "conexaoLp": 0.6589147286821705,
+      "conversaoLp": 0.011764705882352941,
+      "conversaoCliques": 0.007751937984496124
+    },
+    {
+      "dia": "2026-10-10T03:00:00.000Z",
+      "ctr": 0.009134873723804407,
+      "conexaoLp": 0.6638655462184874,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-10-11T03:00:00.000Z",
+      "ctr": 0.008415038987107234,
+      "conexaoLp": 0.6697247706422018,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-10-12T03:00:00.000Z",
+      "ctr": 0.007686932215234102,
+      "conexaoLp": 0.6767676767676768,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-10-13T03:00:00.000Z",
+      "ctr": 0.006950409996095275,
+      "conexaoLp": 0.6853932584269663,
+      "conversaoLp": 0.01639344262295082,
+      "conversaoCliques": 0.011235955056179775
+    },
+    {
+      "dia": "2026-10-14T03:00:00.000Z",
+      "ctr": 0.00895452046186474,
+      "conexaoLp": 0.4824561403508772,
+      "conversaoLp": 0,
+      "conversaoCliques": 0
+    },
+    {
+      "dia": "2026-10-15T03:00:00.000Z",
+      "ctr": 0.010982065260330251,
+      "conexaoLp": 0.49640287769784175,
+      "conversaoLp": 0.028985507246376812,
+      "conversaoCliques": 0.014388489208633094
+    }
+  ],
+  "serieCustosDia": [
+    {
+      "dia": "2026-10-01T03:00:00.000Z",
+      "cpc": 3.035971223021583,
+      "cpm": 39.46507060693912,
+      "cpl": 422,
+      "cmql": 422
+    },
+    {
+      "dia": "2026-10-02T03:00:00.000Z",
+      "cpc": 4.155038759689923,
+      "cpm": 50.475562670684624,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-10-03T03:00:00.000Z",
+      "cpc": 4.285714285714286,
+      "cpm": 48.364153627311524,
+      "cpl": 510,
+      "cmql": 510
+    },
+    {
+      "dia": "2026-10-04T03:00:00.000Z",
+      "cpc": 4.440366972477064,
+      "cpm": 46.22290134657626,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-10-05T03:00:00.000Z",
+      "cpc": 4.626262626262626,
+      "cpm": 44.05116860632875,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-10-06T03:00:00.000Z",
+      "cpc": 6.426966292134831,
+      "cpm": 55.41024895863605,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-10-07T03:00:00.000Z",
+      "cpc": 4.7894736842105265,
+      "cpm": 53.27349009659479,
+      "cpl": 546,
+      "cmql": 546
+    },
+    {
+      "dia": "2026-10-08T03:00:00.000Z",
+      "cpc": 3.741007194244604,
+      "cpm": 51.105651105651106,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-10-09T03:00:00.000Z",
+      "cpc": 3.8294573643410854,
+      "cpm": 48.90604890604891,
+      "cpl": 494,
+      "cmql": 494
+    },
+    {
+      "dia": "2026-10-10T03:00:00.000Z",
+      "cpc": 3.9327731092436973,
+      "cpm": 35.925385737314805,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-10-11T03:00:00.000Z",
+      "cpc": 4.055045871559633,
+      "cpm": 34.12336910368254,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-10-12T03:00:00.000Z",
+      "cpc": 4.202020202020202,
+      "cpm": 32.3006444599736,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-10-13T03:00:00.000Z",
+      "cpc": 5.955056179775281,
+      "cpm": 41.390081999219056,
+      "cpl": 530,
+      "cmql": null
+    },
+    {
+      "dia": "2026-10-14T03:00:00.000Z",
+      "cpc": 4.421052631578948,
+      "cpm": 39.58840625245464,
+      "cpl": 0,
+      "cmql": null
+    },
+    {
+      "dia": "2026-10-15T03:00:00.000Z",
+      "cpc": 3.4388489208633093,
+      "cpm": 37.765663269337125,
+      "cpl": 239,
+      "cmql": 239
+    }
+  ],
+  "ranking": [
+    {
+      "nome": "CONTA02|PERPETUO|SALA|CAPTACAO|ADVANTAGE_campanha_tres",
+      "agrupamento": "campanha",
+      "investimento": 3552.5,
+      "impressoes": 78645,
+      "cliques": 855,
+      "ctr": 0.010871638374976159,
+      "cpc": 4.154970760233918,
+      "cpm": 45.17133956386293,
+      "lpViews": 510,
+      "leads": 4,
+      "cpl": 888.125,
+      "mql": 3,
+      "cmql": 1184.1666666666667,
+      "negociosCriados": 2,
+      "custoPorNegocio": 1776.25
+    },
+    {
+      "nome": "CONTA01|PERPETUO|SESSAO|CAPTACAO|FRIO_campanha_dois",
+      "agrupamento": "campanha",
+      "investimento": 3827.5,
+      "impressoes": 91980,
+      "cliques": 880,
+      "ctr": 0.009567297238530115,
+      "cpc": 4.349431818181818,
+      "cpm": 41.61230702326593,
+      "lpViews": 515,
+      "leads": 3,
+      "cpl": 1275.8333333333333,
+      "mql": 3,
+      "cmql": 1275.8333333333333,
+      "negociosCriados": 3,
+      "custoPorNegocio": 1275.8333333333333
+    }
+  ]
+}

@@ -1,0 +1,333 @@
+{
+  "modo": "seguidores",
+  "kpis": [
+    {
+      "label": "Investimento",
+      "value": 1327,
+      "format": "brl"
+    },
+    {
+      "label": "Visitas ao perfil (ads)",
+      "value": 1500,
+      "format": "int"
+    },
+    {
+      "label": "Custo por visita (ads)",
+      "value": 0.8846666666666667,
+      "format": "brl"
+    },
+    {
+      "label": "Seguidores (post)",
+      "value": null,
+      "format": "int",
+      "hint": "Nenhum impulsionamento casou com post FEED/Carrossel com dado de seguidores no período"
+    },
+    {
+      "label": "Visitas ao perfil (post)",
+      "value": null,
+      "format": "int",
+      "hint": "Nenhum impulsionamento casou com post FEED/Carrossel com dado de seguidores no período"
+    },
+    {
+      "label": "Custo por seguidor (post)",
+      "value": null,
+      "format": "brl",
+      "hint": "Sem seguidores no período — custo indefinido"
+    }
+  ],
+  "serie": [
+    {
+      "dia": "2026-10-11T03:00:00.000Z",
+      "investimento": 42,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 51,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-10-12T03:00:00.000Z",
+      "investimento": 41,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 50,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-10-13T03:00:00.000Z",
+      "investimento": 40,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 49,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-10-14T03:00:00.000Z",
+      "investimento": 46,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 48,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-10-15T03:00:00.000Z",
+      "investimento": 45,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 47,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-10-16T03:00:00.000Z",
+      "investimento": 44,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 46,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-10-17T03:00:00.000Z",
+      "investimento": 43,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 45,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-10-18T03:00:00.000Z",
+      "investimento": 42,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 52,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-10-19T03:00:00.000Z",
+      "investimento": 41,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 51,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-10-20T03:00:00.000Z",
+      "investimento": 40,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 50,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-10-21T03:00:00.000Z",
+      "investimento": 46,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 49,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-10-22T03:00:00.000Z",
+      "investimento": 45,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 48,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-10-23T03:00:00.000Z",
+      "investimento": 44,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 47,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-10-24T03:00:00.000Z",
+      "investimento": 43,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 46,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-10-25T03:00:00.000Z",
+      "investimento": 42,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 45,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-10-26T03:00:00.000Z",
+      "investimento": 41,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 52,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-10-27T03:00:00.000Z",
+      "investimento": 40,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 51,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-10-28T03:00:00.000Z",
+      "investimento": 46,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 50,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-10-29T03:00:00.000Z",
+      "investimento": 45,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 49,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-10-30T03:00:00.000Z",
+      "investimento": 44,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 48,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-10-31T03:00:00.000Z",
+      "investimento": 43,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 47,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-11-01T03:00:00.000Z",
+      "investimento": 42,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 46,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-11-02T03:00:00.000Z",
+      "investimento": 41,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 45,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-11-03T03:00:00.000Z",
+      "investimento": 40,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 52,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-11-04T03:00:00.000Z",
+      "investimento": 46,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 51,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-11-05T03:00:00.000Z",
+      "investimento": 45,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 50,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-11-06T03:00:00.000Z",
+      "investimento": 44,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 49,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-11-07T03:00:00.000Z",
+      "investimento": 43,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 48,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-11-08T03:00:00.000Z",
+      "investimento": 42,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 47,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-11-09T03:00:00.000Z",
+      "investimento": 41,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 46,
+      "custoSeguidor": null
+    },
+    {
+      "dia": "2026-11-10T03:00:00.000Z",
+      "investimento": 40,
+      "seguidoresPost": 0,
+      "visitasPost": 0,
+      "visitasAds": 45,
+      "custoSeguidor": null
+    }
+  ],
+  "funil": [
+    {
+      "etapa": "Impressões",
+      "valor": 134385,
+      "conversaoEtapa": 1
+    },
+    {
+      "etapa": "Cliques",
+      "valor": 465,
+      "conversaoEtapa": 0.0034602076124567475
+    },
+    {
+      "etapa": "Visitas ao perfil (ads)",
+      "valor": 1500,
+      "conversaoEtapa": 3.225806451612903
+    },
+    {
+      "etapa": "Seguidores (post)",
+      "valor": 0,
+      "conversaoEtapa": 0
+    }
+  ],
+  "tabela": [
+    {
+      "adName": "DIST-SEG-002-teste",
+      "investimento": 1327,
+      "cliques": 465,
+      "cpc": 2.8537634408602153,
+      "ctr": 0.0034602076124567475,
+      "cpm": 9.874613982215276,
+      "visitasPerfilAds": 1500,
+      "custoVisita": 0.8846666666666667,
+      "hookRate": 0,
+      "video3s": 0,
+      "video25": 0,
+      "cpv25": 0,
+      "video95": 0,
+      "cpv95": 0
+    }
+  ],
+  "impulsionamentos": [],
+  "impulsionamentosResumo": {
+    "casados": 0,
+    "total": 0
+  }
+}
