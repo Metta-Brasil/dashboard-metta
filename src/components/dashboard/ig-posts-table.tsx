@@ -128,6 +128,8 @@ export function IgPostsTable({ rows }: { rows: IgPostTableRow[] }) {
         alwaysShowTotal={false}
         maxRows={50}
         empty="Nenhum post encontrado."
+        exportName="instagram-posts"
+        searchable={false}
       />
     </div>
   );

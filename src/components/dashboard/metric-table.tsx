@@ -86,7 +86,7 @@ export function MetricTable<T>({
   // Cache do texto renderizado por (linha, coluna) para reaproveitar
   // na detecção de %, no valor de ordenação e no render do corpo.
   const renderedNodes: React.ReactNode[][] = rows.map((r) =>
-    columns.map((c) => c.render(r))
+    columns.map((c) => c.render(r)),
   );
 
   // Inferência de coluna aditiva (data-driven, sem adivinhar por nome):
@@ -201,19 +201,25 @@ export function MetricTable<T>({
     };
   }
 
+  // Busca e CSV vão para a linha do título quando ela existe e não há
+  // outro controle (toolbar) ocupando o canto direito.
+  const flutua = Boolean(title) && !toolbar;
+
   return (
     <div
-      className={cn("surface-card flex flex-col gap-4 p-5 lg:p-6", className)}
+      className={cn(
+        "surface-card relative flex flex-col gap-4 p-5 lg:p-6",
+        className,
+      )}
     >
       {(title || toolbar) && (
         <div className="flex items-baseline justify-between gap-2">
-          <div className="flex flex-col gap-1">
+          {/* Com busca e CSV flutuando à direita, o título cede o espaço deles. */}
+          <div className={cn("flex flex-col gap-1", flutua && "sm:pr-72")}>
             {title && <h3 className="panel-title">{title}</h3>}
             {description && <span className="panel-desc">{description}</span>}
           </div>
-          {toolbar && (
-            <div className="flex items-center gap-2">{toolbar}</div>
-          )}
+          {toolbar && <div className="flex items-center gap-2">{toolbar}</div>}
         </div>
       )}
 
@@ -224,6 +230,8 @@ export function MetricTable<T>({
         alwaysShowTotal={footer !== undefined}
         maxRows={maxRows}
         empty={empty}
+        exportName={title}
+        floatTools={flutua}
       />
     </div>
   );

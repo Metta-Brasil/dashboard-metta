@@ -103,6 +103,8 @@ export function IgStoriesTable({ rows }: { rows: IgStoryTableRow[] }) {
         alwaysShowTotal={false}
         maxRows={50}
         empty="Nenhum story coletado no período."
+        exportName="instagram-stories"
+        searchable={false}
       />
     </div>
   );
