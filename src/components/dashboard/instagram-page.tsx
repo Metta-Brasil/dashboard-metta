@@ -17,6 +17,7 @@ import {
   type IgStoryTableRow,
 } from "@/components/dashboard/ig-stories-table";
 import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
+import { IG_CRITERIO_OPTIONS } from "@/components/dashboard/filter-options";
 import { MultiSelectFilter } from "@/components/dashboard/multi-select-filter";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
@@ -86,11 +87,7 @@ async function IgToolbar({ sp }: { sp: SP }) {
     <MultiSelectFilter
       param="criterio"
       label="Top por"
-      options={[
-        { value: "views", label: "Views" },
-        { value: "er", label: "Engajamento %" },
-        { value: "alcance", label: "Alcance" },
-      ]}
+      options={IG_CRITERIO_OPTIONS}
       mode="todos"
     />
   );

@@ -5,6 +5,8 @@ import { useCallback } from "react";
 
 import { cn } from "@/lib/utils";
 
+import { SDR_DATA_OPTIONS } from "./filter-options";
+
 /**
  * Segmented control "Data de agendamento" | "Data de reunião" da tabela
  * Performance por data (SDR). Sincroniza param `sdrDate` (default = agendamento)
@@ -13,10 +15,7 @@ import { cn } from "@/lib/utils";
 
 type Modo = "agendamento" | "reuniao";
 
-const OPTIONS: { value: Modo; label: string }[] = [
-  { value: "agendamento", label: "Data de agendamento" },
-  { value: "reuniao", label: "Data de reunião" },
-];
+const OPTIONS = SDR_DATA_OPTIONS;
 
 export function SdrDataToggle() {
   const router = useRouter();

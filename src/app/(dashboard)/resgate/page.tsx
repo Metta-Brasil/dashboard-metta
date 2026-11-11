@@ -5,17 +5,17 @@ import { BarList } from "@/components/dashboard/bar-list";
 import { ComboBarLineChart } from "@/components/dashboard/charts";
 import { FunnelHorizontal } from "@/components/dashboard/funnel-horizontal";
 import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
-import { MetricTable, type Column } from "@/components/dashboard/metric-table";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
 import {
-  formatBRL,
   formatBRLCompact,
   formatInt,
   formatPercent,
 } from "@/lib/calc/shared";
-import type { ResgateKpi, ResgateNegocioRow } from "@/lib/calc/types";
+import type { ResgateKpi } from "@/lib/calc/types";
 import { getFilters, getResgate } from "@/lib/page-data";
+
+import { TabelaNegocios } from "./negocios-na-pipeline";
 
 export const metadata: Metadata = {
   title: "Funil de Resgate · Dashboard Metta",
@@ -176,90 +176,6 @@ async function PerfilDaBase({ searchParams }: PageProps) {
   );
 }
 
-async function TabelaNegocios({ searchParams }: PageProps) {
-  const r = await getResgate(searchParams);
-
-  const columns: Column<ResgateNegocioRow>[] = [
-    {
-      key: "nome",
-      header: "Nome",
-      total: "none",
-      render: (n) => (
-        <span className="block max-w-[200px] truncate" title={n.nome}>
-          {n.nome || "—"}
-        </span>
-      ),
-    },
-    {
-      key: "contato",
-      header: "Contato",
-      total: "none",
-      render: (n) => n.contato || "—",
-    },
-    {
-      key: "qualificacao",
-      header: "Qualificação",
-      total: "none",
-      render: (n) => n.qualificacao || "—",
-    },
-    {
-      key: "faturamento",
-      header: "Faturamento",
-      total: "none",
-      render: (n) => n.faturamento || "—",
-    },
-    {
-      key: "utmCampaign",
-      header: "Campanha de origem",
-      total: "none",
-      render: (n) => (
-        <span className="block max-w-[240px] truncate" title={n.utmCampaign}>
-          {n.utmCampaign || "—"}
-        </span>
-      ),
-    },
-    {
-      key: "macroEtapa",
-      header: "Etapa",
-      total: "none",
-      render: (n) => (
-        <span title={n.etapa !== n.macroEtapa ? n.etapa : undefined}>
-          {n.macroEtapa}
-        </span>
-      ),
-    },
-    {
-      key: "diasParado",
-      header: "Dias parado",
-      align: "right",
-      total: "none",
-      render: (n) => (n.diasParado === null ? "—" : formatInt(n.diasParado)),
-    },
-    {
-      key: "dono",
-      header: "Dono",
-      total: "none",
-      render: (n) => n.dono || "—",
-    },
-    {
-      key: "valor",
-      header: "Valor",
-      align: "right",
-      render: (n) => formatBRL(n.valor),
-    },
-  ];
-
-  return (
-    <MetricTable
-      title="Negócios na pipeline"
-      description={`${formatInt(r.total)} negócio(s) · ordenado por profundidade no funil e tempo parado.`}
-      columns={columns}
-      rows={r.negocios}
-      maxRows={15}
-      empty="Nenhum negócio na pipeline Operação Resgate."
-    />
-  );
-}
 
 // ---------------------------------------------------------------------------
 // Fallbacks

@@ -1,14 +1,8 @@
 "use client";
 
+import { FUNIL_OPTIONS } from "./filter-options";
 import { MultiSelectFilter } from "./multi-select-filter";
 
-const FUNIL_OPTIONS = [
-  { value: "sala", label: "Sala" },
-  { value: "aplica", label: "Aplicação" },
-  { value: "sessao", label: "Sessão" },
-  { value: "isca", label: "Isca" },
-  { value: "reality", label: "Reality" },
-];
 
 export function FunilChips() {
   return (

@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
 import { cn } from "@/lib/utils";
+import { TAGS_MODOS } from "./filter-options";
 import { MultiSelectFilter } from "./multi-select-filter";
 
 /**
@@ -23,10 +24,7 @@ export type TagOption = { value: string; label: string };
 
 type Modo = "remover" | "somente";
 
-const MODOS: { value: Modo; label: string }[] = [
-  { value: "remover", label: "Remover" },
-  { value: "somente", label: "Somente" },
-];
+const MODOS = TAGS_MODOS;
 
 function TagsModeToggle() {
   const router = useRouter();

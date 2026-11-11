@@ -5,6 +5,8 @@ import { useCallback } from "react";
 
 import { cn } from "@/lib/utils";
 
+import { DIST_MODO_OPTIONS } from "./filter-options";
+
 /**
  * Segmented control de seleção única (Vídeo | Seguidores) que sincroniza
  * o param `modo` via URL. Ausência de `modo` ou `modo=seguidores` ⇒
@@ -14,10 +16,7 @@ import { cn } from "@/lib/utils";
 
 type Modo = "video" | "seguidores";
 
-const OPTIONS: { value: Modo; label: string }[] = [
-  { value: "video", label: "Vídeo" },
-  { value: "seguidores", label: "Seguidores" },
-];
+const OPTIONS = DIST_MODO_OPTIONS;
 
 export function DistModoToggle() {
   const router = useRouter();

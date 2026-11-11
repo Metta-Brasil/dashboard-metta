@@ -13,8 +13,10 @@ import {
   safeRate,
   sumBy,
 } from "@/lib/calc/shared";
-import type { CloserRow, CloserVendaRow } from "@/lib/calc/types";
+import type { CloserRow } from "@/lib/calc/types";
 import { getCloser, getFilters } from "@/lib/page-data";
+
+import { VendasDoPeriodo } from "./vendas-do-periodo";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -85,55 +87,6 @@ async function CloserContent({ searchParams }: PageProps) {
     receita: Math.round(r.receita),
     meta: r.meta == null ? null : Math.round(r.meta),
   }));
-
-  const vendasColumns: Column<CloserVendaRow>[] = [
-    {
-      key: "data",
-      header: "Data",
-      render: (r) => formatDataBR(r.data),
-    },
-    {
-      key: "comprador",
-      header: "Comprador",
-      render: (r) => r.comprador || "—",
-    },
-    {
-      key: "funil",
-      header: "Funil",
-      render: (r) => r.funil || "—",
-    },
-    {
-      key: "produto",
-      header: "Produto",
-      render: (r) => r.produto,
-    },
-    {
-      key: "valor",
-      header: "Valor",
-      align: "right",
-      render: (r) => formatBRL(r.valor),
-    },
-    {
-      key: "sdr",
-      header: "SDR",
-      render: (r) => r.sdr ?? "—",
-    },
-    {
-      key: "ciclo",
-      header: "Ciclo (dias)",
-      align: "right",
-      render: (r) => (r.ciclo !== null ? formatInt(r.ciclo) : "—"),
-      // Ciclo médio: média das vendas com ciclo conhecido (não somar dias).
-      total: (rs) => {
-        const v = rs
-          .map((r) => r.ciclo)
-          .filter((c): c is number => c !== null && Number.isFinite(c));
-        return v.length
-          ? formatInt(v.reduce((a, b) => a + b, 0) / v.length)
-          : "—";
-      },
-    },
-  ];
 
   const closerColumns: Column<CloserRow>[] = [
     {
@@ -262,12 +215,9 @@ async function CloserContent({ searchParams }: PageProps) {
         </div>
       </div>
 
-      <MetricTable
-        title="Vendas do período"
-        description="Detalhamento das vendas no intervalo selecionado"
-        columns={vendasColumns}
-        rows={result.vendasDoPeriodo}
-      />
+      {/* Seção em arquivo próprio: tem nome de comprador, e o MCP a bloqueia
+          pela identidade do componente (FORA_DO_MCP). */}
+      <VendasDoPeriodo searchParams={searchParams} />
 
       <MetricTable
         title="Performance por Closer"
@@ -295,13 +245,6 @@ function capitalizeFunil(funil: string): string {
     outros: "Outros",
   };
   return map[funil] ?? funil.charAt(0).toUpperCase() + funil.slice(1);
-}
-
-function formatDataBR(d: Date): string {
-  const dd = String(d.getUTCDate()).padStart(2, "0");
-  const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const yyyy = d.getUTCFullYear();
-  return `${dd}/${mm}/${yyyy}`;
 }
 
 function formatMesBR(d: Date): string {

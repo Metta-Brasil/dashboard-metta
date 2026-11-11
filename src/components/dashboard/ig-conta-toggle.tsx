@@ -5,6 +5,8 @@ import { useCallback } from "react";
 
 import { cn } from "@/lib/utils";
 
+import { IG_CONTA_OPTIONS } from "./filter-options";
+
 /**
  * Segmented control (Metta | Tiago) que sincroniza o param `conta` via URL.
  * Ausência de `conta` ou `conta=metta` ⇒ "Metta"; `conta=tiago` ⇒ "Tiago".
@@ -13,10 +15,7 @@ import { cn } from "@/lib/utils";
 
 type Conta = "metta" | "tiago";
 
-const OPTIONS: { value: Conta; label: string }[] = [
-  { value: "metta", label: "Metta" },
-  { value: "tiago", label: "Tiago" },
-];
+const OPTIONS = IG_CONTA_OPTIONS;
 
 export function IgContaToggle() {
   const router = useRouter();

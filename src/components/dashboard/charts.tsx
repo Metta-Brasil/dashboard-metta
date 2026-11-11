@@ -22,8 +22,13 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { formatBRL, formatPercent } from "@/lib/calc/shared";
 import { cn } from "@/lib/utils";
+
+import {
+  donutValueLabel,
+  makeValueFormatter,
+  type ValueFormat,
+} from "./chart-format";
 
 /** Tokens de cor já definidos no globals.css (paleta Metta atual). */
 const PALETTE = [
@@ -367,7 +372,6 @@ export function DonutChart({
                   nameKey="name"
                   formatter={(value, name, item) => {
                     const v = Number(value);
-                    const pct = total > 0 ? (v / total) * 100 : 0;
                     const fill =
                       (item?.payload?.fill as string | undefined) ?? undefined;
                     return (
@@ -380,7 +384,7 @@ export function DonutChart({
                           {name}
                         </span>
                         <span className="font-mono font-medium tabular-nums text-foreground">
-                          {v.toLocaleString("pt-BR")} · {pct.toFixed(1)}%
+                          {donutValueLabel(v, total)}
                         </span>
                       </div>
                     );
@@ -439,20 +443,6 @@ export function DonutChart({
 // Barras agrupadas (1+ barras por categoria)
 // ---------------------------------------------------------------------------
 
-/** Formatação de valor no eixo Y / tooltip. */
-type ValueFormat = "number" | "percent" | "currency";
-
-function makeValueFormatter(
-  fmt: ValueFormat
-): (v: string | number) => string {
-  return (v) => {
-    const n = typeof v === "number" ? v : Number(v);
-    if (!Number.isFinite(n)) return String(v);
-    if (fmt === "percent") return formatPercent(n);
-    if (fmt === "currency") return formatBRL(n);
-    return n.toLocaleString("pt-BR");
-  };
-}
 
 export function GroupedBarChart({
   title,

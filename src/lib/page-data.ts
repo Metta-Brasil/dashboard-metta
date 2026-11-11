@@ -33,25 +33,49 @@ import { readAllSheets } from "@/lib/sheets/read";
 
 type SP = Promise<Record<string, string | string[] | undefined>>;
 
-export const getVisaoGeral = cache(async (sp: SP) => {
+/**
+ * `React.cache` + memo pela identidade da promise `searchParams`.
+ *
+ * O `React.cache` só memoiza dentro de um render do React. O MCP
+ * (`src/lib/mcp`) chama estas MESMAS funções fora de um render — executa a
+ * árvore da página por conta própria para serializá-la — e lá o
+ * `React.cache` vira passagem direta: cada seção releria as abas e
+ * recalcularia tudo. O WeakMap fecha essa diferença sem mudar o contrato:
+ * a chave é a mesma promise que as seções de uma página já compartilham,
+ * some junto com a requisição e nunca cruza requisições.
+ */
+function porRequest<R>(fn: (sp: SP) => Promise<R>): (sp: SP) => Promise<R> {
+  const cached = cache(fn);
+  const memo = new WeakMap<SP, Promise<R>>();
+  return (sp) => {
+    let hit = memo.get(sp);
+    if (!hit) {
+      hit = cached(sp);
+      memo.set(sp, hit);
+    }
+    return hit;
+  };
+}
+
+export const getVisaoGeral = porRequest(async (sp: SP) => {
   const filters = parseFilters(await sp);
   const data = await readAllSheets(["fb_todos", "leads", "sdr", "vendas", "clint"]);
   return calcVisaoGeral(mergeClint(data, filters), filters);
 });
 
-export const getTrafego = cache(async (sp: SP) => {
+export const getTrafego = porRequest(async (sp: SP) => {
   const filters = parseFilters(await sp);
   const data = await readAllSheets(["fb_todos", "leads", "clint"]);
   return calcTrafego(mergeClint(data, filters), filters);
 });
 
-export const getSdr = cache(async (sp: SP) => {
+export const getSdr = porRequest(async (sp: SP) => {
   const filters = parseFilters(await sp);
   const data = await readAllSheets(["leads", "sdr", "vendas", "clint"]);
   return calcSdr(mergeClint(data, filters), filters);
 });
 
-export const getCloser = cache(async (sp: SP) => {
+export const getCloser = porRequest(async (sp: SP) => {
   const filters = parseFilters(await sp);
   const data = await readAllSheets([
     "fb_todos",
@@ -64,7 +88,7 @@ export const getCloser = cache(async (sp: SP) => {
   return calcCloser(mergeClint(data, filters), filters);
 });
 
-export const getAnuncios = cache(async (sp: SP) => {
+export const getAnuncios = porRequest(async (sp: SP) => {
   const filters = parseFilters(await sp);
   const data = await readAllSheets([
     "fb_todos",
@@ -82,13 +106,13 @@ export const getAnuncios = cache(async (sp: SP) => {
   return calcAnuncios(mergeClint(data, filters), filters);
 });
 
-export const getOrigem = cache(async (sp: SP) => {
+export const getOrigem = porRequest(async (sp: SP) => {
   const filters = parseFilters(await sp);
   const data = await readAllSheets(["leads", "sdr", "vendas", "clint"]);
   return calcOrigem(mergeClint(data, filters), filters);
 });
 
-export const getMetas = cache(async (sp: SP) => {
+export const getMetas = porRequest(async (sp: SP) => {
   const filters = parseFilters(await sp);
   const data = await readAllSheets([
     "fb_todos",
@@ -101,7 +125,7 @@ export const getMetas = cache(async (sp: SP) => {
   return calcMetas(mergeClint(data, filters), filters);
 });
 
-export const getTpDistribuicao = cache(async (sp: SP) => {
+export const getTpDistribuicao = porRequest(async (sp: SP) => {
   const f = parseFilters(await sp);
   const spv = await sp;
   const contas =
@@ -129,7 +153,7 @@ export const getClintTags = cache(async () => {
 });
 
 /** Filtros parseados (memoizado) — pro toolbar não re-parsear. */
-export const getFilters = cache(async (sp: SP) => parseFilters(await sp));
+export const getFilters = porRequest(async (sp: SP) => parseFilters(await sp));
 
 export const getInstagramMetta = cache(async (sp?: SP) => {
   const spv = sp ? await sp : {};
@@ -157,7 +181,7 @@ export const getInstagramMetta = cache(async (sp?: SP) => {
 });
 
 /** Página unificada /instagram: escolhe a conta pelo param `conta`. */
-export const getInstagramConta = cache(async (sp: SP) => {
+export const getInstagramConta = porRequest(async (sp: SP) => {
   const spv = await sp;
   return spv.conta === "tiago" ? getInstagramTiago(sp) : getInstagramMetta(sp);
 });
@@ -193,7 +217,7 @@ export const getInstagramTiago = cache(async (sp?: SP) => {
  * NÃO passa por `mergeClint` — esses negócios são base antiga reaquecida,
  * não podem entrar nas métricas de SDR/Closer/Metas como lead novo.
  */
-export const getResgate = cache(async (sp: SP) => {
+export const getResgate = porRequest(async (sp: SP) => {
   const filters = parseFilters(await sp);
   const data = await readAllSheets(["clint"]);
   return calcResgate(data, { from: filters.from, to: filters.to });
@@ -206,7 +230,7 @@ export const getResgate = cache(async (sp: SP) => {
  * etapa hoje". De propósito NÃO passa por `mergeClint` nem pelos filtros de
  * funil/tags: aqui o recorte é a pipeline, não o funil pago.
  */
-export const getAtividades = cache(async (sp: SP) => {
+export const getAtividades = porRequest(async (sp: SP) => {
   const spv = await sp;
   const filters = parseFilters(spv);
   // Params próprios (`pessoa`, `canal`), e não o `sdr` das outras páginas: o

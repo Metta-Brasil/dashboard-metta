@@ -1,5 +1,6 @@
 "use client";
 
+import { CONTA_OPTIONS } from "./filter-options";
 import { MultiSelectFilter } from "./multi-select-filter";
 
 /**
@@ -12,10 +13,7 @@ export function ContaFilter() {
       param="conta"
       label="Conta"
       mode="plain"
-      options={[
-        { value: "metta", label: "Metta" },
-        { value: "tiago", label: "Tiago" },
-      ]}
+      options={CONTA_OPTIONS}
     />
   );
 }
