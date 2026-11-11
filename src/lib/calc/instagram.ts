@@ -265,11 +265,15 @@ export function calcInstagram(
   // KPIs
   // ---------------------------------------------------------------------------
 
-  // Followers: snapshot at end of period
-  const periodEnd = Array.from(byDay.entries())
+  // Followers: snapshot at end of period. Seguidores é uma foto do dia: dia
+  // em que a coleta não rodou fica com a célula vazia (lida como 0) e não
+  // pode virar o valor do KPI nem a base do delta. Vale o último dia COM
+  // foto até a data.
+  const comFoto = Array.from(byDay.entries()).filter(([, r]) => r.seguidores > 0);
+  const periodEnd = comFoto
     .filter(([k]) => k <= dayKey(to))
     .sort(([a], [b]) => (a < b ? -1 : 1));
-  const periodStart = Array.from(byDay.entries())
+  const periodStart = comFoto
     .filter(([k]) => k <= dayKey(from))
     .sort(([a], [b]) => (a < b ? -1 : 1));
 
