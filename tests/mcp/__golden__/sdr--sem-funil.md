@@ -12,8 +12,8 @@ Filtros aplicados:
 - Negócios criados: 4 (Criados no CRM (jul+))
 - Agendamentos: 0 (Total agendado no período)
 - Reuniões agendadas: 0 (Janela por data da reunião)
-- Realizadas: 0 (Show 0.0%)
-- Propostas: 0 (Tx 0.0% das realizadas)
+- Realizadas: 0 (Show 0,0%)
+- Propostas: 0 (Tx 0,0% das realizadas)
 - Valor propostas: R$ 0,00 (Pipeline gerado)
 - Vendas: 0 (Atribuídas ao funil SDR)
 - Faturamento: R$ 0,00 (Receita das vendas atribuídas)
@@ -24,23 +24,23 @@ Filtros aplicados:
 
 Negócios criados 4
 
-▼ 0.0%
+▼ 0,0%
 
 Agendamentos 0
 
-▼ 0.0%
+▼ 0,0%
 
 Reuniões marcadas 0
 
-▼ 0.0%
+▼ 0,0%
 
 Realizadas 0
 
-▼ 0.0%
+▼ 0,0%
 
 Propostas 0
 
-▼ 0.0%
+▼ 0,0%
 
 Vendas 0
 
@@ -171,8 +171,8 @@ Métricas diárias por data da reunião.
 
 | Data | Negócios | Tx agend. % | Agendou | Realizou | Show % | No-show % | Propostas | Tx prop. % | Valor prop. (R$) | Vendas | Close % |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 21/10/26 | 1 | 0.0% | 0 | 0 | 0.0% | 0.0% | 0 | 0.0% | R$ 0,00 | 0 | 0.0% |
-| 20/10/26 | 1 | 0.0% | 0 | 0 | 0.0% | 0.0% | 0 | 0.0% | R$ 0,00 | 0 | 0.0% |
-| 19/10/26 | 1 | 0.0% | 0 | 0 | 0.0% | 0.0% | 0 | 0.0% | R$ 0,00 | 0 | 0.0% |
-| 18/10/26 | 1 | 0.0% | 0 | 0 | 0.0% | 0.0% | 0 | 0.0% | R$ 0,00 | 0 | 0.0% |
-| Total | 4 | 0.0% | 0 | 0 | 0.0% | 0.0% | 0 | 0.0% | R$ 0,00 | 0 | 0.0% |
+| 21/10/26 | 1 | 0,0% | 0 | 0 | 0,0% | 0,0% | 0 | 0,0% | R$ 0,00 | 0 | 0,0% |
+| 20/10/26 | 1 | 0,0% | 0 | 0 | 0,0% | 0,0% | 0 | 0,0% | R$ 0,00 | 0 | 0,0% |
+| 19/10/26 | 1 | 0,0% | 0 | 0 | 0,0% | 0,0% | 0 | 0,0% | R$ 0,00 | 0 | 0,0% |
+| 18/10/26 | 1 | 0,0% | 0 | 0 | 0,0% | 0,0% | 0 | 0,0% | R$ 0,00 | 0 | 0,0% |
+| Total | 4 | 0,0% | 0 | 0 | 0,0% | 0,0% | 0 | 0,0% | R$ 0,00 | 0 | 0,0% |

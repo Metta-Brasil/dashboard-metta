@@ -1,4 +1,11 @@
-import { dayKey, eachDay, safeRate, startOfDayBrt, sumBy } from "@/lib/calc/shared";
+import {
+  dayKey,
+  eachDay,
+  formatPercent,
+  safeRate,
+  startOfDayBrt,
+  sumBy,
+} from "@/lib/calc/shared";
 import type {
   NomeValor,
   ResgateFunilEtapa,
@@ -221,7 +228,7 @@ export function calcResgate(
       label: "Trabalhados",
       value: trabalhados,
       format: "int",
-      hint: `${(safeRate(trabalhados, total) * 100).toFixed(1)}% da base saiu da etapa Base.`,
+      hint: `${formatPercent(safeRate(trabalhados, total))} da base saiu da etapa Base.`,
     },
     { label: "Conexões", value: contagem[2], format: "int" },
     { label: "Reuniões realizadas", value: contagem[6], format: "int" },
@@ -230,9 +237,9 @@ export function calcResgate(
       label: "Valor resgatado",
       value: valorResgatado,
       format: "brl",
-      hint: `${resgatados} negócio(s) fechado(s) · taxa de resgate ${(
-        safeRate(resgatados, total) * 100
-      ).toFixed(1)}%.`,
+      hint: `${resgatados} negócio(s) fechado(s) · taxa de resgate ${formatPercent(
+        safeRate(resgatados, total)
+      )}.`,
     },
   ];
 

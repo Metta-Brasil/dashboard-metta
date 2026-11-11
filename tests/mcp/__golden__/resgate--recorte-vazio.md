@@ -14,11 +14,11 @@ Nenhum registro de negócios da pipeline Operação Resgate entre 11/10/2026 e 1
 Ver o período sem filtros →
 
 - Base carregada: 0 (Negócios na pipeline Operação Resgate.)
-- Trabalhados: 0 (0.0% da base saiu da etapa Base.)
+- Trabalhados: 0 (0,0% da base saiu da etapa Base.)
 - Conexões: 0
 - Reuniões realizadas: 0
 - Propostas: 0
-- Valor resgatado: R$ 0,00 (0 negócio(s) fechado(s) · taxa de resgate 0.0%.)
+- Valor resgatado: R$ 0,00 (0 negócio(s) fechado(s) · taxa de resgate 0,0%.)
 
 ### Funil de resgate
 Posição atual dos 0 negócios
@@ -29,35 +29,35 @@ Base carregada — Negócios parados nesta etapa agora · tempo médio desde a �
 
 0
 
-Prospecção ▼ 0.0% Negócios parados nesta etapa agora · tempo médio desde a última movimentação: — Negócios que seguiram para a etapa seguinte: → 0
+Prospecção ▼ 0,0% Negócios parados nesta etapa agora · tempo médio desde a última movimentação: — Negócios que seguiram para a etapa seguinte: → 0
 
 0
 
-Conexão ▼ 0.0% Negócios parados nesta etapa agora · tempo médio desde a última movimentação: — Negócios que seguiram para a etapa seguinte: → 0
+Conexão ▼ 0,0% Negócios parados nesta etapa agora · tempo médio desde a última movimentação: — Negócios que seguiram para a etapa seguinte: → 0
 
 0
 
-Follow-up ▼ 0.0% Negócios parados nesta etapa agora · tempo médio desde a última movimentação: — Negócios que seguiram para a etapa seguinte: → 0
+Follow-up ▼ 0,0% Negócios parados nesta etapa agora · tempo médio desde a última movimentação: — Negócios que seguiram para a etapa seguinte: → 0
 
 0
 
-Qualificação ▼ 0.0% Negócios parados nesta etapa agora · tempo médio desde a última movimentação: — Negócios que seguiram para a etapa seguinte: → 0
+Qualificação ▼ 0,0% Negócios parados nesta etapa agora · tempo médio desde a última movimentação: — Negócios que seguiram para a etapa seguinte: → 0
 
 0
 
-Reunião agendada ▼ 0.0% Negócios parados nesta etapa agora · tempo médio desde a última movimentação: — Negócios que seguiram para a etapa seguinte: → 0
+Reunião agendada ▼ 0,0% Negócios parados nesta etapa agora · tempo médio desde a última movimentação: — Negócios que seguiram para a etapa seguinte: → 0
 
 0
 
-Reunião realizada ▼ 0.0% Negócios parados nesta etapa agora · tempo médio desde a última movimentação: — Negócios que seguiram para a etapa seguinte: → 0
+Reunião realizada ▼ 0,0% Negócios parados nesta etapa agora · tempo médio desde a última movimentação: — Negócios que seguiram para a etapa seguinte: → 0
 
 0
 
-Proposta ▼ 0.0% Negócios parados nesta etapa agora · tempo médio desde a última movimentação: — Negócios que seguiram para a etapa seguinte: → 0
+Proposta ▼ 0,0% Negócios parados nesta etapa agora · tempo médio desde a última movimentação: — Negócios que seguiram para a etapa seguinte: → 0
 
 0
 
-Resgatado ▼ 0.0% Negócios parados nesta etapa agora · tempo médio desde a última movimentação: — 
+Resgatado ▼ 0,0% Negócios parados nesta etapa agora · tempo médio desde a última movimentação: — 
 
 ### Movimentações por dia
 Cards cuja última movimentação caiu no dia. Vira série real de passagem quando o snapshot diário estiver ligado.

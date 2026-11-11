@@ -18,8 +18,8 @@ Ver o período sem filtros →
 - Negócios criados: 0 (Criados no CRM (jul+))
 - Agendamentos: 0 (Total agendado no período)
 - Reuniões agendadas: 0 (Janela por data da reunião)
-- Realizadas: 0 (Show 0.0%)
-- Propostas: 0 (Tx 0.0% das realizadas)
+- Realizadas: 0 (Show 0,0%)
+- Propostas: 0 (Tx 0,0% das realizadas)
 - Valor propostas: R$ 0,00 (Pipeline gerado)
 - Vendas: 0 (Atribuídas ao funil SDR)
 - Faturamento: R$ 0,00 (Receita das vendas atribuídas)
@@ -30,23 +30,23 @@ Ver o período sem filtros →
 
 Negócios criados 0
 
-▼ 0.0%
+▼ 0,0%
 
 Agendamentos 0
 
-▼ 0.0%
+▼ 0,0%
 
 Reuniões marcadas 0
 
-▼ 0.0%
+▼ 0,0%
 
 Realizadas 0
 
-▼ 0.0%
+▼ 0,0%
 
 Propostas 0
 
-▼ 0.0%
+▼ 0,0%
 
 Vendas 0
 

@@ -55,15 +55,15 @@ Visitas do anúncio e do post medem coisas diferentes e nunca se somam. Seguidor
 
 Impressões 134.385
 
-▼ 0.3%
+▼ 0,3%
 
 Cliques 465
 
-▼ 322.6%
+▼ 322,6%
 
 Visitas ao perfil (ads) 1.500
 
-▼ 0.0%
+▼ 0,0%
 
 Seguidores (post) 0
 
@@ -72,5 +72,5 @@ Por anúncio · ordenado por seguidores.
 
 | Nome do anúncio | Investimento | Cliques | CPC | CTR | CPM | Visitas ao perfil (ads) | Custo p/ visita |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| DIST-SEG-002-teste | R$ 1.327,00 | 465 | R$ 2,85 | 0.3% | R$ 9,87 | 1.500 | R$ 0,88 |
-| Total | R$ 1.327,00 | 465 | R$ 2,85 | 0.3% | R$ 9,87 | 1.500 | R$ 0,88 |
+| DIST-SEG-002-teste | R$ 1.327,00 | 465 | R$ 2,85 | 0,3% | R$ 9,87 | 1.500 | R$ 0,88 |
+| Total | R$ 1.327,00 | 465 | R$ 2,85 | 0,3% | R$ 9,87 | 1.500 | R$ 0,88 |

@@ -11,6 +11,7 @@ import { PageShell } from "@/components/page-shell";
 import {
   formatBRL,
   formatBRLCompact,
+  formatDecimal,
   formatInt,
   formatPercent,
   safeRate,
@@ -391,7 +392,7 @@ function gapText(gap: number | null, monetary: boolean): string | undefined {
 function formatPacingValor(metrica: string, valor: number): string {
   const s = metrica.toLowerCase();
   if (s.includes("fatur") || s.includes("invest")) return formatBRL(valor);
-  if (s.includes("vend")) return valor.toFixed(2);
+  if (s.includes("vend")) return formatDecimal(valor, 2);
   return formatInt(valor);
 }
 

@@ -12,7 +12,7 @@ Filtros aplicados:
 - CPV 95%: R$ 0,24
 - Visualizações 25%: 29.295
 - CPV 25%: R$ 0,07
-- Hook rate: 28.9%
+- Hook rate: 28,9%
 
 ### Investimento, Visualizações 95% e CPV 95% · diário
 Barras (Investimento + Views 95%) + linha (CPV 95%, eixo direito)
@@ -55,15 +55,15 @@ Barras (Investimento + Views 95%) + linha (CPV 95%, eixo direito)
 
 Impressões 222.580
 
-▼ 28.9%
+▼ 28,9%
 
 Visualizações 3s 64.325
 
-▼ 45.5%
+▼ 45,5%
 
 Visualizações 25% 29.295
 
-▼ 28.0%
+▼ 28,0%
 
 Visualizações 95% 8.215
 
@@ -72,5 +72,5 @@ Por anúncio · ordenado por investimento.
 
 | Nome do anúncio | Investimento | Hook rate | Visualizações 3s | Visualizações 25% | CPV 25% | Visualizações 95% | CPV 95% | CPM |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| DIST-VIDEO-001-teste | R$ 1.974,00 | 28.9% | 64.325 | 29.295 | R$ 0,07 | 8.215 | R$ 0,24 | R$ 8,87 |
-| Total | R$ 1.974,00 | 28.9% | 64.325 | 29.295 | R$ 0,07 | 8.215 | R$ 0,24 | R$ 8,87 |
+| DIST-VIDEO-001-teste | R$ 1.974,00 | 28,9% | 64.325 | 29.295 | R$ 0,07 | 8.215 | R$ 0,24 | R$ 8,87 |
+| Total | R$ 1.974,00 | 28,9% | 64.325 | 29.295 | R$ 0,07 | 8.215 | R$ 0,24 | R$ 8,87 |

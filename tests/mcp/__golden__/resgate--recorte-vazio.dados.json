@@ -12,7 +12,7 @@
       "label": "Trabalhados",
       "value": 0,
       "format": "int",
-      "hint": "0.0% da base saiu da etapa Base."
+      "hint": "0,0% da base saiu da etapa Base."
     },
     {
       "label": "Conexões",
@@ -33,7 +33,7 @@
       "label": "Valor resgatado",
       "value": 0,
       "format": "brl",
-      "hint": "0 negócio(s) fechado(s) · taxa de resgate 0.0%."
+      "hint": "0 negócio(s) fechado(s) · taxa de resgate 0,0%."
     }
   ],
   "funil": [

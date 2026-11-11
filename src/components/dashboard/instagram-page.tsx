@@ -21,7 +21,7 @@ import { IG_CRITERIO_OPTIONS } from "@/components/dashboard/filter-options";
 import { MultiSelectFilter } from "@/components/dashboard/multi-select-filter";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
-import { formatInt } from "@/lib/calc/shared";
+import { formatDecimal, formatInt } from "@/lib/calc/shared";
 import type { DemografiaItem, IgPostRow, IgResult } from "@/lib/calc/instagram";
 
 // ---------------------------------------------------------------------------
@@ -485,7 +485,7 @@ function HorizontalBars({
                   {it.nome}
                 </span>
                 <span className="shrink-0 tabular-nums text-muted-foreground">
-                  {pct.toFixed(1)}%
+                  {formatDecimal(pct, 1)}%
                 </span>
               </div>
               <div className="h-2 w-full overflow-hidden rounded bg-muted">
@@ -640,7 +640,7 @@ function IgPostCard({ post }: { post: IgPostRow }) {
         <div className="flex justify-between gap-1 text-[11px] font-medium tabular-nums">
           <span title="Views">{formatInt(post.views)}</span>
           <span title="ER%" className="text-muted-foreground">
-            {post.taxaEngajamento.toFixed(1)}%
+            {formatDecimal(post.taxaEngajamento, 1)}%
           </span>
         </div>
         {post.permalink && (

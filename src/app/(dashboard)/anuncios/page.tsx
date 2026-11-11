@@ -6,6 +6,7 @@ import { PageShell } from "@/components/page-shell";
 import {
   formatBRL,
   formatBRLCompact,
+  formatDecimal,
   formatInt,
   formatPercent,
   safeRate,
@@ -262,7 +263,7 @@ function CreativeCard({ item }: { item: AnuncioCard }) {
             value={formatInt(item.reunioesRealizadas)}
           />
           <CreativeMetric label="Vendas" value={formatInt(item.vendas)} />
-          <CreativeMetric label="ROAS" value={`${item.roas.toFixed(1)}x`} />
+          <CreativeMetric label="ROAS" value={`${formatDecimal(item.roas, 1)}x`} />
         </div>
       </dl>
       {hasIg ? (

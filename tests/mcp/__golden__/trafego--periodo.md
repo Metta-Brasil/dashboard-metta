@@ -9,7 +9,7 @@ Filtros aplicados:
 - Investimento: R$ 7,4k (Gasto Meta no período)
 - CPM: R$ 43,25 (Custo por mil impressões)
 - CPC: R$ 4,25 (Custo por clique)
-- CTR: 1.0% (Cliques ÷ impressões)
+- CTR: 1,0% (Cliques ÷ impressões)
 - CMQL: R$ 1.230,00 (Investimento ÷ MQL)
 - Negócios criados: 5 (Criados no CRM (jul+))
 - Custo/negócio: R$ 1.476,00 (Investimento ÷ Negócios criados)
@@ -39,23 +39,23 @@ Barras (Investimento · MQL · Negócios) + linhas de custo (eixo direito)
 
 Impressões 170.625
 
-▼ 1.0%
+▼ 1,0%
 
 Cliques 1.735
 
-▼ 59.1%
+▼ 59,1%
 
 Visualizações de página 1.025
 
-▼ 0.7%
+▼ 0,7%
 
 Leads 7
 
-▼ 85.7%
+▼ 85,7%
 
 MQL 6
 
-▼ 83.3%
+▼ 83,3%
 
 Negócios criados 5
 
@@ -64,9 +64,9 @@ Distribuição de MQL por temperatura (utm_source)
 
 MQL: 4
 
-- Advantage: 0 · 0.0%
-- Quente: 2 · 50.0%
-- Frio: 2 · 50.0%
+- Advantage: 0 · 0,0%
+- Quente: 2 · 50,0%
+- Frio: 2 · 50,0%
 
 ### MQL e CMQL por funil
 Recorte fixo dos 5 funis (ignora filtro de funil)
@@ -84,21 +84,21 @@ Taxas do funil de tráfego · diário
 
 | dia | CTR | Conexão LP | Conversão LP | Conversão cliques |
 | --- | --- | --- | --- | --- |
-| 01/10 | 1.3% | 38.1% | 1.9% | 0.7% |
-| 02/10 | 1.2% | 67.4% | 0.0% | 0.0% |
-| 03/10 | 1.1% | 68.1% | 1.2% | 0.8% |
-| 04/10 | 1.0% | 68.8% | 0.0% | 0.0% |
-| 05/10 | 1.0% | 69.7% | 0.0% | 0.0% |
-| 06/10 | 0.9% | 70.8% | 0.0% | 0.0% |
-| 07/10 | 1.1% | 50.0% | 1.8% | 0.9% |
-| 08/10 | 1.4% | 36.7% | 0.0% | 0.0% |
-| 09/10 | 1.3% | 65.9% | 1.2% | 0.8% |
-| 10/10 | 0.9% | 66.4% | 0.0% | 0.0% |
-| 11/10 | 0.8% | 67.0% | 0.0% | 0.0% |
-| 12/10 | 0.8% | 67.7% | 0.0% | 0.0% |
-| 13/10 | 0.7% | 68.5% | 1.6% | 1.1% |
-| 14/10 | 0.9% | 48.2% | 0.0% | 0.0% |
-| 15/10 | 1.1% | 49.6% | 2.9% | 1.4% |
+| 01/10 | 1,3% | 38,1% | 1,9% | 0,7% |
+| 02/10 | 1,2% | 67,4% | 0,0% | 0,0% |
+| 03/10 | 1,1% | 68,1% | 1,2% | 0,8% |
+| 04/10 | 1,0% | 68,8% | 0,0% | 0,0% |
+| 05/10 | 1,0% | 69,7% | 0,0% | 0,0% |
+| 06/10 | 0,9% | 70,8% | 0,0% | 0,0% |
+| 07/10 | 1,1% | 50,0% | 1,8% | 0,9% |
+| 08/10 | 1,4% | 36,7% | 0,0% | 0,0% |
+| 09/10 | 1,3% | 65,9% | 1,2% | 0,8% |
+| 10/10 | 0,9% | 66,4% | 0,0% | 0,0% |
+| 11/10 | 0,8% | 67,0% | 0,0% | 0,0% |
+| 12/10 | 0,8% | 67,7% | 0,0% | 0,0% |
+| 13/10 | 0,7% | 68,5% | 1,6% | 1,1% |
+| 14/10 | 0,9% | 48,2% | 0,0% | 0,0% |
+| 15/10 | 1,1% | 49,6% | 2,9% | 1,4% |
 
 ### Custos
 Custo por etapa · diário
@@ -126,6 +126,6 @@ Agrupado por campanha · ordenado por CMQL.
 
 | Campanha | Invest | Impr | CTR | CPC | CPM | LP Views | Leads | CPL | MQL | CMQL | Negócios | Custo/neg |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| CONTA02\|PERPETUO\|SALA\|CAPTACAO\|ADVANTAGE_campanha_tres | R$ 3.552,50 | 78.645 | 1.1% | R$ 4,15 | R$ 45,17 | 510 | 4 | R$ 888,13 | 3 | R$ 1.184,17 | 2 | R$ 1.776,25 |
-| CONTA01\|PERPETUO\|SESSAO\|CAPTACAO\|FRIO_campanha_dois | R$ 3.827,50 | 91.980 | 1.0% | R$ 4,35 | R$ 41,61 | 515 | 3 | R$ 1.275,83 | 3 | R$ 1.275,83 | 3 | R$ 1.275,83 |
-| Total | R$ 7.380,00 | 170.625 | 1.0% | R$ 4,25 | R$ 43,25 | 1.025 | 7 | R$ 1.054,29 | 6 | R$ 1.230,00 | 5 | R$ 1.476,00 |
+| CONTA02\|PERPETUO\|SALA\|CAPTACAO\|ADVANTAGE_campanha_tres | R$ 3.552,50 | 78.645 | 1,1% | R$ 4,15 | R$ 45,17 | 510 | 4 | R$ 888,13 | 3 | R$ 1.184,17 | 2 | R$ 1.776,25 |
+| CONTA01\|PERPETUO\|SESSAO\|CAPTACAO\|FRIO_campanha_dois | R$ 3.827,50 | 91.980 | 1,0% | R$ 4,35 | R$ 41,61 | 515 | 3 | R$ 1.275,83 | 3 | R$ 1.275,83 | 3 | R$ 1.275,83 |
+| Total | R$ 7.380,00 | 170.625 | 1,0% | R$ 4,25 | R$ 43,25 | 1.025 | 7 | R$ 1.054,29 | 6 | R$ 1.230,00 | 5 | R$ 1.476,00 |

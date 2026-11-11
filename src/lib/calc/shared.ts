@@ -348,9 +348,23 @@ export function formatBRLCompact(n: number): string {
   return formatBRL(n);
 }
 
+/**
+ * Número com casas fixas no padrão brasileiro (vírgula decimal, ponto de
+ * milhar): `formatDecimal(6.214, 2)` → "6,21". Base de todo percentual,
+ * multiplicador (ROAS) e taxa impressos na tela: `toFixed` devolve ponto.
+ */
+export function formatDecimal(n: number, decimals = 1): string {
+  if (!Number.isFinite(n)) n = 0;
+  return new Intl.NumberFormat("pt-BR", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(n);
+}
+
+/** Recebe FRAÇÃO (0..1) e devolve "12,3%". */
 export function formatPercent(n: number, decimals = 1): string {
   if (!Number.isFinite(n)) n = 0;
-  return `${(n * 100).toFixed(decimals)}%`;
+  return `${formatDecimal(n * 100, decimals)}%`;
 }
 
 export function formatInt(n: number): string {

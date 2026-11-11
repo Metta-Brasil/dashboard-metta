@@ -13,11 +13,11 @@ Ações contadas pelo dia em que aconteceram (horário de Brasília). Base de 30
 ## Ligações
 
 - Ligações feitas: 144 (Registros de ligação no Clint)
-- Atendidas: 36 (25.0% das feitas)
-- Atendidas até 10s: 18 (50.0% das atendidas)
+- Atendidas: 36 (25,0% das feitas)
+- Atendidas até 10s: 18 (50,0% das atendidas)
 - Ligações de 30s+: 18 (Conexão por ligação)
 - Leads únicos 30s+: 6 (Leads distintos com ligação de 30s+)
-- Ligações de 2min+: 9 (50.0% das de 30s+)
+- Ligações de 2min+: 9 (50,0% das de 30s+)
 - Duração média: 2:25 (Só das ligações de 30s+)
 
 ## WhatsApp e Instagram
@@ -25,7 +25,7 @@ Ações contadas pelo dia em que aconteceram (horário de Brasília). Base de 30
 - Mensagens enviadas: 252 (Clint 36 · celular 216)
 - Leads abordados: 6 (3 pelo chat do Clint)
 - Leads que responderam: 6 (Conexão por mensagem)
-- Responderam e agendaram: 6 (100.0% dos que responderam)
+- Responderam e agendaram: 6 (100,0% dos que responderam)
 - Responderam e não agendaram: 0 (Responderam, sem reunião agendada no período)
 - Mensagens recebidas: 348 (Enviadas pelos leads)
 - Mensagens automáticas: 108 (Disparos; fora do número da SDR)

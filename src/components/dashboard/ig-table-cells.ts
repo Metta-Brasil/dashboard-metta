@@ -1,4 +1,4 @@
-import { formatInt } from "@/lib/calc/shared";
+import { formatDecimal, formatInt } from "@/lib/calc/shared";
 
 /**
  * Linhas e células das tabelas "Todos os posts" e "Todos os stories", fora
@@ -93,7 +93,7 @@ export function igPostCells(r: IgPostTableRow): IgCell[] {
     { text: formatInt(r.visitasPerfil), sortValue: r.visitasPerfil },
     { text: formatInt(r.seguidores), sortValue: r.seguidores },
     {
-      text: Number.isFinite(r.er) ? `${r.er.toFixed(2)}%` : "—",
+      text: Number.isFinite(r.er) ? `${formatDecimal(r.er, 2)}%` : "—",
       sortValue: Number.isFinite(r.er) ? r.er : null,
     },
   ];

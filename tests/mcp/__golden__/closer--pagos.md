@@ -20,7 +20,7 @@ Distribuição de faturamento por funil de origem
 
 Receita total: R$ 144k
 
-- Aplica: 144.000 · 100.0%
+- Aplica: 144.000 · 100,0%
 
 ### Evolução de receita (12 meses)
 Faturamento mensal vs meta
@@ -48,6 +48,6 @@ Agendamentos, propostas e fechamento por closer
 
 | Closer | Agendou | Realizou | Show% | Propostas | Tx prop. | Valor prop. | Vendas | Close% | Faturamento | Ticket médio |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Closer Gama | 7 | 7 | 100.0% | 5 | 71.4% | R$ 240.000,00 | 3 | 60.0% | R$ 144.000,00 | R$ 48.000,00 |
-| Closer Delta | 5 | 0 | 0.0% | 0 | 0.0% | R$ 0,00 | 0 | 0.0% | R$ 0,00 | R$ 0,00 |
-| Total | 12 | 7 | 50.0% | 5 | 71.4% | R$ 240.000,00 | 3 | 60.0% | R$ 144.000,00 | R$ 48.000,00 |
+| Closer Gama | 7 | 7 | 100,0% | 5 | 71,4% | R$ 240.000,00 | 3 | 60,0% | R$ 144.000,00 | R$ 48.000,00 |
+| Closer Delta | 5 | 0 | 0,0% | 0 | 0,0% | R$ 0,00 | 0 | 0,0% | R$ 0,00 | R$ 0,00 |
+| Total | 12 | 7 | 50,0% | 5 | 71,4% | R$ 240.000,00 | 3 | 60,0% | R$ 144.000,00 | R$ 48.000,00 |

@@ -18,6 +18,7 @@ import { SEM_TAG } from "@/lib/calc/clint";
 import {
   formatBRL,
   formatBRLCompact,
+  formatDecimal,
   formatInt,
   formatPercent,
 } from "@/lib/calc/shared";
@@ -215,7 +216,7 @@ async function KpisSection({ searchParams }: PageProps) {
     },
     {
       label: "ROAS",
-      value: `${k.roas.toFixed(2)}x`,
+      value: `${formatDecimal(k.roas, 2)}x`,
       hint: "Receita ÷ Investimento",
     },
     {

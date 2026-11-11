@@ -1,4 +1,4 @@
-import { formatBRL, formatPercent } from "@/lib/calc/shared";
+import { formatBRL, formatDecimal, formatPercent } from "@/lib/calc/shared";
 
 /**
  * Formatação dos valores dos gráficos, fora do módulo de cliente de
@@ -25,5 +25,5 @@ export function makeValueFormatter(
 /** Rótulo de uma fatia do donut: valor e participação no total. */
 export function donutValueLabel(value: number, total: number): string {
   const pct = total > 0 ? (value / total) * 100 : 0;
-  return `${value.toLocaleString("pt-BR")} · ${pct.toFixed(1)}%`;
+  return `${value.toLocaleString("pt-BR")} · ${formatDecimal(pct, 1)}%`;
 }
