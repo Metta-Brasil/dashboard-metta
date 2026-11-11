@@ -159,7 +159,7 @@ const RANGES: Record<SheetTab, string> = {
   ig_tiago_stories: "ig_tiago_stories!A:O",
   ig_impulsionados_hist: "ig_impulsionados_hist!A:L",
   atv_contatos: "diario_contatos!A:Q",
-  atv_contatos_dim: "contatos!A:C",
+  atv_contatos_dim: "contatos!A:D",
   atv_acoes: "diario_acoes!A:AD",
   atv_etapas: "etapas!A:J",
   atv_atividades: "atividades!A:K",

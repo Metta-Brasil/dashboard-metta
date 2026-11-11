@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { ATV_LISTAS, calcAtividades, parseAtvLista } from "@/lib/calc/atividades";
 
-import { AGORA, criarBase } from "./fixture";
+import { AGORA, PIPELINE_RESGATE_BASE, criarBase } from "./fixture";
 
 /**
  * Lista "leads por trás do número" da página Comercial Atividades e os
@@ -66,6 +66,55 @@ describe("leads por trás do número", () => {
     expect(parseAtvLista("qualquer")).toBeNull();
     expect(parseAtvLista(undefined)).toBeNull();
     expect(parseAtvLista("constructor")).toBeNull();
+  });
+});
+
+describe("contato com negócio em mais de uma pipeline", () => {
+  // O contato-01 é trabalhado no Perpétuo e ganhou um negócio mais novo em
+  // outra pipeline, sem funil nem UTM (criado por automação).
+  const antigo = base.clint.find((n) => n.dealId === "deal-01")!;
+  const novo = {
+    ...antigo,
+    dealId: "deal-novo",
+    nome: "Negócio Novo",
+    pipelineId: PIPELINE_RESGATE_BASE.id,
+    pipeline: PIPELINE_RESGATE_BASE.nome,
+    etapa: "Base",
+    funil: "",
+    utmSource: "",
+  };
+  const dim = (dealIds: string) =>
+    base.atv_contatos_dim.map((d) =>
+      d.contato === "contato-01" ? { ...d, dealId: "deal-novo", negocios: 2, dealIds } : d
+    );
+  const com = (dealIds: string, extra: Partial<Parameters<typeof calcAtividades>[1]> = {}) =>
+    calcAtividades(
+      { ...base, clint: [...base.clint, novo], atv_contatos_dim: dim(dealIds) },
+      { ...periodo, ...extra }
+    );
+  const lead = (r: ReturnType<typeof com>) => r.leads.find((l) => l.contato === "contato-01");
+
+  it("a linha mostra o negócio da pipeline em que a ação aconteceu", () => {
+    const l = lead(com("deal-novo deal-01"))!;
+    expect(l.nome).toBe(antigo.nome);
+    expect(l.pipeline).toBe(antigo.pipeline);
+    expect(l.etapa).toBe(antigo.etapa);
+  });
+
+  it("funil e origem filtram pelo negócio trabalhado, não pelo mais novo", () => {
+    const antes = calc({ origem: "pago" }).leads.some((l) => l.contato === "contato-01");
+    const depois = com("deal-novo deal-01", { origem: "pago" }).leads.some(
+      (l) => l.contato === "contato-01"
+    );
+    expect(antes).toBe(true); // o negócio trabalhado veio de anúncio
+    expect(depois).toBe(true);
+    expect(com("deal-novo deal-01").resumo).toEqual(calc().resumo);
+  });
+
+  it("base sem a lista de negócios cai no negócio mais recente", () => {
+    const l = lead(com(""))!;
+    expect(l.nome).toBe("Negócio Novo");
+    expect(l.pipeline).toBe(PIPELINE_RESGATE_BASE.nome);
   });
 });
 

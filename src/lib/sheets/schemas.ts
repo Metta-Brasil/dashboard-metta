@@ -787,21 +787,28 @@ export const ATV_ACOES_COLUMN_MAP = {
 } as const;
 
 /**
- * Aba `contatos` — dimensão contato → negócio mais recente. Só
- * identificadores: nome, funil e origem do lead vêm da aba `clint`, pelo ID
- * do negócio. É o que permite listar os leads por trás de cada número e
- * filtrar as ações por funil e origem.
+ * Aba `contatos` — dimensão contato → negócios. Só identificadores: nome,
+ * funil e origem do lead vêm da aba `clint`, pelo ID do negócio. É o que
+ * permite listar os leads por trás de cada número e filtrar as ações por
+ * funil e origem.
+ *
+ * `dealIds` traz todos os negócios do contato, do mais novo para o mais
+ * antigo, separados por espaço. Quase metade dos contatos trabalhados tem
+ * negócio em mais de uma pipeline; a página mostra o da pipeline em que a
+ * ação aconteceu (ver `calcAtividades`). Vazio em base antiga: vale `dealId`.
  */
 export const AtvContatoDimRowSchema = z.object({
   contato: zString,
   dealId: zString,
   negocios: zInt,
+  dealIds: zString.optional().transform((v) => v ?? ""),
 });
 export type AtvContatoDimRow = z.infer<typeof AtvContatoDimRowSchema>;
 export const ATV_CONTATOS_DIM_COLUMN_MAP = {
   contato: 0,
   dealId: 1,
   negocios: 2,
+  dealIds: 3,
 } as const;
 
 /** Aba `etapas` — uma linha por mudança de etapa (nome da etapa da época). */

@@ -94,8 +94,9 @@ export type AtvFilters = {
 
 /**
  * Um lead com ação no período: é a linha da lista "quem são os leads por
- * trás do número". Nome, etapa, funil e dono vêm do negócio mais recente
- * do contato na aba `clint`; contato sem negócio fica sem nome.
+ * trás do número". Nome, etapa, funil e dono vêm do negócio do contato na
+ * PIPELINE EM QUE A AÇÃO ACONTECEU (aba `clint`); sem negócio nessa pipeline,
+ * do negócio mais recente; contato sem negócio fica sem nome.
  */
 export type AtvLead = {
   contato: string;
@@ -415,22 +416,32 @@ export function calcAtividades(
     : null;
   const naVisao = (pipeline: string) => nomes === null || nomes.has(pipeline);
 
-  // Contato → negócio mais recente (aba `clint`), para nome, funil e origem.
+  // Contato → negócios (aba `clint`), do mais novo para o mais antigo, para
+  // nome, etapa, funil e origem. Quase metade dos contatos trabalhados tem
+  // negócio em mais de uma pipeline (lead do Perpétuo que ganhou negócio na
+  // Campanha Resgate): vale o negócio da pipeline em que a ação aconteceu.
+  // Usar sempre o mais recente mostrava, na visão Perpétuo, pipeline e etapa
+  // de outro negócio em 245 de 292 leads, e filtrava funil e origem por ele.
   const negocioPorId = new Map<string, ClintRow>();
   for (const r of data.clint) if (r.dealId) negocioPorId.set(r.dealId, r);
-  const negocioDe = new Map<string, ClintRow>();
+  const negociosDe = new Map<string, ClintRow[]>();
   for (const d of data.atv_contatos_dim ?? []) {
-    const n = negocioPorId.get(d.dealId);
-    if (n) negocioDe.set(d.contato, n);
+    const ids = d.dealIds ? d.dealIds.split(/\s+/).filter(Boolean) : [d.dealId];
+    const lista = ids.map((id) => negocioPorId.get(id)).filter((n): n is ClintRow => !!n);
+    if (lista.length) negociosDe.set(d.contato, lista);
   }
+  const negocioDe = (contato: string, pipeline: string): ClintRow | undefined => {
+    const lista = negociosDe.get(contato);
+    return lista?.find((n) => n.pipeline === pipeline) ?? lista?.[0];
+  };
   const funisSel = (filters.funis ?? []).filter((f) => f !== FUNIL_TUDO && f !== "todos");
   const origemSel = filters.origem && filters.origem !== "todos" ? filters.origem : null;
   const escopoAtivo = funisSel.length > 0 || origemSel !== null;
   // Contato sem negócio: sem funil e sem UTM (orgânico), pela mesma regra
   // das outras páginas.
-  const noEscopo = (contato: string): boolean => {
+  const noEscopo = (contato: string, pipeline: string): boolean => {
     if (!escopoAtivo) return true;
-    const n = negocioDe.get(contato);
+    const n = negocioDe(contato, pipeline);
     if (funisSel.length && filterLeadsByFunil([{ funil: n?.funil ?? "" }], funisSel).length === 0) {
       return false;
     }
@@ -467,7 +478,7 @@ export function calcAtividades(
   }
 
   const contatosPeriodo = data.atv_contatos.filter(
-    (c) => noPeriodo(c.dia) && naVisao(c.pipeline) && noEscopo(c.contato)
+    (c) => noPeriodo(c.dia) && naVisao(c.pipeline) && noEscopo(c.contato, c.pipeline)
   );
   // Linhas sem contato (mensagens automáticas e recebidas): não dá para
   // atribuir funil nem origem, então ficam fora de um recorte desses.
@@ -538,19 +549,19 @@ export function calcAtividades(
 
   // Leads por trás dos números: uma linha por contato, com as mesmas regras
   // do resumo (o filtro de canal corta só os campos de mensagem).
+  // O negócio da linha é o da pipeline da ação mais recente do contato.
   const porContato = new Map<string, AtvLead & { _pessoas: Set<string> }>();
   for (const c of contatos) {
     if (!c.contato) continue;
     let l = porContato.get(c.contato);
     if (!l) {
-      const n = negocioDe.get(c.contato);
       l = {
         contato: c.contato,
-        nome: n?.nome ?? "",
-        pipeline: n?.pipeline || c.pipeline,
-        etapa: n?.etapa ?? "",
-        funil: n ? (funilKey(n.funil) === "sem-funil" ? "" : n.funil) : "",
-        dono: n?.dono ?? "",
+        nome: "",
+        pipeline: c.pipeline,
+        etapa: "",
+        funil: "",
+        dono: "",
         pessoas: [],
         ultimoDia: c.dia,
         ligFeitas: 0,
@@ -569,7 +580,10 @@ export function calcAtividades(
       porContato.set(c.contato, l);
     }
     if (c.pessoa) l._pessoas.add(c.pessoa);
-    if (c.dia > l.ultimoDia) l.ultimoDia = c.dia;
+    if (c.dia > l.ultimoDia) {
+      l.ultimoDia = c.dia;
+      l.pipeline = c.pipeline;
+    }
     l.ligFeitas += c.ligFeitas;
     l.ligAtendidas += c.ligAtendidas;
     l.ligAte10 += c.ligAte10;
@@ -582,10 +596,18 @@ export function calcAtividades(
     if (c.abordado > 0) l.abordado = true;
     if (c.respondeu > 0) l.respondeu = true;
   }
-  const leads: AtvLead[] = Array.from(porContato.values(), ({ _pessoas, ...l }) => ({
-    ...l,
-    pessoas: Array.from(_pessoas).sort((a, b) => a.localeCompare(b, "pt-BR")),
-  })).sort(
+  const leads: AtvLead[] = Array.from(porContato.values(), ({ _pessoas, ...l }) => {
+    const n = negocioDe(l.contato, l.pipeline);
+    return {
+      ...l,
+      nome: n?.nome ?? "",
+      pipeline: n?.pipeline || l.pipeline,
+      etapa: n?.etapa ?? "",
+      funil: n ? (funilKey(n.funil) === "sem-funil" ? "" : n.funil) : "",
+      dono: n?.dono ?? "",
+      pessoas: Array.from(_pessoas).sort((a, b) => a.localeCompare(b, "pt-BR")),
+    };
+  }).sort(
     (x, y) =>
       (y.ultimoDia < x.ultimoDia ? -1 : y.ultimoDia > x.ultimoDia ? 1 : 0) ||
       x.nome.localeCompare(y.nome, "pt-BR") ||
@@ -631,7 +653,7 @@ function calcConsultoria(
     noPeriodo: (dia: string) => boolean;
     naVisao: (pipeline: string) => boolean;
     daPessoa: (p: string) => boolean;
-    noEscopo: (contato: string) => boolean;
+    noEscopo: (contato: string, pipeline: string) => boolean;
     ids: Set<string>;
   }
 ): AtvConsultoria {
@@ -643,7 +665,7 @@ function calcConsultoria(
   const chave = { fu1: new Set<string>(), fu2: new Set<string>(), env: new Set<string>(), rec: new Set<string>() };
   for (const e of data.atv_etapas) {
     if (!f.noPeriodo(e.dia) || !f.naVisao(e.pipeline) || !f.daPessoa(e.usuario)) continue;
-    if (!f.noEscopo(e.contato)) continue;
+    if (!f.noEscopo(e.contato, e.pipeline)) continue;
     const etapa = e.etapaNova.trim() || "—";
     const k = `${e.pipeline}\u0000${norm(etapa)}`;
     let cell = entradas.get(k);
@@ -708,7 +730,7 @@ function calcConsultoria(
   for (const a of data.atv_atividades) {
     if (a.situacao !== "Concluída") continue;
     if (!f.noPeriodo(a.dia) || !f.naVisao(a.pipeline) || !f.daPessoa(a.usuario)) continue;
-    if (!f.noEscopo(a.contato)) continue;
+    if (!f.noEscopo(a.contato, a.pipeline)) continue;
     const classe = classeAtividade(a.tipo, a.titulo);
     atividadesPorClasse[classe] += 1;
     const titulo = a.titulo.trim() || "(sem título)";

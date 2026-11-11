@@ -630,6 +630,7 @@ function atvContatosDim(): AtvContatoDimRow[] {
     contato: `contato-${dois(n)}`,
     dealId: `deal-${dois(n)}`,
     negocios: 1,
+    dealIds: `deal-${dois(n)}`,
   }));
 }
 
