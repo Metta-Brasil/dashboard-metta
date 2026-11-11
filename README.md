@@ -86,7 +86,7 @@ Filtros sincronizam via URL (`?from=…&to=…&funis=sala,sessao&sdr=Ana,Bia&sta
 
 ## Servidor MCP
 
-Clientes de IA (Claude Code, claude.ai, ChatGPT, Codex) leem as páginas do
+Clientes de IA (Claude Code, claude.ai, ChatGPT, Codex, Hermes Agent) leem as páginas do
 dashboard por MCP, com os mesmos números da tela. Instalação para quem vai
 usar: página pública [`/docs/mcp`](src/app/docs/mcp/page.tsx).
 

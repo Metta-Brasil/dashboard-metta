@@ -5,7 +5,7 @@ import { Suspense } from "react";
 export const metadata: Metadata = {
   title: "MCP · Dashboard Metta",
   description:
-    "Como conectar Claude, ChatGPT e Codex ao Dashboard Metta por MCP.",
+    "Como conectar Claude, ChatGPT, Codex e Hermes ao Dashboard Metta por MCP.",
   robots: { index: false },
 };
 
@@ -63,7 +63,7 @@ async function Conteudo() {
       <Section title="O que é">
         <p>
           O Dashboard Metta tem um servidor MCP. Com ele, um cliente de IA
-          (Claude, ChatGPT, Codex) lê as páginas do dashboard e responde com
+          (Claude, ChatGPT, Codex, Hermes) lê as páginas do dashboard e responde com
           os mesmos números que aparecem na tela, no mesmo filtro.
         </p>
         <ul className="flex list-disc flex-col gap-1 pl-5">
@@ -149,6 +149,20 @@ async function Conteudo() {
         <Steps>
           <li>O segundo comando abre o navegador na página de autorização.</li>
           <li>Cole a chave e autorize.</li>
+        </Steps>
+
+        <h3 className="mt-2 text-sm font-semibold">Hermes Agent</h3>
+        <Code>{`hermes mcp add metta --url ${url} --auth oauth\nhermes mcp test metta`}</Code>
+        <Steps>
+          <li>
+            O primeiro comando registra o servidor e abre o navegador na
+            página de autorização. Cole a chave e autorize.
+          </li>
+          <li>
+            O segundo confere a conexão e lista as ferramentas. Se a
+            autorização não abrir ou expirar, rode{" "}
+            <code className="font-mono">hermes mcp login metta</code>.
+          </li>
         </Steps>
         <p className="text-xs text-muted-foreground">
           Os nomes de menu e de opção mudam entre versões dos clientes. Se um
