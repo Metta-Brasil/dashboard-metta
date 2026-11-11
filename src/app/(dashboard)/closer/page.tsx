@@ -1,7 +1,11 @@
 import { Suspense } from "react";
 
 import { AreaLineChart, DonutChart } from "@/components/dashboard/charts";
-import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
+import {
+  KpiGrid,
+  KpiGridSkeleton,
+  type Kpi,
+} from "@/components/dashboard/kpi-grid";
 import { MetricTable, type Column } from "@/components/dashboard/metric-table";
 import { RecorteVazio } from "@/components/dashboard/recorte-vazio";
 import { Toolbar } from "@/components/dashboard/toolbar";
@@ -197,7 +201,7 @@ async function CloserContent({ searchParams }: PageProps) {
         oQue="reuniões, propostas ou vendas"
         filters={filters}
       />
-      <KpiGrid kpis={kpis} cols="grid-cols-2 lg:grid-cols-3 xl:grid-cols-6" />
+      <KpiGrid kpis={kpis} principais={3} cols="grid-cols-3" />
 
       {/* g-2 do #p4: Receita por funil (donut) + Evolução de receita */}
       <div className="grid items-stretch gap-6 lg:grid-cols-2">
@@ -268,18 +272,7 @@ function CloserSkeleton() {
       title="Comercial Closer"
       description="Reuniões realizadas, taxa de fechamento e ticket médio por Closer."
     >
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div
-            key={i}
-            className="flex h-[110px] flex-col gap-2 rounded-xl border border-border bg-card p-5 shadow-xs"
-          >
-            <div className="h-3 w-20 animate-pulse rounded bg-muted" />
-            <div className="h-7 w-28 animate-pulse rounded bg-muted" />
-            <div className="h-3 w-32 animate-pulse rounded bg-muted" />
-          </div>
-        ))}
-      </div>
+      <KpiGridSkeleton count={6} principais={3} cols="grid-cols-3" altura={[267, 465]} />
       {Array.from({ length: 4 }).map((_, i) => (
         <div
           key={i}

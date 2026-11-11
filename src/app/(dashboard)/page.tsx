@@ -5,7 +5,11 @@ import {
   MultiLineChart,
 } from "@/components/dashboard/charts";
 import { FunnelVertical } from "@/components/dashboard/funnel-vertical";
-import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
+import {
+  KpiGrid,
+  KpiGridSkeleton,
+  type Kpi,
+} from "@/components/dashboard/kpi-grid";
 import {
   MetricTable,
   type Column,
@@ -65,7 +69,7 @@ export default function VisaoGeralPage({ searchParams }: PageProps) {
         </Suspense>
       }
     >
-      <Suspense fallback={<SectionFallback label="Carregando KPIs…" />}>
+      <Suspense fallback={<KpiGridSkeleton count={10} principais={5} trend altura={[334, 813]} />}>
         <KpisSection searchParams={searchParams} />
       </Suspense>
 
@@ -177,30 +181,37 @@ async function KpisSection({ searchParams }: PageProps) {
       }
     : undefined;
 
+  // Tendência dos cards principais: a série diária do próprio indicador.
+  const serie = result.serieDiaria;
   const kpis: Kpi[] = [
     {
       label: "Investimento",
+      trend: serie.map((d) => d.investimento),
       value: formatBRLCompact(k.investimento),
       hint: "Tráfego pago no período",
     },
     {
       label: "MQL",
+      trend: serie.map((d) => d.mql),
       value: formatInt(k.mql),
       hint: `CMQL ${formatBRL(k.cmql)}`,
     },
     {
       label: "Negócios criados",
+      trend: serie.map((d) => d.negociosCriados),
       value: formatInt(k.negociosCriados),
       hint: `Custo/negócio ${formatBRL(k.custoPorNegocio)}`,
       delta: negociosCriadosDelta,
     },
     {
       label: "Reuniões realizadas",
+      trend: serie.map((d) => d.reunioes),
       value: formatInt(k.reunioes),
       hint: `Show ${formatPercent(k.show)} · No-show ${formatInt(k.noShow)}`,
     },
     {
       label: "Vendas",
+      trend: serie.map((d) => d.vendas),
       value: formatInt(k.vendas),
       hint: `Conv R→V ${formatPercent(k.convReunParaVenda)}`,
     },
@@ -243,7 +254,7 @@ async function KpisSection({ searchParams }: PageProps) {
         oQue="investimento, leads, negócios ou vendas"
         filters={filters}
       />
-      <KpiGrid kpis={kpis} />
+      <KpiGrid kpis={kpis} principais={5} />
     </>
   );
 }

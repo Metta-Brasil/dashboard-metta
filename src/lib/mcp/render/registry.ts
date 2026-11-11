@@ -74,6 +74,7 @@ export const SERIALIZERS = new Map<unknown, Serializer>([
   [pageShellMod.PageShell, S.pageShell],
   [pageShellMod.KpiCard, S.kpiCard],
   [kpiGridMod.KpiGrid, S.kpiGrid],
+  [kpiGridMod.KpiGridSkeleton, S.nada],
   [progressCardMod.ProgressStatCard, S.progressStatCard],
   [progressCardMod.PacingBars, S.pacingBars],
   [barListMod.BarList, S.barList],

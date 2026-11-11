@@ -58,7 +58,7 @@ async function DashboardShell({ children }: { children: React.ReactNode }) {
       <Suspense fallback={<AppSidebar variant="inset" user={LOADING_USER} />}>
         <UserSidebar session={session} />
       </Suspense>
-      <SidebarInset>
+      <SidebarInset className="min-w-0 overflow-x-clip">
         <div className="flex flex-1 flex-col">{children}</div>
       </SidebarInset>
       {/* Só rende algo em celular fora do modo instalado; ver o componente. */}
@@ -85,7 +85,7 @@ export default function DashboardLayout({
         fallback={
           <>
             <AppSidebar variant="inset" user={LOADING_USER} />
-            <SidebarInset>
+            <SidebarInset className="min-w-0 overflow-x-clip">
               <div className="flex flex-1 flex-col" />
             </SidebarInset>
           </>

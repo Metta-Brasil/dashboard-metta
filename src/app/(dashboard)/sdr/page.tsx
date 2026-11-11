@@ -2,7 +2,11 @@ import { Suspense } from "react";
 
 import { MultiLineChart } from "@/components/dashboard/charts";
 import { FunnelVertical } from "@/components/dashboard/funnel-vertical";
-import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
+import {
+  KpiGrid,
+  KpiGridSkeleton,
+  type Kpi,
+} from "@/components/dashboard/kpi-grid";
 import { FilterSelect } from "@/components/dashboard/filter-select";
 import { MetricTable, type Column } from "@/components/dashboard/metric-table";
 import { SDRHeatmap } from "@/components/dashboard/sdr-heatmap";
@@ -335,7 +339,7 @@ async function SdrContent({ searchParams }: PageProps) {
         oQue="negócios, agendamentos ou reuniões"
         filters={filters}
       />
-      <KpiGrid kpis={kpis} />
+      <KpiGrid kpis={kpis} principais={5} />
 
       <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
         <div className="flex lg:col-span-1">
@@ -409,18 +413,7 @@ async function SdrContent({ searchParams }: PageProps) {
 function SdrSkeleton() {
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div
-            key={i}
-            className="flex h-[110px] flex-col gap-2 rounded-xl border border-border bg-card p-5 shadow-xs"
-          >
-            <div className="h-3 w-20 animate-pulse rounded bg-muted" />
-            <div className="h-7 w-28 animate-pulse rounded bg-muted" />
-            <div className="h-3 w-32 animate-pulse rounded bg-muted" />
-          </div>
-        ))}
-      </div>
+      <KpiGridSkeleton count={10} principais={5} altura={[267, 685]} />
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="h-72 animate-pulse rounded-xl border border-border bg-card" />
         <div className="h-72 animate-pulse rounded-xl border border-border bg-card" />

@@ -5,7 +5,11 @@ import { ComboBarLineChart } from "@/components/dashboard/charts";
 import { ContaFilter } from "@/components/dashboard/conta-filter";
 import { DistModoToggle } from "@/components/dashboard/dist-modo-toggle";
 import { FunnelVertical } from "@/components/dashboard/funnel-vertical";
-import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
+import {
+  KpiGrid,
+  KpiGridSkeleton,
+  type Kpi,
+} from "@/components/dashboard/kpi-grid";
 import { MetricTable, type Column } from "@/components/dashboard/metric-table";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
@@ -124,7 +128,7 @@ async function TpDistKpis({ searchParams }: PageProps) {
     hint: k.hint,
   }));
   return (
-    <KpiGrid kpis={kpis} cols="grid-cols-2 lg:grid-cols-3 xl:grid-cols-6" />
+    <KpiGrid kpis={kpis} principais={3} cols="grid-cols-3" />
   );
 }
 
@@ -401,19 +405,7 @@ async function TabelaDist({ searchParams }: PageProps) {
 // ---------------------------------------------------------------------------
 
 function KpisFallback() {
-  return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div
-          key={i}
-          className="flex h-[110px] flex-col gap-2 rounded-xl border border-border bg-card p-5 shadow-xs"
-        >
-          <div className="h-3 w-20 animate-pulse rounded bg-muted" />
-          <div className="h-7 w-28 animate-pulse rounded bg-muted" />
-        </div>
-      ))}
-    </div>
-  );
+  return <KpiGridSkeleton count={6} principais={3} cols="grid-cols-3" altura={[258, 485]} />;
 }
 
 function TableFallback({ rows }: { rows: number }) {

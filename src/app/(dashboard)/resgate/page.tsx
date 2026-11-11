@@ -4,7 +4,11 @@ import { Suspense } from "react";
 import { BarList } from "@/components/dashboard/bar-list";
 import { ComboBarLineChart } from "@/components/dashboard/charts";
 import { FunnelHorizontal } from "@/components/dashboard/funnel-horizontal";
-import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
+import {
+  KpiGrid,
+  KpiGridSkeleton,
+  type Kpi,
+} from "@/components/dashboard/kpi-grid";
 import { RecorteVazio } from "@/components/dashboard/recorte-vazio";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
@@ -135,7 +139,7 @@ async function ResgateKpis({ searchParams }: PageProps) {
     value: formatKpi(k),
     hint: k.hint,
   }));
-  return <KpiGrid kpis={kpis} cols="grid-cols-2 lg:grid-cols-3 xl:grid-cols-6" />;
+  return <KpiGrid kpis={kpis} principais={3} cols="grid-cols-3" />;
 }
 
 async function Funil({ searchParams }: PageProps) {
@@ -206,19 +210,7 @@ async function PerfilDaBase({ searchParams }: PageProps) {
 // ---------------------------------------------------------------------------
 
 function KpisFallback() {
-  return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div
-          key={i}
-          className="flex h-[110px] flex-col gap-2 rounded-xl border border-border bg-card p-5 shadow-xs"
-        >
-          <div className="h-3 w-20 animate-pulse rounded bg-muted" />
-          <div className="h-7 w-28 animate-pulse rounded bg-muted" />
-        </div>
-      ))}
-    </div>
-  );
+  return <KpiGridSkeleton count={6} principais={3} cols="grid-cols-3" altura={[267, 471]} />;
 }
 
 function TableFallback({ rows }: { rows: number }) {

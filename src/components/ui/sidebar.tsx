@@ -149,6 +149,8 @@ function SidebarProvider({
   )
 }
 
+const subscribeNever = () => () => {}
+
 function Sidebar({
   side = "left",
   variant = "sidebar",
@@ -163,6 +165,16 @@ function Sidebar({
   collapsible?: "offcanvas" | "icon" | "none"
 }) {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+  // A barra hidrata dentro de um <Suspense> (espera a sessão), depois que o
+  // provider já sabe que a tela é de celular. Sem esta trava, a hidratação
+  // comparava a variante de celular com o HTML de desktop do servidor e o
+  // React acusava erro em toda página aberta no celular. Durante a
+  // hidratação vale a variante do servidor; a troca vem logo depois.
+  const hydrated = React.useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false
+  )
 
   if (collapsible === "none") {
     return (
@@ -179,7 +191,7 @@ function Sidebar({
     )
   }
 
-  if (isMobile) {
+  if (isMobile && hydrated) {
     return (
       <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
         <SheetContent

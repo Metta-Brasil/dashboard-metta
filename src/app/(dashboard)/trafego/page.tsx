@@ -7,7 +7,11 @@ import {
   MultiLineChart,
 } from "@/components/dashboard/charts";
 import { FunnelVertical } from "@/components/dashboard/funnel-vertical";
-import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
+import {
+  KpiGrid,
+  KpiGridSkeleton,
+  type Kpi,
+} from "@/components/dashboard/kpi-grid";
 import { MetricTable, type Column } from "@/components/dashboard/metric-table";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
@@ -165,7 +169,7 @@ async function TrafegoKpis({ searchParams }: PageProps) {
   ];
 
   return (
-    <KpiGrid kpis={kpis} cols="grid-cols-2 lg:grid-cols-3 xl:grid-cols-6" />
+    <KpiGrid kpis={kpis} principais={3} cols="grid-cols-2 lg:grid-cols-4" />
   );
 }
 
@@ -501,20 +505,7 @@ async function RankingMidia({ searchParams }: PageProps) {
 // ---------------------------------------------------------------------------
 
 function KpisFallback() {
-  return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div
-          key={i}
-          className="flex h-[110px] flex-col gap-2 rounded-xl border border-border bg-card p-5 shadow-xs"
-        >
-          <div className="h-3 w-20 animate-pulse rounded bg-muted" />
-          <div className="h-7 w-28 animate-pulse rounded bg-muted" />
-          <div className="h-3 w-32 animate-pulse rounded bg-muted" />
-        </div>
-      ))}
-    </div>
-  );
+  return <KpiGridSkeleton count={7} principais={3} cols="grid-cols-2 lg:grid-cols-4" altura={[267, 568]} />;
 }
 
 function TableFallback({ rows }: { rows: number }) {
