@@ -786,6 +786,24 @@ export const ATV_ACOES_COLUMN_MAP = {
   msgRecebidas: 16,
 } as const;
 
+/**
+ * Aba `contatos` — dimensão contato → negócio mais recente. Só
+ * identificadores: nome, funil e origem do lead vêm da aba `clint`, pelo ID
+ * do negócio. É o que permite listar os leads por trás de cada número e
+ * filtrar as ações por funil e origem.
+ */
+export const AtvContatoDimRowSchema = z.object({
+  contato: zString,
+  dealId: zString,
+  negocios: zInt,
+});
+export type AtvContatoDimRow = z.infer<typeof AtvContatoDimRowSchema>;
+export const ATV_CONTATOS_DIM_COLUMN_MAP = {
+  contato: 0,
+  dealId: 1,
+  negocios: 2,
+} as const;
+
 /** Aba `etapas` — uma linha por mudança de etapa (nome da etapa da época). */
 export const AtvEtapaRowSchema = z.object({
   dia: zDia,

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { LeadsDoNumero } from "@/app/(dashboard)/atividades/leads-do-numero";
 import { VendasDoPeriodo } from "@/app/(dashboard)/closer/vendas-do-periodo";
 import { TabelaNegocios } from "@/app/(dashboard)/resgate/negocios-na-pipeline";
 import * as atvVisaoToggleMod from "@/components/dashboard/atv-visao-toggle";
@@ -63,6 +64,7 @@ import type { Registry, Serializer } from "./walker";
 export const FORA_DO_MCP = new Map<unknown, string>([
   [TabelaNegocios, "Negócios na pipeline"],
   [VendasDoPeriodo, "Vendas do período"],
+  [LeadsDoNumero, "Leads trabalhados no período"],
 ]);
 
 export const SERIALIZERS = new Map<unknown, Serializer>([

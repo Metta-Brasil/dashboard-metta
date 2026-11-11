@@ -8,6 +8,10 @@ import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
 import { MetricTable, type Column } from "@/components/dashboard/metric-table";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
+import {
+  parseAtvLista,
+  type AtvLista,
+} from "@/lib/calc/atividades";
 import type {
   AtividadesResult,
   AtvAtividadeLinha,
@@ -17,7 +21,9 @@ import type {
   AtvResumo,
 } from "@/lib/calc/atividades";
 import { formatInt, formatPercent, safeRate } from "@/lib/calc/shared";
-import { getAtividades, getFilters } from "@/lib/page-data";
+import { getAtividades, getFiltersDinamico } from "@/lib/page-data";
+
+import { LeadsDoNumero } from "./leads-do-numero";
 
 export const metadata: Metadata = {
   title: "Comercial Atividades · Dashboard Metta",
@@ -66,14 +72,16 @@ export default function AtividadesPage({ searchParams }: PageProps) {
 
 async function AtividadesToolbar({ searchParams }: PageProps) {
   const [filters, result] = await Promise.all([
-    getFilters(searchParams),
+    getFiltersDinamico(searchParams),
     getAtividades(searchParams),
   ]);
   return (
     <Toolbar
       from={filters.from}
       to={filters.to}
-      funil={false}
+      // Funil e origem pelo negócio do contato; a pipeline desta página é
+      // o seletor de visão ao lado, não o filtro genérico de pipeline.
+      escopo={{ filters, pipeline: false }}
       leftExtras={<AtvVisaoToggle />}
       extras={
         <>
@@ -85,8 +93,24 @@ async function AtividadesToolbar({ searchParams }: PageProps) {
   );
 }
 
+/** Liga cada indicador à lista dos leads que ele conta (param `lista`). */
+type Listas = { ativa: AtvLista | null; href: (lista: AtvLista) => string };
+
 async function AtividadesContent({ searchParams }: PageProps) {
-  const r = await getAtividades(searchParams);
+  const [r, spv] = await Promise.all([getAtividades(searchParams), searchParams]);
+  const ativa = parseAtvLista(spv.lista);
+  const listas: Listas = {
+    ativa,
+    // Clicar no indicador já aberto fecha a lista dele.
+    href: (lista) => {
+      const p = new URLSearchParams();
+      for (const [k, v] of Object.entries(spv)) {
+        if (k !== "lista" && typeof v === "string") p.set(k, v);
+      }
+      if (lista !== ativa) p.set("lista", lista);
+      return `?${p.toString()}#leads`;
+    },
+  };
 
   if (!r.temDados) {
     return (
@@ -102,7 +126,14 @@ async function AtividadesContent({ searchParams }: PageProps) {
   return (
     <>
       <Cobertura r={r} />
-      {r.visao === "consultoria" ? <Consultoria r={r} /> : <Prospeccao r={r} />}
+      {r.visao === "consultoria" ? (
+        <Consultoria r={r} />
+      ) : (
+        <>
+          <Prospeccao r={r} listas={listas} />
+          <LeadsDoNumero searchParams={searchParams} />
+        </>
+      )}
       <GraficoPorDia r={r} />
       <TabelaPorPessoa r={r} />
     </>
@@ -136,35 +167,46 @@ function Secao({
   );
 }
 
-function kpisLigacoes(s: AtvResumo): Kpi[] {
+/** Props de card clicável: abre a lista dos leads do indicador. */
+function link(l: Listas, lista: AtvLista): Pick<Kpi, "href" | "active"> {
+  return { href: l.href(lista), active: l.ativa === lista };
+}
+
+function kpisLigacoes(s: AtvResumo, l: Listas): Kpi[] {
   return [
     {
       label: "Ligações feitas",
+      ...link(l, "ligados"),
       value: formatInt(s.ligFeitas),
       hint: "Registros de ligação no Clint",
     },
     {
       label: "Atendidas",
+      ...link(l, "atendidas"),
       value: formatInt(s.ligAtendidas),
       hint: `${formatPercent(safeRate(s.ligAtendidas, s.ligFeitas))} das feitas`,
     },
     {
       label: "Atendidas até 10s",
+      ...link(l, "ate10"),
       value: formatInt(s.ligAte10),
       hint: `${formatPercent(safeRate(s.ligAte10, s.ligAtendidas))} das atendidas`,
     },
     {
       label: "Ligações de 30s+",
+      ...link(l, "conexoes"),
       value: formatInt(s.lig30),
       hint: "Conexão por ligação",
     },
     {
       label: "Leads únicos 30s+",
+      ...link(l, "conexoes"),
       value: formatInt(s.unicos30),
       hint: "Leads distintos com ligação de 30s+",
     },
     {
       label: "Ligações de 2min+",
+      ...link(l, "lig120"),
       value: formatInt(s.lig120),
       hint: `${formatPercent(safeRate(s.lig120, s.lig30))} das de 30s+`,
     },
@@ -176,60 +218,72 @@ function kpisLigacoes(s: AtvResumo): Kpi[] {
   ];
 }
 
-function kpisMensagens(s: AtvResumo): Kpi[] {
+function kpisMensagens(s: AtvResumo, l: Listas, semContato: boolean): Kpi[] {
   return [
     {
       label: "Mensagens enviadas",
+      ...link(l, "mensagens"),
       value: formatInt(s.msgEnviadas),
       hint: `Clint ${formatInt(s.msgClint)} · celular ${formatInt(s.msgCelular)}`,
     },
     {
       label: "Leads abordados",
+      ...link(l, "abordados"),
       value: formatInt(s.abordados),
       hint: `${formatInt(s.abordadosClint)} pelo chat do Clint`,
     },
     {
       label: "Leads que responderam",
+      ...link(l, "responderam"),
       value: formatInt(s.responderam),
       hint: "Conexão por mensagem",
     },
     {
       label: "Responderam e agendaram",
+      ...link(l, "responderamAgendaram"),
       value: formatInt(s.responderamAgendaram),
       hint: `${formatPercent(safeRate(s.responderamAgendaram, s.responderam))} dos que responderam`,
     },
     {
       label: "Responderam e não agendaram",
+      ...link(l, "responderamNaoAgendaram"),
       value: formatInt(s.responderamNaoAgendaram),
       hint: "Responderam, sem reunião agendada no período",
     },
     {
       label: "Mensagens recebidas",
       value: formatInt(s.msgRecebidas),
-      hint: "Enviadas pelos leads",
+      hint: semContato
+        ? "Sem lead atrelado: fora do filtro de funil e origem"
+        : "Enviadas pelos leads",
     },
     {
       label: "Mensagens automáticas",
       value: formatInt(s.msgAutomaticas),
-      hint: "Disparos; fora do número da SDR",
+      hint: semContato
+        ? "Sem lead atrelado: fora do filtro de funil e origem"
+        : "Disparos; fora do número da SDR",
     },
   ];
 }
 
-function kpisAgendamentos(s: AtvResumo): Kpi[] {
+function kpisAgendamentos(s: AtvResumo, l: Listas): Kpi[] {
   return [
     {
       label: "Reuniões agendadas",
+      ...link(l, "agendados"),
       value: formatInt(s.reunioes),
       hint: "Pelo dia em que a SDR agendou",
     },
     {
       label: "Conexões que viraram agenda",
+      ...link(l, "conexoesAgendaram"),
       value: formatInt(s.conexoesAgendaram),
       hint: `de ${formatInt(s.unicos30)} leads com ligação de 30s+`,
     },
     {
       label: "Conexões que não viraram agenda",
+      ...link(l, "conexoesNaoAgendaram"),
       value: formatInt(s.conexoesNaoAgendaram),
       hint: "Ligação de 30s+, sem reunião agendada no período",
     },
@@ -240,17 +294,17 @@ const COLS_7 = "grid-cols-2 lg:grid-cols-4 xl:grid-cols-7";
 const COLS_3 = "grid-cols-1 sm:grid-cols-3";
 
 /** Visões Todas, Perpétuo e Resgate: ligações, mensagens e agendamentos. */
-function Prospeccao({ r }: { r: AtividadesResult }) {
+function Prospeccao({ r, listas }: { r: AtividadesResult; listas: Listas }) {
   return (
     <>
       <Secao titulo="Ligações">
-        <KpiGrid kpis={kpisLigacoes(r.resumo)} cols={COLS_7} />
+        <KpiGrid kpis={kpisLigacoes(r.resumo, listas)} cols={COLS_7} />
       </Secao>
       <Secao titulo="WhatsApp e Instagram">
-        <KpiGrid kpis={kpisMensagens(r.resumo)} cols={COLS_7} />
+        <KpiGrid kpis={kpisMensagens(r.resumo, listas, r.escopoAtivo)} cols={COLS_7} />
       </Secao>
       <Secao titulo="Agendamentos">
-        <KpiGrid kpis={kpisAgendamentos(r.resumo)} cols={COLS_3} />
+        <KpiGrid kpis={kpisAgendamentos(r.resumo, listas)} cols={COLS_3} />
       </Secao>
     </>
   );

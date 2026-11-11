@@ -1,6 +1,8 @@
 # Comercial Atividades
 
 Filtros aplicados:
+- Funil (`funis`): Todos
+- Origem (`origem`): Todos
 - Pipeline (`pipeline`): Consultoria
 - Pessoa (`pessoa`): sem seleção
 - Canal (`canal`): sem seleção

@@ -1,6 +1,8 @@
 # Comercial Atividades
 
 Filtros aplicados:
+- Funil (`funis`): Todos
+- Origem (`origem`): Todos
 - Pipeline (`pipeline`): Todas
 - Pessoa (`pessoa`): sem seleção
 - Canal (`canal`): sem seleção
@@ -35,6 +37,9 @@ Ações contadas pelo dia em que aconteceram (horário de Brasília). Base de 30
 - Reuniões agendadas: 12 (Pelo dia em que a SDR agendou)
 - Conexões que viraram agenda: 6 (de 6 leads com ligação de 30s+)
 - Conexões que não viraram agenda: 0 (Ligação de 30s+, sem reunião agendada no período)
+
+### Leads trabalhados no período
+Seção disponível só no dashboard: contém dados pessoais e não é enviada pelo MCP.
 
 ### Ações por dia
 Ligações e mensagens enviadas (barras) e reuniões agendadas (linha, eixo da direita)

@@ -1,7 +1,16 @@
-import { dayKey, eachDay, safeRate } from "@/lib/calc/shared";
+import { origemDe } from "@/lib/calc/escopo";
+import {
+  FUNIL_TUDO,
+  dayKey,
+  eachDay,
+  filterLeadsByFunil,
+  funilKey,
+  safeRate,
+} from "@/lib/calc/shared";
 import type {
   AtvAcaoRow,
   AtvAtividadeRow,
+  AtvContatoDimRow,
   AtvContatoRow,
   AtvEtapaRow,
   ClintRow,
@@ -77,7 +86,85 @@ export type AtvFilters = {
   pessoas?: string[];
   /** Canais selecionados — só afetam os números de mensagem. */
   canais?: string[];
+  /** Chaves de funil (ver `funilKey`). Ausente/"tudo" = sem corte. */
+  funis?: string[];
+  /** Origem do lead (pago × orgânico). Ausente/"todos" = sem corte. */
+  origem?: "todos" | "pago" | "organico";
 };
+
+/**
+ * Um lead com ação no período: é a linha da lista "quem são os leads por
+ * trás do número". Nome, etapa, funil e dono vêm do negócio mais recente
+ * do contato na aba `clint`; contato sem negócio fica sem nome.
+ */
+export type AtvLead = {
+  contato: string;
+  nome: string;
+  pipeline: string;
+  etapa: string;
+  funil: string;
+  dono: string;
+  /** Quem do time atuou no lead no período. */
+  pessoas: string[];
+  /** Último dia com ação (AAAA-MM-DD). */
+  ultimoDia: string;
+  ligFeitas: number;
+  ligAtendidas: number;
+  ligAte10: number;
+  lig30: number;
+  lig120: number;
+  msgClint: number;
+  msgCelular: number;
+  abordado: boolean;
+  respondeu: boolean;
+  /** Reuniões agendadas pelas pessoas do filtro. */
+  reunioes: number;
+  /** Teve reunião agendada no período, por qualquer pessoa. */
+  agendouNoPeriodo: boolean;
+};
+
+/**
+ * Listas de leads, uma por indicador clicável. `tem` é a MESMA regra que o
+ * indicador usa para contar: o tamanho da lista bate com o número do card
+ * nos indicadores de leads distintos.
+ */
+export const ATV_LISTAS = {
+  ligados: { titulo: "Leads com ligação feita", tem: (l: AtvLead) => l.ligFeitas > 0 },
+  atendidas: { titulo: "Leads que atenderam", tem: (l: AtvLead) => l.ligAtendidas > 0 },
+  ate10: { titulo: "Leads com ligação atendida até 10s", tem: (l: AtvLead) => l.ligAte10 > 0 },
+  conexoes: { titulo: "Leads com ligação de 30s+", tem: (l: AtvLead) => l.lig30 > 0 },
+  lig120: { titulo: "Leads com ligação de 2min+", tem: (l: AtvLead) => l.lig120 > 0 },
+  mensagens: {
+    titulo: "Leads que receberam mensagem",
+    tem: (l: AtvLead) => l.msgClint + l.msgCelular > 0,
+  },
+  abordados: { titulo: "Leads abordados", tem: (l: AtvLead) => l.abordado },
+  responderam: { titulo: "Leads que responderam", tem: (l: AtvLead) => l.respondeu },
+  responderamAgendaram: {
+    titulo: "Responderam e agendaram",
+    tem: (l: AtvLead) => l.respondeu && l.agendouNoPeriodo,
+  },
+  responderamNaoAgendaram: {
+    titulo: "Responderam e não agendaram",
+    tem: (l: AtvLead) => l.respondeu && !l.agendouNoPeriodo,
+  },
+  agendados: { titulo: "Leads com reunião agendada", tem: (l: AtvLead) => l.reunioes > 0 },
+  conexoesAgendaram: {
+    titulo: "Conexões que viraram agenda",
+    tem: (l: AtvLead) => l.lig30 > 0 && l.agendouNoPeriodo,
+  },
+  conexoesNaoAgendaram: {
+    titulo: "Conexões que não viraram agenda",
+    tem: (l: AtvLead) => l.lig30 > 0 && !l.agendouNoPeriodo,
+  },
+} as const;
+export type AtvLista = keyof typeof ATV_LISTAS;
+
+export function parseAtvLista(v: unknown): AtvLista | null {
+  return typeof v === "string" && Object.prototype.hasOwnProperty.call(ATV_LISTAS, v)
+    ? (v as AtvLista)
+    : null;
+}
 
 export type AtvResumo = {
   // Ligações
@@ -169,6 +256,13 @@ export type AtividadesResult = {
   porPessoa: AtvPessoaRow[];
   serie: AtvDiaPoint[];
   consultoria: AtvConsultoria | null;
+  /** Leads com alguma ação no período e nos filtros, um por contato. */
+  leads: AtvLead[];
+  /**
+   * Há filtro de funil ou de origem. Mensagens automáticas e recebidas não
+   * têm contato atrelado na base, então não entram nesse recorte (ficam 0).
+   */
+  escopoAtivo: boolean;
 };
 
 const norm = (s: string): string =>
@@ -299,6 +393,8 @@ export function calcAtividades(
     atv_acoes: AtvAcaoRow[];
     atv_etapas: AtvEtapaRow[];
     atv_atividades: AtvAtividadeRow[];
+    /** Ausente em base antiga: sem ela não há nome nem filtro de funil. */
+    atv_contatos_dim?: AtvContatoDimRow[];
     clint: ClintRow[];
   },
   filters: AtvFilters
@@ -318,6 +414,28 @@ export function calcAtividades(
     ? new Set(alvo.flatMap((p) => [p.nome, nomeAtual.get(p.id) ?? p.nome]))
     : null;
   const naVisao = (pipeline: string) => nomes === null || nomes.has(pipeline);
+
+  // Contato → negócio mais recente (aba `clint`), para nome, funil e origem.
+  const negocioPorId = new Map<string, ClintRow>();
+  for (const r of data.clint) if (r.dealId) negocioPorId.set(r.dealId, r);
+  const negocioDe = new Map<string, ClintRow>();
+  for (const d of data.atv_contatos_dim ?? []) {
+    const n = negocioPorId.get(d.dealId);
+    if (n) negocioDe.set(d.contato, n);
+  }
+  const funisSel = (filters.funis ?? []).filter((f) => f !== FUNIL_TUDO && f !== "todos");
+  const origemSel = filters.origem && filters.origem !== "todos" ? filters.origem : null;
+  const escopoAtivo = funisSel.length > 0 || origemSel !== null;
+  // Contato sem negócio: sem funil e sem UTM (orgânico), pela mesma regra
+  // das outras páginas.
+  const noEscopo = (contato: string): boolean => {
+    if (!escopoAtivo) return true;
+    const n = negocioDe.get(contato);
+    if (funisSel.length && filterLeadsByFunil([{ funil: n?.funil ?? "" }], funisSel).length === 0) {
+      return false;
+    }
+    return origemSel === null || origemDe(n?.utmSource ?? "") === origemSel;
+  };
 
   const pessoasSel = filters.pessoas?.length ? new Set(filters.pessoas) : null;
   const canaisSel = filters.canais?.length ? new Set(filters.canais) : null;
@@ -349,11 +467,13 @@ export function calcAtividades(
   }
 
   const contatosPeriodo = data.atv_contatos.filter(
-    (c) => noPeriodo(c.dia) && naVisao(c.pipeline)
+    (c) => noPeriodo(c.dia) && naVisao(c.pipeline) && noEscopo(c.contato)
   );
-  const acoesPeriodo = data.atv_acoes.filter(
-    (a) => noPeriodo(a.dia) && naVisao(a.pipeline)
-  );
+  // Linhas sem contato (mensagens automáticas e recebidas): não dá para
+  // atribuir funil nem origem, então ficam fora de um recorte desses.
+  const acoesPeriodo = escopoAtivo
+    ? []
+    : data.atv_acoes.filter((a) => noPeriodo(a.dia) && naVisao(a.pipeline));
   const contatos = contatosPeriodo.filter((c) => daPessoa(c.pessoa));
   const acoes = acoesPeriodo.filter((a) => daPessoa(a.pessoa));
 
@@ -416,6 +536,62 @@ export function calcAtividades(
   }
   const serie = dias.map((d) => porDia.get(dayKey(d))!);
 
+  // Leads por trás dos números: uma linha por contato, com as mesmas regras
+  // do resumo (o filtro de canal corta só os campos de mensagem).
+  const porContato = new Map<string, AtvLead & { _pessoas: Set<string> }>();
+  for (const c of contatos) {
+    if (!c.contato) continue;
+    let l = porContato.get(c.contato);
+    if (!l) {
+      const n = negocioDe.get(c.contato);
+      l = {
+        contato: c.contato,
+        nome: n?.nome ?? "",
+        pipeline: n?.pipeline || c.pipeline,
+        etapa: n?.etapa ?? "",
+        funil: n ? (funilKey(n.funil) === "sem-funil" ? "" : n.funil) : "",
+        dono: n?.dono ?? "",
+        pessoas: [],
+        ultimoDia: c.dia,
+        ligFeitas: 0,
+        ligAtendidas: 0,
+        ligAte10: 0,
+        lig30: 0,
+        lig120: 0,
+        msgClint: 0,
+        msgCelular: 0,
+        abordado: false,
+        respondeu: false,
+        reunioes: 0,
+        agendouNoPeriodo: agendadosNoPeriodo.has(c.contato),
+        _pessoas: new Set<string>(),
+      };
+      porContato.set(c.contato, l);
+    }
+    if (c.pessoa) l._pessoas.add(c.pessoa);
+    if (c.dia > l.ultimoDia) l.ultimoDia = c.dia;
+    l.ligFeitas += c.ligFeitas;
+    l.ligAtendidas += c.ligAtendidas;
+    l.ligAte10 += c.ligAte10;
+    l.lig30 += c.lig30;
+    l.lig120 += c.lig120;
+    l.reunioes += c.reunioes;
+    if (canaisSel && !canaisSel.has(c.canal)) continue;
+    l.msgClint += c.msgClint;
+    l.msgCelular += c.msgCelular;
+    if (c.abordado > 0) l.abordado = true;
+    if (c.respondeu > 0) l.respondeu = true;
+  }
+  const leads: AtvLead[] = Array.from(porContato.values(), ({ _pessoas, ...l }) => ({
+    ...l,
+    pessoas: Array.from(_pessoas).sort((a, b) => a.localeCompare(b, "pt-BR")),
+  })).sort(
+    (x, y) =>
+      (y.ultimoDia < x.ultimoDia ? -1 : y.ultimoDia > x.ultimoDia ? 1 : 0) ||
+      x.nome.localeCompare(y.nome, "pt-BR") ||
+      x.contato.localeCompare(y.contato)
+  );
+
   return {
     visao,
     temDados: data.atv_contatos.length > 0,
@@ -431,9 +607,12 @@ export function calcAtividades(
             noPeriodo,
             naVisao,
             daPessoa,
+            noEscopo,
             ids: new Set(PIPELINES.consultoria.map((p) => p.id)),
           })
         : null,
+    leads,
+    escopoAtivo,
   };
 }
 
@@ -452,6 +631,7 @@ function calcConsultoria(
     noPeriodo: (dia: string) => boolean;
     naVisao: (pipeline: string) => boolean;
     daPessoa: (p: string) => boolean;
+    noEscopo: (contato: string) => boolean;
     ids: Set<string>;
   }
 ): AtvConsultoria {
@@ -463,6 +643,7 @@ function calcConsultoria(
   const chave = { fu1: new Set<string>(), fu2: new Set<string>(), env: new Set<string>(), rec: new Set<string>() };
   for (const e of data.atv_etapas) {
     if (!f.noPeriodo(e.dia) || !f.naVisao(e.pipeline) || !f.daPessoa(e.usuario)) continue;
+    if (!f.noEscopo(e.contato)) continue;
     const etapa = e.etapaNova.trim() || "—";
     const k = `${e.pipeline}\u0000${norm(etapa)}`;
     let cell = entradas.get(k);
@@ -527,6 +708,7 @@ function calcConsultoria(
   for (const a of data.atv_atividades) {
     if (a.situacao !== "Concluída") continue;
     if (!f.noPeriodo(a.dia) || !f.naVisao(a.pipeline) || !f.daPessoa(a.usuario)) continue;
+    if (!f.noEscopo(a.contato)) continue;
     const classe = classeAtividade(a.tipo, a.titulo);
     atividadesPorClasse[classe] += 1;
     const titulo = a.titulo.trim() || "(sem título)";

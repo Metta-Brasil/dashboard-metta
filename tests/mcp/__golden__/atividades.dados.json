@@ -305,5 +305,152 @@
       "reunioes": 1
     }
   ],
-  "consultoria": null
+  "consultoria": null,
+  "leads": [
+    {
+      "contato": "contato-06",
+      "nome": "",
+      "pipeline": "B2B - Consultoria · Ativação",
+      "etapa": "",
+      "funil": "",
+      "dono": "",
+      "pessoas": [
+        "Sdr Alfa",
+        "Sdr Beta"
+      ],
+      "ultimoDia": "2026-11-10",
+      "ligFeitas": 36,
+      "ligAtendidas": 6,
+      "ligAte10": 3,
+      "lig30": 3,
+      "lig120": 0,
+      "msgClint": 12,
+      "msgCelular": 48,
+      "abordado": true,
+      "respondeu": true,
+      "reunioes": 2,
+      "agendouNoPeriodo": true
+    },
+    {
+      "contato": "contato-01",
+      "nome": "Xantipa01 Quorvale01",
+      "pipeline": "Comercial · Pipeline de Vendas Funil Perpétuo - Metta Brasil",
+      "etapa": "Negócio fechado",
+      "funil": "Aplicação",
+      "dono": "Dono Epsilon",
+      "pessoas": [
+        "Sdr Alfa",
+        "Sdr Beta"
+      ],
+      "ultimoDia": "2026-11-10",
+      "ligFeitas": 12,
+      "ligAtendidas": 6,
+      "ligAte10": 3,
+      "lig30": 3,
+      "lig120": 3,
+      "msgClint": 0,
+      "msgCelular": 24,
+      "abordado": true,
+      "respondeu": true,
+      "reunioes": 2,
+      "agendouNoPeriodo": true
+    },
+    {
+      "contato": "contato-02",
+      "nome": "Xantipa02 Quorvale02",
+      "pipeline": "Comercial · Pipeline de Vendas Funil Perpétuo - Metta Brasil",
+      "etapa": "Prospecção",
+      "funil": "Sessão estratégica",
+      "dono": "Dono Zeta",
+      "pessoas": [
+        "Sdr Alfa",
+        "Sdr Beta"
+      ],
+      "ultimoDia": "2026-11-10",
+      "ligFeitas": 24,
+      "ligAtendidas": 6,
+      "ligAte10": 3,
+      "lig30": 3,
+      "lig120": 0,
+      "msgClint": 12,
+      "msgCelular": 36,
+      "abordado": true,
+      "respondeu": true,
+      "reunioes": 2,
+      "agendouNoPeriodo": true
+    },
+    {
+      "contato": "contato-03",
+      "nome": "Xantipa03 Quorvale03",
+      "pipeline": "Comercial · Pipeline de Vendas Funil Perpétuo - Metta Brasil",
+      "etapa": "Reunião agendada",
+      "funil": "Sala",
+      "dono": "Dono Epsilon",
+      "pessoas": [
+        "Sdr Alfa",
+        "Sdr Beta"
+      ],
+      "ultimoDia": "2026-11-10",
+      "ligFeitas": 36,
+      "ligAtendidas": 6,
+      "ligAte10": 3,
+      "lig30": 3,
+      "lig120": 3,
+      "msgClint": 0,
+      "msgCelular": 48,
+      "abordado": true,
+      "respondeu": true,
+      "reunioes": 2,
+      "agendouNoPeriodo": true
+    },
+    {
+      "contato": "contato-04",
+      "nome": "Xantipa04 Quorvale04",
+      "pipeline": "Comercial · Pipeline de Vendas Funil Perpétuo - Metta Brasil",
+      "etapa": "Prospecção",
+      "funil": "Aplicação",
+      "dono": "Dono Zeta",
+      "pessoas": [
+        "Sdr Alfa",
+        "Sdr Beta"
+      ],
+      "ultimoDia": "2026-11-10",
+      "ligFeitas": 12,
+      "ligAtendidas": 6,
+      "ligAte10": 3,
+      "lig30": 3,
+      "lig120": 0,
+      "msgClint": 12,
+      "msgCelular": 24,
+      "abordado": true,
+      "respondeu": true,
+      "reunioes": 2,
+      "agendouNoPeriodo": true
+    },
+    {
+      "contato": "contato-05",
+      "nome": "Xantipa05 Quorvale05",
+      "pipeline": "Comercial · Pipeline de Vendas Funil Perpétuo - Metta Brasil",
+      "etapa": "Reunião realizada",
+      "funil": "Sessão estratégica",
+      "dono": "Dono Epsilon",
+      "pessoas": [
+        "Sdr Alfa",
+        "Sdr Beta"
+      ],
+      "ultimoDia": "2026-11-10",
+      "ligFeitas": 24,
+      "ligAtendidas": 6,
+      "ligAte10": 3,
+      "lig30": 3,
+      "lig120": 3,
+      "msgClint": 0,
+      "msgCelular": 36,
+      "abordado": true,
+      "respondeu": true,
+      "reunioes": 2,
+      "agendouNoPeriodo": true
+    }
+  ],
+  "escopoAtivo": false
 }

@@ -3,6 +3,7 @@ import type {
   AtLeadRow,
   AtvAcaoRow,
   AtvAtividadeRow,
+  AtvContatoDimRow,
   AtvContatoRow,
   AtvEtapaRow,
   ClintRow,
@@ -619,6 +620,19 @@ function atvContatos(): AtvContatoRow[] {
   return rows;
 }
 
+/**
+ * Contato → negócio mais recente. Os cinco primeiros contatos têm negócio
+ * no funil perpétuo (logo, nome de lead); o sexto não tem negócio, como os
+ * contatos de chat sem card no Clint.
+ */
+function atvContatosDim(): AtvContatoDimRow[] {
+  return [1, 2, 3, 4, 5].map((n) => ({
+    contato: `contato-${dois(n)}`,
+    dealId: `deal-${dois(n)}`,
+    negocios: 1,
+  }));
+}
+
 function atvAcoes(): AtvAcaoRow[] {
   const rows: AtvAcaoRow[] = [];
   for (let d = 0; d < 12; d += 1) {
@@ -692,6 +706,7 @@ export function criarBase() {
     ig_tiago_stories: igStories("tiago"),
     ig_impulsionados_hist: igImpulsionados(),
     atv_contatos: atvContatos(),
+    atv_contatos_dim: atvContatosDim(),
     atv_acoes: atvAcoes(),
     atv_etapas: atvEtapas(),
     atv_atividades: atvAtividades(),

@@ -13,11 +13,14 @@ import {
   ATV_ACOES_COLUMN_MAP,
   ATV_ATIVIDADES_COLUMN_MAP,
   ATV_CONTATOS_COLUMN_MAP,
+  ATV_CONTATOS_DIM_COLUMN_MAP,
   ATV_ETAPAS_COLUMN_MAP,
   AtvAcaoRow,
   AtvAcaoRowSchema,
   AtvAtividadeRow,
   AtvAtividadeRowSchema,
+  AtvContatoDimRow,
+  AtvContatoDimRowSchema,
   AtvContatoRow,
   AtvContatoRowSchema,
   AtvEtapaRow,
@@ -101,6 +104,7 @@ export type SheetTab =
   | "ig_impulsionados_hist"
   // Atividades comerciais do Clint — ficam em OUTRA planilha (ATIVIDADES_TABS)
   | "atv_contatos"
+  | "atv_contatos_dim"
   | "atv_acoes"
   | "atv_etapas"
   | "atv_atividades";
@@ -108,6 +112,7 @@ export type SheetTab =
 /** Abas que vivem na planilha de atividades comerciais, não na principal. */
 const ATIVIDADES_TABS: SheetTab[] = [
   "atv_contatos",
+  "atv_contatos_dim",
   "atv_acoes",
   "atv_etapas",
   "atv_atividades",
@@ -154,6 +159,7 @@ const RANGES: Record<SheetTab, string> = {
   ig_tiago_stories: "ig_tiago_stories!A:O",
   ig_impulsionados_hist: "ig_impulsionados_hist!A:L",
   atv_contatos: "diario_contatos!A:Q",
+  atv_contatos_dim: "contatos!A:C",
   atv_acoes: "diario_acoes!A:AD",
   atv_etapas: "etapas!A:J",
   atv_atividades: "atividades!A:K",
@@ -182,6 +188,7 @@ type TabRowMap = {
   ig_tiago_stories: IgStoriesRow;
   ig_impulsionados_hist: IgBoostHistRow;
   atv_contatos: AtvContatoRow;
+  atv_contatos_dim: AtvContatoDimRow;
   atv_acoes: AtvAcaoRow;
   atv_etapas: AtvEtapaRow;
   atv_atividades: AtvAtividadeRow;
@@ -294,6 +301,13 @@ function parseTab<T extends SheetTab>(
       return parseSheetData(AtvContatoRowSchema, values, ATV_CONTATOS_COLUMN_MAP, {
         tab,
       }) as TabRowMap[T][];
+    case "atv_contatos_dim":
+      return parseSheetData(
+        AtvContatoDimRowSchema,
+        values,
+        ATV_CONTATOS_DIM_COLUMN_MAP,
+        { tab }
+      ) as TabRowMap[T][];
     case "atv_acoes":
       return parseSheetData(AtvAcaoRowSchema, values, ATV_ACOES_COLUMN_MAP, {
         tab,
@@ -537,6 +551,7 @@ export async function refreshAllSheets(): Promise<{
     "ig_tiago_stories",
     "ig_impulsionados_hist",
     "atv_contatos",
+    "atv_contatos_dim",
     "atv_acoes",
     "atv_etapas",
     "atv_atividades",

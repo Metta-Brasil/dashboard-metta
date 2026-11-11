@@ -191,6 +191,9 @@ export const PAGINAS: Pagina[] = [
       "Ações do comercial por dia, pipeline, pessoa e canal: ligações, mensagens, leads abordados e reuniões agendadas (base do Clint).",
     filtros: [
       ...PERIODO,
+      // Pelo negócio do contato; mensagens sem lead atrelado ficam fora do recorte.
+      FUNIS_DINAMICO,
+      ORIGEM,
       {
         param: "pipeline",
         nome: "Pipeline",

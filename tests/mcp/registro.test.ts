@@ -43,8 +43,11 @@ describe("registro de serializers", () => {
     expect(emDuas, "componentes em mais de uma lista").toEqual([]);
   });
 
-  it("as seções privadas são exatamente as duas combinadas", () => {
+  it("as seções privadas são exatamente as combinadas", () => {
+    // Toda seção que mostra nome de lead ou de comprador. A de Atividades
+    // entrou em 11/11/2026, com a lista de leads por trás de cada número.
     expect([...FORA_DO_MCP.values()].sort()).toEqual([
+      "Leads trabalhados no período",
       "Negócios na pipeline",
       "Vendas do período",
     ]);

@@ -264,7 +264,9 @@ export const getResgate = porRequest(async (sp: SP) => {
  */
 export const getAtividades = porRequest(async (sp: SP) => {
   const spv = await sp;
-  const filters = parseFilters(spv);
+  // Funil e origem valem aqui (pelo negócio do contato); o recorte de
+  // pipeline desta página é o seletor de visão, não `clintPipeline`.
+  const filters = parseFilters(spv, DINAMICO);
   // Params próprios (`pessoa`, `canal`), e não o `sdr` das outras páginas: o
   // menu leva a query string de uma página para a outra, e os nomes daqui
   // (usuário do Clint ou dono do canal) não são os mesmos do filtro de SDR.
@@ -277,6 +279,7 @@ export const getAtividades = porRequest(async (sp: SP) => {
       : [];
   const data = await readAllSheets([
     "atv_contatos",
+    "atv_contatos_dim",
     "atv_acoes",
     "atv_etapas",
     "atv_atividades",
@@ -288,5 +291,7 @@ export const getAtividades = porRequest(async (sp: SP) => {
     visao: parseAtvVisao(spv.pipeline),
     pessoas: lista(spv.pessoa),
     canais: lista(spv.canal),
+    funis: filters.funis,
+    origem: filters.origem,
   });
 });

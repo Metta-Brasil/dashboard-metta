@@ -5,7 +5,7 @@ import { PAGINAS, acharPagina } from "@/lib/mcp/pages";
 import { FORA_DO_MCP, criarRegistro } from "@/lib/mcp/render/registry";
 import { AVISO_PRIVADO, createWalker, normalizar } from "@/lib/mcp/render/walker";
 import { opcoesDeFiltro, verPagina } from "@/lib/mcp/tools";
-import { getCloser, getResgate } from "@/lib/page-data";
+import { getAtividades, getCloser, getResgate } from "@/lib/page-data";
 
 import { MARCAS_DE_DADO_PESSOAL, PESSOAS } from "./fixture";
 
@@ -44,6 +44,7 @@ describe("seções fora do MCP", () => {
   const casos = [
     { rota: "/resgate", titulo: "Negócios na pipeline" },
     { rota: "/closer", titulo: "Vendas do período" },
+    { rota: "/atividades", titulo: "Leads trabalhados no período" },
   ];
 
   it("a lista FORA_DO_MCP é a testada aqui", () => {
@@ -74,6 +75,9 @@ describe("seções fora do MCP", () => {
     expect(resgate.negocios.every((n) => n.nome.includes("Xantipa"))).toBe(true);
     expect(resgate.negocios.some((n) => n.contato.includes("perfil_ficticio_"))).toBe(true);
     expect(resgate.negocios.some((n) => n.contato.includes("90000-10"))).toBe(true);
+    const atividades = await getAtividades(sp);
+    expect(atividades.leads.length).toBe(6);
+    expect(atividades.leads.filter((l) => l.nome.includes("Xantipa")).length).toBe(5);
   });
 
   /**

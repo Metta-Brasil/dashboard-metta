@@ -414,5 +414,56 @@
         "contatos": 2
       }
     ]
-  }
+  },
+  "leads": [
+    {
+      "contato": "contato-06",
+      "nome": "",
+      "pipeline": "B2B - Consultoria · Ativação",
+      "etapa": "",
+      "funil": "",
+      "dono": "",
+      "pessoas": [
+        "Sdr Alfa",
+        "Sdr Beta"
+      ],
+      "ultimoDia": "2026-11-10",
+      "ligFeitas": 36,
+      "ligAtendidas": 6,
+      "ligAte10": 3,
+      "lig30": 3,
+      "lig120": 0,
+      "msgClint": 12,
+      "msgCelular": 48,
+      "abordado": true,
+      "respondeu": true,
+      "reunioes": 2,
+      "agendouNoPeriodo": true
+    },
+    {
+      "contato": "contato-03",
+      "nome": "Xantipa03 Quorvale03",
+      "pipeline": "Comercial · Pipeline de Vendas Funil Perpétuo - Metta Brasil",
+      "etapa": "Reunião agendada",
+      "funil": "Sala",
+      "dono": "Dono Epsilon",
+      "pessoas": [
+        "Sdr Alfa",
+        "Sdr Beta"
+      ],
+      "ultimoDia": "2026-11-10",
+      "ligFeitas": 36,
+      "ligAtendidas": 6,
+      "ligAte10": 3,
+      "lig30": 3,
+      "lig120": 3,
+      "msgClint": 0,
+      "msgCelular": 48,
+      "abordado": true,
+      "respondeu": true,
+      "reunioes": 2,
+      "agendouNoPeriodo": true
+    }
+  ],
+  "escopoAtivo": false
 }
