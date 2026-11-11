@@ -1,6 +1,7 @@
 import { cache } from "react";
 
 import { calcAnuncios } from "@/lib/calc/anuncios";
+import { calcAtividades, parseAtvVisao } from "@/lib/calc/atividades";
 import { listClintTags, mergeClint } from "@/lib/calc/clint";
 import { calcCloser } from "@/lib/calc/closer";
 import { calcInstagram } from "@/lib/calc/instagram";
@@ -196,4 +197,37 @@ export const getResgate = cache(async (sp: SP) => {
   const filters = parseFilters(await sp);
   const data = await readAllSheets(["clint"]);
   return calcResgate(data, { from: filters.from, to: filters.to });
+});
+
+/**
+ * Comercial Atividades — ações do comercial por dia (ligações, mensagens,
+ * agendamentos, etapas e atividades), da planilha de atividades do Clint.
+ * A aba `clint` entra só para o nome atual das pipelines e para "leads por
+ * etapa hoje". De propósito NÃO passa por `mergeClint` nem pelos filtros de
+ * funil/tags: aqui o recorte é a pipeline, não o funil pago.
+ */
+export const getAtividades = cache(async (sp: SP) => {
+  const spv = await sp;
+  const filters = parseFilters(spv);
+  const canais =
+    typeof spv.canal === "string"
+      ? spv.canal
+          .split(",")
+          .map((c) => c.trim())
+          .filter((c) => c !== "")
+      : [];
+  const data = await readAllSheets([
+    "atv_contatos",
+    "atv_acoes",
+    "atv_etapas",
+    "atv_atividades",
+    "clint",
+  ]);
+  return calcAtividades(data, {
+    from: filters.from,
+    to: filters.to,
+    visao: parseAtvVisao(spv.pipeline),
+    pessoas: filters.sdr,
+    canais,
+  });
 });

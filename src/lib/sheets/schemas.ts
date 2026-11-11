@@ -686,3 +686,142 @@ export const IG_METTA_STORIES_COLUMN_MAP = {
 } as const;
 
 export const IG_TIAGO_STORIES_COLUMN_MAP = IG_METTA_STORIES_COLUMN_MAP;
+
+// ----- Atividades comerciais (planilha "Base de dados - Clint - Atividades comerciais")
+//
+// Base POR DIA das ações do comercial, gravada pela extração do servidor
+// (metta-extracoes/clint/historico.py). Fica em OUTRA planilha, não na
+// principal — ver `ATIVIDADES_SPREADSHEET_ID` em client.ts.
+//
+// O dia vira chave de calendário "AAAA-MM-DD" direto, sem passar por Date:
+// a célula é um dia de Brasília e não um instante, e um Date em UTC cairia
+// no dia anterior ao ser lido em BRT.
+
+/** "05/11/2026" | serial da planilha → "2026-11-05". Vazio/inválido → "". */
+const zDia = z.union([z.string(), z.number(), z.null()]).transform((v) => {
+  if (v == null || v === "") return "";
+  if (typeof v === "number") {
+    if (!Number.isFinite(v)) return "";
+    return new Date(Math.round(v - 25569) * 86400 * 1000)
+      .toISOString()
+      .slice(0, 10);
+  }
+  const s = String(v).trim();
+  const br = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (br) return `${br[3]}-${br[2].padStart(2, "0")}-${br[1].padStart(2, "0")}`;
+  const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return iso ? `${iso[1]}-${iso[2]}-${iso[3]}` : "";
+});
+
+/**
+ * Aba `diario_contatos` — uma linha por dia × pipeline × pessoa × canal ×
+ * contato. É dela que saem os números de um PERÍODO: somar para volumes,
+ * contar contatos distintos para "únicos" e cruzamentos (abordados,
+ * conexões que viraram agenda). Somar os únicos de cada dia contaria o
+ * mesmo lead várias vezes.
+ */
+export const AtvContatoRowSchema = z.object({
+  dia: zDia,
+  pipeline: zString,
+  pessoa: zString,
+  usuario: zString,
+  canal: zString,
+  contato: zString,
+  ligFeitas: zInt,
+  ligAtendidas: zInt,
+  ligAte10: zInt,
+  lig30: zInt,
+  lig120: zInt,
+  dur30: zInt,
+  msgClint: zInt,
+  msgCelular: zInt,
+  abordado: zInt,
+  respondeu: zInt,
+  reunioes: zInt,
+});
+export type AtvContatoRow = z.infer<typeof AtvContatoRowSchema>;
+
+export const ATV_CONTATOS_COLUMN_MAP = {
+  dia: 0,
+  pipeline: 1,
+  pessoa: 2,
+  usuario: 3,
+  canal: 4,
+  contato: 5,
+  ligFeitas: 6,
+  ligAtendidas: 7,
+  ligAte10: 8,
+  lig30: 9,
+  lig120: 10,
+  dur30: 11,
+  msgClint: 12,
+  msgCelular: 13,
+  abordado: 14,
+  respondeu: 15,
+  reunioes: 16,
+} as const;
+
+/**
+ * Aba `diario_acoes` — dia × pipeline × pessoa × canal. Daqui a página usa
+ * só o que não tem contato atrelado: mensagens automáticas e recebidas.
+ */
+export const AtvAcaoRowSchema = z.object({
+  dia: zDia,
+  pipeline: zString,
+  pessoa: zString,
+  usuario: zString,
+  canal: zString,
+  msgAutomaticas: zInt,
+  msgRecebidas: zInt,
+});
+export type AtvAcaoRow = z.infer<typeof AtvAcaoRowSchema>;
+
+export const ATV_ACOES_COLUMN_MAP = {
+  dia: 0,
+  pipeline: 1,
+  pessoa: 2,
+  usuario: 3,
+  canal: 4,
+  msgAutomaticas: 15,
+  msgRecebidas: 16,
+} as const;
+
+/** Aba `etapas` — uma linha por mudança de etapa (nome da etapa da época). */
+export const AtvEtapaRowSchema = z.object({
+  dia: zDia,
+  pipeline: zString,
+  contato: zString,
+  etapaNova: zString,
+  usuario: zString,
+});
+export type AtvEtapaRow = z.infer<typeof AtvEtapaRowSchema>;
+
+export const ATV_ETAPAS_COLUMN_MAP = {
+  dia: 0,
+  pipeline: 2,
+  contato: 4,
+  etapaNova: 6,
+  usuario: 8,
+} as const;
+
+/** Aba `atividades` — uma linha por atividade marcada no card. */
+export const AtvAtividadeRowSchema = z.object({
+  dia: zDia,
+  pipeline: zString,
+  contato: zString,
+  titulo: zString,
+  tipo: zString,
+  situacao: zString,
+  usuario: zString,
+});
+export type AtvAtividadeRow = z.infer<typeof AtvAtividadeRowSchema>;
+
+export const ATV_ATIVIDADES_COLUMN_MAP = {
+  dia: 0,
+  pipeline: 2,
+  contato: 4,
+  titulo: 6,
+  tipo: 7,
+  situacao: 8,
+  usuario: 9,
+} as const;

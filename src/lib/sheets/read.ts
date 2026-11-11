@@ -1,10 +1,27 @@
-import { assertSheetsEnv, sheetsClient, SPREADSHEET_ID } from "./client";
+import {
+  assertSheetsEnv,
+  ATIVIDADES_SPREADSHEET_ID,
+  sheetsClient,
+  SPREADSHEET_ID,
+} from "./client";
 import { parseSheetData } from "./parse";
 import {
   ADS_LINKS_COLUMN_MAP,
   AdsLinkRow,
   AdsLinkRowSchema,
   AT_AP_COLUMN_MAP,
+  ATV_ACOES_COLUMN_MAP,
+  ATV_ATIVIDADES_COLUMN_MAP,
+  ATV_CONTATOS_COLUMN_MAP,
+  ATV_ETAPAS_COLUMN_MAP,
+  AtvAcaoRow,
+  AtvAcaoRowSchema,
+  AtvAtividadeRow,
+  AtvAtividadeRowSchema,
+  AtvContatoRow,
+  AtvContatoRowSchema,
+  AtvEtapaRow,
+  AtvEtapaRowSchema,
   AT_APH_COLUMN_MAP,
   AT_SALA_COLUMN_MAP,
   AT_SE_COLUMN_MAP,
@@ -81,7 +98,23 @@ export type SheetTab =
   | "ig_tiago_demograficos"
   | "ig_metta_stories"
   | "ig_tiago_stories"
-  | "ig_impulsionados_hist";
+  | "ig_impulsionados_hist"
+  // Atividades comerciais do Clint — ficam em OUTRA planilha (ATIVIDADES_TABS)
+  | "atv_contatos"
+  | "atv_acoes"
+  | "atv_etapas"
+  | "atv_atividades";
+
+/** Abas que vivem na planilha de atividades comerciais, não na principal. */
+const ATIVIDADES_TABS: SheetTab[] = [
+  "atv_contatos",
+  "atv_acoes",
+  "atv_etapas",
+  "atv_atividades",
+];
+
+const spreadsheetOf = (tab: SheetTab): string =>
+  ATIVIDADES_TABS.includes(tab) ? ATIVIDADES_SPREADSHEET_ID : SPREADSHEET_ID;
 
 /**
  * Cache aplicacional manual no Upstash (NÃO `'use cache'`).
@@ -120,6 +153,10 @@ const RANGES: Record<SheetTab, string> = {
   ig_metta_stories: "ig_metta_stories!A:O",
   ig_tiago_stories: "ig_tiago_stories!A:O",
   ig_impulsionados_hist: "ig_impulsionados_hist!A:L",
+  atv_contatos: "diario_contatos!A:Q",
+  atv_acoes: "diario_acoes!A:AD",
+  atv_etapas: "etapas!A:J",
+  atv_atividades: "atividades!A:K",
 };
 
 type TabRowMap = {
@@ -144,6 +181,10 @@ type TabRowMap = {
   ig_metta_stories: IgStoriesRow;
   ig_tiago_stories: IgStoriesRow;
   ig_impulsionados_hist: IgBoostHistRow;
+  atv_contatos: AtvContatoRow;
+  atv_acoes: AtvAcaoRow;
+  atv_etapas: AtvEtapaRow;
+  atv_atividades: AtvAtividadeRow;
 };
 
 /** TTL do snapshot cru. Maior que o intervalo do cron (1h) — assim o
@@ -249,6 +290,25 @@ function parseTab<T extends SheetTab>(
       return parseSheetData(IgStoriesRowSchema, values, IG_TIAGO_STORIES_COLUMN_MAP, {
         tab,
       }) as TabRowMap[T][];
+    case "atv_contatos":
+      return parseSheetData(AtvContatoRowSchema, values, ATV_CONTATOS_COLUMN_MAP, {
+        tab,
+      }) as TabRowMap[T][];
+    case "atv_acoes":
+      return parseSheetData(AtvAcaoRowSchema, values, ATV_ACOES_COLUMN_MAP, {
+        tab,
+      }) as TabRowMap[T][];
+    case "atv_etapas":
+      return parseSheetData(AtvEtapaRowSchema, values, ATV_ETAPAS_COLUMN_MAP, {
+        tab,
+      }) as TabRowMap[T][];
+    case "atv_atividades":
+      return parseSheetData(
+        AtvAtividadeRowSchema,
+        values,
+        ATV_ATIVIDADES_COLUMN_MAP,
+        { tab }
+      ) as TabRowMap[T][];
     default:
       throw new Error(`Aba desconhecida: ${tab}`);
   }
@@ -258,7 +318,7 @@ function parseTab<T extends SheetTab>(
 async function fetchTab<T extends SheetTab>(tab: T): Promise<TabRowMap[T][]> {
   assertSheetsEnv();
   const { data } = await sheetsClient.spreadsheets.values.get({
-    spreadsheetId: SPREADSHEET_ID,
+    spreadsheetId: spreadsheetOf(tab),
     range: RANGES[tab],
     valueRenderOption: "UNFORMATTED_VALUE",
     dateTimeRenderOption: "FORMATTED_STRING",
@@ -293,7 +353,16 @@ async function fetchTabs<T extends SheetTab>(
   ];
   const big = tabs.filter((t) => BIG.includes(t));
   const optional = tabs.filter((t) => OPTIONAL.includes(t));
-  const rest = tabs.filter((t) => !BIG.includes(t) && !OPTIONAL.includes(t));
+  // Planilha de atividades: outra planilha, então não cabe no batchGet da
+  // principal. Cada aba vai sozinha e tolera erro (→ []), como as opcionais:
+  // falha de acesso a ESTA planilha não pode derrubar o refresh das demais
+  // páginas. Com cache anterior cheio, o [] cai na trava anti-clobber e o
+  // refresh responde não-200 — o problema aparece, o dado bom fica.
+  const atividades = tabs.filter((t) => ATIVIDADES_TABS.includes(t));
+  const rest = tabs.filter(
+    (t) =>
+      !BIG.includes(t) && !OPTIONAL.includes(t) && !ATIVIDADES_TABS.includes(t)
+  );
 
   const jobs: Promise<void>[] = [];
 
@@ -333,6 +402,30 @@ async function fetchTabs<T extends SheetTab>(
         .catch((err) => {
           console.warn(
             `[read] aba opcional '${tab}' indisponível (provável: ainda não criada) — usando []. ${err?.message ?? err}`
+          );
+          result[tab] = [] as TabRowMap[typeof tab][];
+        })
+    );
+  }
+
+  for (const tab of atividades) {
+    jobs.push(
+      sheetsClient.spreadsheets.values
+        .get({
+          spreadsheetId: ATIVIDADES_SPREADSHEET_ID,
+          range: RANGES[tab],
+          valueRenderOption: "UNFORMATTED_VALUE",
+          dateTimeRenderOption: "FORMATTED_STRING",
+        })
+        .then(({ data }) => {
+          result[tab] = parseTab(
+            tab,
+            data.values as unknown[][] | undefined
+          ) as TabRowMap[typeof tab][];
+        })
+        .catch((err) => {
+          console.warn(
+            `[read] aba '${tab}' (planilha de atividades) indisponível — usando []. ${err?.message ?? err}`
           );
           result[tab] = [] as TabRowMap[typeof tab][];
         })
@@ -443,6 +536,10 @@ export async function refreshAllSheets(): Promise<{
     "ig_metta_stories",
     "ig_tiago_stories",
     "ig_impulsionados_hist",
+    "atv_contatos",
+    "atv_acoes",
+    "atv_etapas",
+    "atv_atividades",
   ];
   const fetched = await fetchTabs(tabs);
 
