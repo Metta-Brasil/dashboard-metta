@@ -1,14 +1,18 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
+import { headers } from "next/headers";
+
 import { auth, signOut } from "@/auth";
 import { getGoogleProfile, getProfile } from "@/lib/auth/users";
+import { listKeys } from "@/lib/mcp/keys";
 import { PageShell } from "@/components/page-shell";
 import { ChangePasswordForm } from "@/components/change-password-form";
 import { ProfileForm } from "@/components/profile-form";
 import { EmailChange } from "@/components/email-change";
 import { AvatarUpload } from "@/components/avatar-upload";
 import { DeleteAccountButton } from "@/components/delete-account-button";
+import { McpKeys } from "@/components/mcp-keys";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export const metadata: Metadata = { title: "Configurações · Dashboard Metta" };
@@ -70,6 +74,16 @@ async function ConfiguracoesContent({
       avatar: o?.avatar ?? user?.image ?? undefined,
     };
   }
+
+  // Só lista chaves para quem tem sessão: o layout já barra, mas esta
+  // seção não depende dele para não vazar nome de chave e e-mail de quem
+  // criou.
+  const mcpKeys = email ? await listKeys() : [];
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
+  const proto =
+    h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+  const mcpUrl = host ? `${proto}://${host}/api/mcp` : "/api/mcp";
 
   return (
     <>
@@ -133,6 +147,27 @@ async function ConfiguracoesContent({
           <ChangePasswordForm />
         </div>
       )}
+
+      {/* MCP — chaves para clientes de IA lerem o dashboard */}
+      <div
+        id="mcp"
+        className="surface-card flex flex-col gap-4 p-5 lg:p-6"
+      >
+        <div className="flex flex-col gap-1">
+          <h3 className="panel-title">MCP</h3>
+          <span className="panel-desc">
+            Chaves para conectar clientes de IA (Claude, ChatGPT, Codex) às
+            páginas do dashboard, somente leitura. Quem tem a chave lê os
+            números de qualquer conta de IA — trate como senha. Qualquer
+            pessoa logada pode revogar qualquer chave.{" "}
+            <a href="/docs/mcp" className="underline">
+              Como instalar
+            </a>
+            .
+          </span>
+        </div>
+        <McpKeys initialKeys={mcpKeys} mcpUrl={mcpUrl} />
+      </div>
 
       {/* Sessão */}
       <div className="surface-card flex flex-col gap-4 p-5 lg:p-6">

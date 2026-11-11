@@ -57,7 +57,15 @@ export const config = {
   // dois SEM cookie ao instalar na tela de início. Com eles atrás do
   // guard, o Safari recebia 302 pro /login e o atalho nascia com ícone
   // genérico e nome errado. São assets estáticos, sem dado nenhum.
+  //
+  // MCP: `/api/mcp` se autentica por token OAuth (amarrado a uma chave
+  // MCP), e o fluxo que emite esse token — metadados em `/.well-known`,
+  // `/oauth/register`, `/oauth/authorize`, `/oauth/token` — precisa
+  // funcionar SEM sessão do dashboard: quem conecta um cliente de IA cola
+  // a chave, não faz login aqui. `/docs/mcp` é a página pública de
+  // instalação. Cada um entra pelo caminho exato; um `/oauth/qualquer`
+  // novo continua atrás do guard.
   matcher: [
-    "/((?!api/auth/|api/auth$|api/cron/?$|api/revalidate/?$|_next/static/|_next/image$|favicon.ico$|manifest.webmanifest$|sw.js$|apple-icon.png$|icon.png$|icon-192.png$|icon-512.png$|icon-maskable.png$|fonts/|brand/).*)",
+    "/((?!api/auth/|api/auth$|api/cron/?$|api/revalidate/?$|api/mcp/?$|oauth/authorize/?$|oauth/token/?$|oauth/register/?$|\\.well-known/oauth-protected-resource(?:/|$)|\\.well-known/oauth-authorization-server(?:/|$)|docs/mcp/?$|_next/static/|_next/image$|favicon.ico$|manifest.webmanifest$|sw.js$|apple-icon.png$|icon.png$|icon-192.png$|icon-512.png$|icon-maskable.png$|fonts/|brand/).*)",
   ],
 };

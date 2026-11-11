@@ -84,6 +84,50 @@ Filtros sincronizam via URL (`?from=…&to=…&funis=sala,sessao&sdr=Ana,Bia&sta
 
 ---
 
+## Servidor MCP
+
+Clientes de IA (Claude Code, claude.ai, ChatGPT, Codex) leem as páginas do
+dashboard por MCP, com os mesmos números da tela. Instalação para quem vai
+usar: página pública [`/docs/mcp`](src/app/docs/mcp/page.tsx).
+
+- **Endpoint:** `POST /api/mcp` (HTTP streamable, sem estado). Somente leitura.
+- **Ferramentas:** `listar_paginas`, `opcoes_de_filtro`, `ver_pagina`,
+  `status_atualizacao`.
+- **Acesso por chave MCP**, não por conta: as chaves são criadas e revogadas em
+  Configurações → MCP (qualquer pessoa logada revoga qualquer chave), ficam no
+  Upstash só como SHA-256 e aparecem uma única vez. O cliente se conecta por
+  OAuth 2.1 (PKCE + registro dinâmico); a página `/oauth/authorize` não exige
+  login no dashboard — pede só a chave. Todo token aponta para a chave que o
+  emitiu: revogou a chave, o token deixa de valer na chamada seguinte.
+- **Uma fonte de verdade:** `ver_pagina` chama o componente da própria página
+  com os mesmos `searchParams` e percorre a árvore que ela devolve
+  (`src/lib/mcp/render/walker.ts`). Os loaders de `src/lib/page-data.ts` são os
+  mesmos; nenhuma conta é refeita no MCP.
+- **Dado pessoal fica de fora:** as seções em `FORA_DO_MCP`
+  (`src/lib/mcp/render/registry.ts`) viram um aviso fixo, decidido antes de o
+  componente executar. Hoje: "Negócios na pipeline" (`/resgate`) e "Vendas do
+  período" (`/closer`).
+- **Texto livre é dado:** o conteúdo volta dentro de `<conteudo_da_tela>`, com
+  identificador por resposta.
+
+Ao mexer nas páginas:
+
+| Mudança | O que fazer |
+| --- | --- |
+| Componente novo em `src/components/dashboard` | Registrar em `render/registry.ts` (serializer, ou `DESCER` se for só composição). Sem isso o teste de completude e o próprio `ver_pagina` falham — de propósito. |
+| Seção nova com nome, e-mail ou telefone de lead/comprador | Componente próprio, em arquivo fora de `page.tsx`, incluído em `FORA_DO_MCP`. |
+| Página nova | Entrada em `PAGINAS` (`src/lib/mcp/pages.ts`) e cenário em `tests/mcp/paginas.ts`. |
+| Filtro novo | Opções em `src/components/dashboard/filter-options.ts` (lidas pela tela e pelo MCP) e entrada nos `filtros` da página. |
+| Número ou layout mudou de propósito | `npx vitest run -u` regrava os goldens; o diff vai no commit. |
+
+```bash
+npm test                                   # goldens, paridade, privacidade e auth (base sintética)
+npx tsx scripts/mcp-ver-pagina.ts /sdr     # a página como o MCP devolve, com os dados reais
+npx tsx scripts/mcp-ver-pagina.ts --todas  # todas as páginas: tamanho e erros
+```
+
+---
+
 ## Tema (claro / escuro / sistema)
 
 `next-themes` no root layout (`attribute="class"`, `defaultTheme="system"`). Tokens claro e escuro definidos em `globals.css` (`:root` e `.dark`). Card seletor em `/configuracoes`. No escuro o fundo da página é levemente mais claro que a sidebar para manter a separação visual do tema claro.
