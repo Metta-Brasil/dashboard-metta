@@ -5,6 +5,7 @@ import { BarList } from "@/components/dashboard/bar-list";
 import { ComboBarLineChart } from "@/components/dashboard/charts";
 import { FunnelHorizontal } from "@/components/dashboard/funnel-horizontal";
 import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
+import { RecorteVazio } from "@/components/dashboard/recorte-vazio";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
 import {
@@ -56,6 +57,10 @@ export default function ResgatePage({ searchParams }: PageProps) {
         <AvisoColuna searchParams={searchParams} />
       </Suspense>
 
+      <Suspense fallback={null}>
+        <SemNegocios searchParams={searchParams} />
+      </Suspense>
+
       <Suspense fallback={<KpisFallback />}>
         <ResgateKpis searchParams={searchParams} />
       </Suspense>
@@ -105,6 +110,21 @@ async function AvisoColuna({ searchParams }: PageProps) {
       está com as 37 colunas antigas. Estenda a importação até a coluna AM para
       a página encher.
     </div>
+  );
+}
+
+async function SemNegocios({ searchParams }: PageProps) {
+  const [r, filters] = await Promise.all([
+    getResgate(searchParams),
+    getFiltersDinamico(searchParams),
+  ]);
+  return (
+    <RecorteVazio
+      vazio={r.temColunaPipeline && r.total === 0}
+      rota="/resgate"
+      oQue="negócios da pipeline Operação Resgate"
+      filters={filters}
+    />
   );
 }
 

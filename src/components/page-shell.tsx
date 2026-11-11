@@ -26,8 +26,11 @@ export function PageShell({
           celular, onde tudo divide a mesma faixa de tela. Fica abaixo
           dos overlays (popover/dropdown/sheet em z-50), então os
           dropdowns dos filtros continuam por cima do header. */}
-      <header className="sticky top-0 z-40 shrink-0 border-b border-border bg-background/80 backdrop-blur-sm sm:h-(--header-height)">
-        <div className="flex w-full flex-col gap-2 px-4 py-2.5 sm:h-full sm:flex-row sm:items-center sm:gap-2 sm:py-0 lg:px-6">
+      {/* `min-h`, não `h`: com muitos filtros a barra quebra em outra
+          linha, e altura travada empurrava os controles para fora da
+          borda do cabeçalho. */}
+      <header className="sticky top-0 z-40 shrink-0 border-b border-border bg-background/80 backdrop-blur-sm">
+        <div className="flex w-full flex-col gap-2 px-4 py-2.5 sm:min-h-(--header-height) sm:flex-row sm:flex-wrap sm:items-center sm:gap-2 lg:px-6">
           <div className="flex items-center gap-2">
             <SidebarTrigger className="-ml-1" />
             <Separator
@@ -38,9 +41,10 @@ export function PageShell({
               {title}
             </h1>
           </div>
-          <div className="hidden flex-1 sm:block" />
+          {/* `ml-auto`, não espaçador `flex-1`: o espaçador roubava uma
+              linha inteira quando a barra quebrava. */}
           {toolbar && (
-            <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap sm:shrink-0">
+            <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2 sm:ml-auto">
               {toolbar}
             </div>
           )}

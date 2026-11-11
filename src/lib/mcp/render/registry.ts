@@ -6,6 +6,7 @@ import { TabelaNegocios } from "@/app/(dashboard)/resgate/negocios-na-pipeline";
 import * as atvVisaoToggleMod from "@/components/dashboard/atv-visao-toggle";
 import * as barListMod from "@/components/dashboard/bar-list";
 import * as chartsMod from "@/components/dashboard/charts";
+import * as clearFiltersMod from "@/components/dashboard/clear-filters";
 import * as contaFilterMod from "@/components/dashboard/conta-filter";
 import * as dateRangeMod from "@/components/dashboard/date-range-popover";
 import * as distModoMod from "@/components/dashboard/dist-modo-toggle";
@@ -24,6 +25,7 @@ import * as metricTableInteractiveMod from "@/components/dashboard/metric-table-
 import * as multiSelectMod from "@/components/dashboard/multi-select-filter";
 import * as progressCardMod from "@/components/dashboard/progress-card";
 import * as origemToggleMod from "@/components/dashboard/origem-toggle";
+import * as recorteVazioMod from "@/components/dashboard/recorte-vazio";
 import * as sdrDataToggleMod from "@/components/dashboard/sdr-data-toggle";
 import * as sdrHeatmapMod from "@/components/dashboard/sdr-heatmap";
 import * as tagsClintMod from "@/components/dashboard/tags-clint-filter";
@@ -77,6 +79,8 @@ export const SERIALIZERS = new Map<unknown, Serializer>([
   [filterSelectMod.FilterSelect, S.filterSelect],
   [funilChipsMod.FunilChips, S.funilChips],
   [origemToggleMod.OrigemToggle, S.origemToggle],
+  // Botão de ação da tela (limpar filtros): não é conteúdo.
+  [clearFiltersMod.ClearFilters, S.nada],
   [contaFilterMod.ContaFilter, S.contaFilter],
   [distModoMod.DistModoToggle, S.distModoToggle],
   [igContaMod.IgContaToggle, S.igContaToggle],
@@ -113,6 +117,8 @@ export const DESCER = new Set<unknown>([
   // Só compõe Funil + Origem + Pipeline, cada um com serializer próprio.
   escopoFiltersMod.EscopoFilters,
   escopoFiltersMod.EscopoFiltersFallback,
+  // Título, uma linha de texto e o link de saída.
+  recorteVazioMod.RecorteVazio,
   funnelVMod.FunnelVertical,
   funnelHMod.FunnelHorizontal,
   sdrHeatmapMod.SDRHeatmap,
@@ -126,6 +132,7 @@ export const MODULOS_COMPARTILHADOS: Record<string, Record<string, unknown>> = {
   "dashboard/atv-visao-toggle": atvVisaoToggleMod,
   "dashboard/bar-list": barListMod,
   "dashboard/charts": chartsMod,
+  "dashboard/clear-filters": clearFiltersMod,
   "dashboard/conta-filter": contaFilterMod,
   "dashboard/date-range-popover": dateRangeMod,
   "dashboard/dist-modo-toggle": distModoMod,
@@ -144,6 +151,7 @@ export const MODULOS_COMPARTILHADOS: Record<string, Record<string, unknown>> = {
   "dashboard/multi-select-filter": multiSelectMod,
   "dashboard/origem-toggle": origemToggleMod,
   "dashboard/progress-card": progressCardMod,
+  "dashboard/recorte-vazio": recorteVazioMod,
   "dashboard/sdr-data-toggle": sdrDataToggleMod,
   "dashboard/sdr-heatmap": sdrHeatmapMod,
   "dashboard/tags-clint-filter": tagsClintMod,

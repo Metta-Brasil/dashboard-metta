@@ -63,4 +63,7 @@ export const CENARIOS: { rota: string; variante: string; filtros: Record<string,
   { rota: "/closer", variante: "pagos", filtros: { origem: "pago" } },
   { rota: "/origem", variante: "funil-novo", filtros: { funis: "imersao-presencial" } },
   { rota: "/resgate", variante: "funil-e-origem", filtros: { funis: "aplica", origem: "organico" } },
+  // Recorte sem dado: o layout continua com zeros e entra o bloco de estado vazio
+  { rota: "/sdr", variante: "recorte-vazio", filtros: { funis: "reality" } },
+  { rota: "/resgate", variante: "recorte-vazio", filtros: { funis: "reality" } },
 ];

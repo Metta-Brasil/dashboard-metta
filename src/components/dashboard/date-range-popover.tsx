@@ -1,7 +1,6 @@
 "use client";
 
 import { ptBR } from "date-fns/locale";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { useUrlState } from "./use-url-state";
 
 type Range = { from: Date; to: Date };
 
@@ -129,8 +129,7 @@ export function DateRangePopover({
   from: Date;
   to: Date;
 }) {
-  const router = useRouter();
-  const sp = useSearchParams();
+  const { setParams } = useUrlState();
   const [open, setOpen] = useState(false);
   const [range, setRange] = useState<Range>({ from, to });
   const isMobile = useIsMobile();
@@ -148,10 +147,10 @@ export function DateRangePopover({
   }
 
   function apply(next: Range) {
-    const params = new URLSearchParams(sp?.toString() ?? "");
-    params.set("from", fmtIso(next.from));
-    params.set("to", fmtIso(next.to));
-    router.replace(`?${params.toString()}`, { scroll: false });
+    setParams((params) => {
+      params.set("from", fmtIso(next.from));
+      params.set("to", fmtIso(next.to));
+    });
     setOpen(false);
   }
 

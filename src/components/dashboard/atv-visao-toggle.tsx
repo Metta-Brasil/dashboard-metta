@@ -1,10 +1,10 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
 import { ATV_VISOES, parseAtvVisao, type AtvVisao } from "@/lib/calc/atividades";
 import { cn } from "@/lib/utils";
+import { useUrlState } from "./use-url-state";
 
 /**
  * Seletor de pipeline da página Comercial Atividades (Todas | Perpétuo |
@@ -14,26 +14,26 @@ import { cn } from "@/lib/utils";
  * que não existe na nova deixaria a página zerada sem explicação.
  */
 export function AtvVisaoToggle() {
-  const router = useRouter();
-  const sp = useSearchParams();
+  const { params: sp, setParams, pending } = useUrlState();
   const current = parseAtvVisao(sp?.get("pipeline"));
 
   const select = useCallback(
     (value: AtvVisao) => {
       if (value === current) return;
-      const params = new URLSearchParams(sp?.toString() ?? "");
-      if (value === "todas") params.delete("pipeline");
-      else params.set("pipeline", value);
-      params.delete("pessoa");
-      params.delete("canal");
-      router.replace(`?${params.toString()}`, { scroll: false });
+      setParams((params) => {
+        if (value === "todas") params.delete("pipeline");
+        else params.set("pipeline", value);
+        params.delete("pessoa");
+        params.delete("canal");
+      });
     },
-    [current, router, sp]
+    [current, setParams]
   );
 
   return (
     <div
       role="radiogroup"
+      aria-busy={pending || undefined}
       aria-label="Pipeline"
       className="inline-flex h-9 items-center rounded-md border border-input bg-card p-0.5"
     >

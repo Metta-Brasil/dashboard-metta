@@ -59,3 +59,25 @@ export const ORIGEM_OPTIONS: FilterOption<"todos" | "pago" | "organico">[] = [
   { value: "pago", label: "Pagos" },
   { value: "organico", label: "Orgânicos" },
 ];
+
+/**
+ * Parâmetros que são FILTRO (recortam o que já está na tela) e que o botão
+ * "Limpar filtros" remove. Todos têm o padrão "ausente da URL", então
+ * filtro ativo = parâmetro presente. Ficam de fora, de propósito, os que
+ * NAVEGAM (trocam a tela inteira e sobrevivem à limpeza): `conta` do
+ * Instagram, `modo` da TP Distribuição, `pipeline` de Atividades,
+ * `criterio`, `sdrDate`.
+ */
+export const FILTER_PARAMS = [
+  "funis",
+  "origem",
+  "clintPipeline",
+  "tags",
+  "tagsMode",
+  "sdr",
+  "status",
+  "pessoa",
+  "canal",
+  "from",
+  "to",
+] as const;

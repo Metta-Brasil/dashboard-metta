@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { AreaLineChart, DonutChart } from "@/components/dashboard/charts";
 import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
 import { MetricTable, type Column } from "@/components/dashboard/metric-table";
+import { RecorteVazio } from "@/components/dashboard/recorte-vazio";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
 import {
@@ -188,6 +189,14 @@ async function CloserContent({ searchParams }: PageProps) {
       description="Reuniões realizadas, taxa de fechamento e ticket médio por Closer."
       toolbar={<Toolbar from={filters.from} to={filters.to} escopo={{ filters }} />}
     >
+      <RecorteVazio
+        vazio={
+          result.kpis.vendas + result.kpis.reunioes + result.kpis.propostas === 0
+        }
+        rota="/closer"
+        oQue="reuniões, propostas ou vendas"
+        filters={filters}
+      />
       <KpiGrid kpis={kpis} cols="grid-cols-2 lg:grid-cols-3 xl:grid-cols-6" />
 
       {/* g-2 do #p4: Receita por funil (donut) + Evolução de receita */}

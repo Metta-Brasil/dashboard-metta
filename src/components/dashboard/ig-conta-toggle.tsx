@@ -1,11 +1,11 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
 import { cn } from "@/lib/utils";
 
 import { IG_CONTA_OPTIONS } from "./filter-options";
+import { useUrlState } from "./use-url-state";
 
 /**
  * Segmented control (Metta | Tiago) que sincroniza o param `conta` via URL.
@@ -18,25 +18,25 @@ type Conta = "metta" | "tiago";
 const OPTIONS = IG_CONTA_OPTIONS;
 
 export function IgContaToggle() {
-  const router = useRouter();
-  const sp = useSearchParams();
+  const { params: sp, setParams, pending } = useUrlState();
 
   const current: Conta = sp?.get("conta") === "tiago" ? "tiago" : "metta";
 
   const select = useCallback(
     (value: Conta) => {
       if (value === current) return;
-      const params = new URLSearchParams(sp?.toString() ?? "");
-      if (value === "metta") params.delete("conta");
-      else params.set("conta", value);
-      router.replace(`?${params.toString()}`, { scroll: false });
+      setParams((params) => {
+        if (value === "metta") params.delete("conta");
+        else params.set("conta", value);
+      });
     },
-    [current, router, sp]
+    [current, setParams]
   );
 
   return (
     <div
       role="radiogroup"
+      aria-busy={pending || undefined}
       aria-label="Conta Instagram"
       className="inline-flex h-9 items-center rounded-md border border-input bg-card p-0.5"
     >

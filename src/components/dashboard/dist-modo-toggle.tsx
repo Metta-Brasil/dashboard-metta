@@ -1,11 +1,11 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
 import { cn } from "@/lib/utils";
 
 import { DIST_MODO_OPTIONS } from "./filter-options";
+import { useUrlState } from "./use-url-state";
 
 /**
  * Segmented control de seleção única (Vídeo | Seguidores) que sincroniza
@@ -19,26 +19,26 @@ type Modo = "video" | "seguidores";
 const OPTIONS = DIST_MODO_OPTIONS;
 
 export function DistModoToggle() {
-  const router = useRouter();
-  const sp = useSearchParams();
+  const { params: sp, setParams, pending } = useUrlState();
 
   const current: Modo = sp?.get("modo") === "video" ? "video" : "seguidores";
 
   const select = useCallback(
     (value: Modo) => {
       if (value === current) return;
-      const params = new URLSearchParams(sp?.toString() ?? "");
-      // Seguidores é o default → não polui a URL com o param.
-      if (value === "seguidores") params.delete("modo");
-      else params.set("modo", value);
-      router.replace(`?${params.toString()}`, { scroll: false });
+      setParams((params) => {
+        // Seguidores é o default → não polui a URL com o param.
+        if (value === "seguidores") params.delete("modo");
+        else params.set("modo", value);
+      });
     },
-    [current, router, sp]
+    [current, setParams]
   );
 
   return (
     <div
       role="radiogroup"
+      aria-busy={pending || undefined}
       aria-label="Funil"
       className="inline-flex h-9 items-center rounded-md border border-input bg-card p-0.5"
     >

@@ -1,11 +1,11 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
 import { cn } from "@/lib/utils";
 
 import { ORIGEM_OPTIONS } from "./filter-options";
+import { useUrlState } from "./use-url-state";
 
 /**
  * Segmented control "Todos | Pagos | Orgânicos" das páginas de funil
@@ -16,8 +16,7 @@ import { ORIGEM_OPTIONS } from "./filter-options";
 type Origem = (typeof ORIGEM_OPTIONS)[number]["value"];
 
 export function OrigemToggle() {
-  const router = useRouter();
-  const sp = useSearchParams();
+  const { params: sp, setParams, pending } = useUrlState();
 
   const raw = sp?.get("origem");
   const current: Origem = raw === "pago" || raw === "organico" ? raw : "todos";
@@ -25,17 +24,18 @@ export function OrigemToggle() {
   const select = useCallback(
     (value: Origem) => {
       if (value === current) return;
-      const params = new URLSearchParams(sp?.toString() ?? "");
-      if (value === "todos") params.delete("origem");
-      else params.set("origem", value);
-      router.replace(`?${params.toString()}`, { scroll: false });
+      setParams((params) => {
+        if (value === "todos") params.delete("origem");
+        else params.set("origem", value);
+      });
     },
-    [current, router, sp]
+    [current, setParams]
   );
 
   return (
     <div
       role="radiogroup"
+      aria-busy={pending || undefined}
       aria-label="Origem do lead"
       className="inline-flex h-9 items-center rounded-md border border-input bg-card p-0.5"
     >

@@ -1,9 +1,9 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
+import { useUrlState } from "./use-url-state";
 
 export type MultiSelectOption = { value: string; label: string };
 
@@ -31,8 +31,7 @@ export function MultiSelectFilter({
   mode = "plain",
   header,
 }: MultiSelectFilterProps) {
-  const router = useRouter();
-  const sp = useSearchParams();
+  const { params: sp, setParams, pending } = useUrlState();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -55,12 +54,12 @@ export function MultiSelectFilter({
 
   const commit = useCallback(
     (next: Set<string>) => {
-      const params = new URLSearchParams(sp?.toString() ?? "");
-      if (next.size === 0) params.delete(param);
-      else params.set(param, Array.from(next).join(","));
-      router.replace(`?${params.toString()}`, { scroll: false });
+      setParams((params) => {
+        if (next.size === 0) params.delete(param);
+        else params.set(param, Array.from(next).join(","));
+      });
     },
-    [param, router, sp]
+    [param, setParams]
   );
 
   const toggle = useCallback(
@@ -108,7 +107,12 @@ export function MultiSelectFilter({
   const todosActive = mode === "todos" && count === 0;
 
   return (
-    <div ref={rootRef} className="relative" onKeyDown={onKeyDown}>
+    <div
+      ref={rootRef}
+      className="relative"
+      onKeyDown={onKeyDown}
+      aria-busy={pending || undefined}
+    >
       <button
         ref={triggerRef}
         type="button"

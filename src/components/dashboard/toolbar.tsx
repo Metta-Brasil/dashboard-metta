@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import type { FilterState } from "@/lib/calc/types";
 
+import { ClearFilters } from "./clear-filters";
 import { DateRangePopover } from "./date-range-popover";
 import { EscopoFilters, EscopoFiltersFallback } from "./escopo-filters";
 import { FunilChips } from "./funil-chips";
@@ -24,6 +25,8 @@ type ToolbarProps = {
   extras?: React.ReactNode;
   /** Filtros extras à esquerda, logo depois do funil. */
   leftExtras?: React.ReactNode;
+  /** Parâmetros de filtro próprios da página que o "Limpar filtros" também remove. */
+  limparExtras?: readonly string[];
 };
 
 /** O que o recorte tira da página, dito na tela em vez de um zero mudo. */
@@ -46,13 +49,14 @@ export function Toolbar({
   escopo,
   extras,
   leftExtras,
+  limparExtras,
 }: ToolbarProps) {
   // Página sem seletor de pipeline (Resgate) não tem investimento nem MQL
   // para o recorte zerar: o aviso não se aplica.
   const aviso =
     escopo && escopo.pipeline !== false ? avisoDoEscopo(escopo.filters) : null;
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex min-w-0 max-w-full flex-col gap-2">
       <div className="flex flex-wrap gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
           {escopo ? (
@@ -67,6 +71,7 @@ export function Toolbar({
         <div className="flex flex-wrap items-center gap-2">
           {extras}
           <DateRangePopover from={from} to={to} />
+          <ClearFilters extra={limparExtras} />
         </div>
       </div>
       {aviso && <p className="text-xs text-muted-foreground">{aviso}</p>}

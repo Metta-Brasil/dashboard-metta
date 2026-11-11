@@ -1,11 +1,11 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
 import { cn } from "@/lib/utils";
 
 import { SDR_DATA_OPTIONS } from "./filter-options";
+import { useUrlState } from "./use-url-state";
 
 /**
  * Segmented control "Data de agendamento" | "Data de reunião" da tabela
@@ -18,26 +18,26 @@ type Modo = "agendamento" | "reuniao";
 const OPTIONS = SDR_DATA_OPTIONS;
 
 export function SdrDataToggle() {
-  const router = useRouter();
-  const sp = useSearchParams();
+  const { params: sp, setParams, pending } = useUrlState();
 
   const current: Modo = sp?.get("sdrDate") === "reuniao" ? "reuniao" : "agendamento";
 
   const select = useCallback(
     (value: Modo) => {
       if (value === current) return;
-      const params = new URLSearchParams(sp?.toString() ?? "");
-      // Agendamento é o default → não polui a URL.
-      if (value === "agendamento") params.delete("sdrDate");
-      else params.set("sdrDate", value);
-      router.replace(`?${params.toString()}`, { scroll: false });
+      setParams((params) => {
+        // Agendamento é o default → não polui a URL.
+        if (value === "agendamento") params.delete("sdrDate");
+        else params.set("sdrDate", value);
+      });
     },
-    [current, router, sp]
+    [current, setParams]
   );
 
   return (
     <div
       role="radiogroup"
+      aria-busy={pending || undefined}
       aria-label="Agrupamento por data"
       className="inline-flex h-9 items-center rounded-md border border-input bg-card p-0.5"
     >

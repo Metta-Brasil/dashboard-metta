@@ -1,11 +1,11 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
 import { cn } from "@/lib/utils";
 import { TAGS_MODOS } from "./filter-options";
 import { MultiSelectFilter } from "./multi-select-filter";
+import { useUrlState } from "./use-url-state";
 
 /**
  * Filtro "Tags Clint" — multiselect das tags do CRM com um seletor de modo
@@ -27,25 +27,25 @@ type Modo = "remover" | "somente";
 const MODOS = TAGS_MODOS;
 
 function TagsModeToggle() {
-  const router = useRouter();
-  const sp = useSearchParams();
+  const { params: sp, setParams, pending } = useUrlState();
   const current: Modo = sp?.get("tagsMode") === "somente" ? "somente" : "remover";
 
   const select = useCallback(
     (value: Modo) => {
       if (value === current) return;
-      const params = new URLSearchParams(sp?.toString() ?? "");
-      // "remover" é o default → não polui a URL.
-      if (value === "remover") params.delete("tagsMode");
-      else params.set("tagsMode", value);
-      router.replace(`?${params.toString()}`, { scroll: false });
+      setParams((params) => {
+        // "remover" é o default → não polui a URL.
+        if (value === "remover") params.delete("tagsMode");
+        else params.set("tagsMode", value);
+      });
     },
-    [current, router, sp]
+    [current, setParams]
   );
 
   return (
     <div
       role="radiogroup"
+      aria-busy={pending || undefined}
       aria-label="Modo do filtro de tags"
       className="inline-flex h-8 w-full items-center rounded-md border border-input bg-background p-0.5"
     >
@@ -75,7 +75,7 @@ function TagsModeToggle() {
 }
 
 export function TagsClintFilter({ options }: { options: TagOption[] }) {
-  const sp = useSearchParams();
+  const { params: sp } = useUrlState();
   const somente = sp?.get("tagsMode") === "somente";
   const ativo = (sp?.get("tags") ?? "").trim() !== "";
 

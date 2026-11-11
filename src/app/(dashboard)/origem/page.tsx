@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
 import { MetricTable, type Column } from "@/components/dashboard/metric-table";
+import { RecorteVazio } from "@/components/dashboard/recorte-vazio";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
 import {
@@ -104,7 +105,10 @@ function rateCell(num: number, den: number): string {
 }
 
 async function OrigemContent({ searchParams }: PageProps) {
-  const result = await getOrigem(searchParams);
+  const [result, filters] = await Promise.all([
+    getOrigem(searchParams),
+    getFiltersDinamico(searchParams),
+  ]);
 
   // Conjunto base de colunas (contagens + taxas intercaladas). O 1º
   // cabeçalho varia por tabela; é injetado em `cols(...)` abaixo.
@@ -220,6 +224,16 @@ async function OrigemContent({ searchParams }: PageProps) {
 
   return (
     <div className="flex flex-col gap-4">
+      <RecorteVazio
+        vazio={
+          result.porUtmSource.length === 0 &&
+          result.porQualificacao.length === 0 &&
+          result.porSegmento.length === 0
+        }
+        rota="/origem"
+        oQue="leads, negócios ou vendas"
+        filters={filters}
+      />
       <MetricTable
         title="Por UTM Source"
         description={`Top ${MAX_ROWS} por MQL · Total considera todas as origens`}

@@ -1,0 +1,246 @@
+{
+  "temColunaPipeline": true,
+  "total": 0,
+  "kpis": [
+    {
+      "label": "Base carregada",
+      "value": 0,
+      "format": "int",
+      "hint": "Negócios na pipeline Operação Resgate."
+    },
+    {
+      "label": "Trabalhados",
+      "value": 0,
+      "format": "int",
+      "hint": "0.0% da base saiu da etapa Base."
+    },
+    {
+      "label": "Conexões",
+      "value": 0,
+      "format": "int"
+    },
+    {
+      "label": "Reuniões realizadas",
+      "value": 0,
+      "format": "int"
+    },
+    {
+      "label": "Propostas",
+      "value": 0,
+      "format": "int"
+    },
+    {
+      "label": "Valor resgatado",
+      "value": 0,
+      "format": "brl",
+      "hint": "0 negócio(s) fechado(s) · taxa de resgate 0.0%."
+    }
+  ],
+  "funil": [
+    {
+      "etapa": "Base carregada",
+      "valor": 0,
+      "conversaoEtapa": 1,
+      "parados": 0,
+      "avancaram": 0,
+      "diasMedia": null
+    },
+    {
+      "etapa": "Prospecção",
+      "valor": 0,
+      "conversaoEtapa": 0,
+      "parados": 0,
+      "avancaram": 0,
+      "diasMedia": null
+    },
+    {
+      "etapa": "Conexão",
+      "valor": 0,
+      "conversaoEtapa": 0,
+      "parados": 0,
+      "avancaram": 0,
+      "diasMedia": null
+    },
+    {
+      "etapa": "Follow-up",
+      "valor": 0,
+      "conversaoEtapa": 0,
+      "parados": 0,
+      "avancaram": 0,
+      "diasMedia": null
+    },
+    {
+      "etapa": "Qualificação",
+      "valor": 0,
+      "conversaoEtapa": 0,
+      "parados": 0,
+      "avancaram": 0,
+      "diasMedia": null
+    },
+    {
+      "etapa": "Reunião agendada",
+      "valor": 0,
+      "conversaoEtapa": 0,
+      "parados": 0,
+      "avancaram": 0,
+      "diasMedia": null
+    },
+    {
+      "etapa": "Reunião realizada",
+      "valor": 0,
+      "conversaoEtapa": 0,
+      "parados": 0,
+      "avancaram": 0,
+      "diasMedia": null
+    },
+    {
+      "etapa": "Proposta",
+      "valor": 0,
+      "conversaoEtapa": 0,
+      "parados": 0,
+      "avancaram": 0,
+      "diasMedia": null
+    },
+    {
+      "etapa": "Resgatado",
+      "valor": 0,
+      "conversaoEtapa": 0,
+      "parados": 0,
+      "avancaram": 0,
+      "diasMedia": null
+    }
+  ],
+  "perdidos": 0,
+  "noShow": 0,
+  "serieMovimentos": [
+    {
+      "dia": "2026-10-11T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-12T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-13T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-14T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-15T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-16T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-17T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-18T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-19T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-20T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-21T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-22T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-23T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-24T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-25T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-26T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-27T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-28T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-29T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-30T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-10-31T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-11-01T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-11-02T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-11-03T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-11-04T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-11-05T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-11-06T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-11-07T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-11-08T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-11-09T03:00:00.000Z",
+      "movimentacoes": 0
+    },
+    {
+      "dia": "2026-11-10T03:00:00.000Z",
+      "movimentacoes": 0
+    }
+  ],
+  "perfilQualificacao": [],
+  "perfilFaturamento": [],
+  "perfilFunil": [],
+  "perfilCampanha": [],
+  "negocios": []
+}

@@ -11,6 +11,7 @@ import {
   type Column,
 } from "@/components/dashboard/metric-table";
 import { TagsClintFilter } from "@/components/dashboard/tags-clint-filter";
+import { RecorteVazio } from "@/components/dashboard/recorte-vazio";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
 import { SEM_TAG } from "@/lib/calc/clint";
@@ -229,7 +230,21 @@ async function KpisSection({ searchParams }: PageProps) {
     },
   ];
 
-  return <KpiGrid kpis={kpis} />;
+  const filters = await getFiltersDinamico(searchParams);
+  const vazio =
+    k.investimento === 0 &&
+    k.mql + k.negociosCriados + k.agendamentos + k.reunioesAgendadas + k.reunioes + k.vendas === 0;
+  return (
+    <>
+      <RecorteVazio
+        vazio={vazio}
+        rota="/"
+        oQue="investimento, leads, negócios ou vendas"
+        filters={filters}
+      />
+      <KpiGrid kpis={kpis} />
+    </>
+  );
 }
 
 async function FunilSection({ searchParams }: PageProps) {

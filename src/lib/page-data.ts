@@ -249,7 +249,10 @@ export const getResgate = porRequest(async (sp: SP) => {
   // Funil e origem valem aqui; a pipeline não: a página É uma pipeline.
   const noEscopo = aplicarEscopo(data, { origem: filters.origem });
   const clint = filterLeadsByFunil(noEscopo.clint, filters.funis ?? [FUNIL_TUDO]);
-  return calcResgate({ clint }, { from: filters.from, to: filters.to });
+  const r = calcResgate({ clint }, { from: filters.from, to: filters.to });
+  // "A coluna Pipeline chegou?" é pergunta sobre a base, não sobre o recorte:
+  // um filtro que zera os negócios não pode acender o aviso de coluna ausente.
+  return { ...r, temColunaPipeline: (data.clint ?? []).some((c) => c.pipelineId !== "") };
 });
 
 /**

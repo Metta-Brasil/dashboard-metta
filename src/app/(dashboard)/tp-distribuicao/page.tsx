@@ -101,6 +101,7 @@ async function TpDistToolbar({ searchParams }: PageProps) {
       from={filters.from}
       to={filters.to}
       funil={false}
+      limparExtras={["conta"]}
       extras={
         <>
           <ContaFilter />

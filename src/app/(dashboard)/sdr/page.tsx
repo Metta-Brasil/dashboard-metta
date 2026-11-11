@@ -6,6 +6,7 @@ import { KpiGrid, type Kpi } from "@/components/dashboard/kpi-grid";
 import { FilterSelect } from "@/components/dashboard/filter-select";
 import { MetricTable, type Column } from "@/components/dashboard/metric-table";
 import { SDRHeatmap } from "@/components/dashboard/sdr-heatmap";
+import { RecorteVazio } from "@/components/dashboard/recorte-vazio";
 import { Toolbar } from "@/components/dashboard/toolbar";
 import { PageShell } from "@/components/page-shell";
 import {
@@ -66,7 +67,10 @@ async function SdrToolbar({ searchParams }: PageProps) {
 }
 
 async function SdrContent({ searchParams }: PageProps) {
-  const result = await getSdr(searchParams);
+  const [result, filters] = await Promise.all([
+    getSdr(searchParams),
+    getFiltersDinamico(searchParams),
+  ]);
   const k = result.kpis;
 
   const kpis: Kpi[] = [
@@ -325,6 +329,12 @@ async function SdrContent({ searchParams }: PageProps) {
 
   return (
     <>
+      <RecorteVazio
+        vazio={result.funilSdr.every((e) => e.valor === 0)}
+        rota="/sdr"
+        oQue="negócios, agendamentos ou reuniões"
+        filters={filters}
+      />
       <KpiGrid kpis={kpis} />
 
       <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
