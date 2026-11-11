@@ -30,22 +30,42 @@ import {
 
 import { InstagramIcon } from "@/components/instagram-icon";
 
-const navMain = [
-  { title: "Visão Geral", url: "/", icon: LayoutDashboardIcon },
-  { title: "Metas vs Realizado", url: "/metas", icon: TargetIcon },
-  { title: "TP Aquisição", url: "/trafego", icon: MegaphoneIcon },
+// Seções da barra lateral. O título da seção já diz o assunto, então os
+// itens não repetem "TP" nem "Comercial".
+const navSections = [
   {
-    title: "TP Distribuição de conteúdo",
-    url: "/tp-distribuicao",
-    icon: NewspaperIcon,
+    label: "Resultado",
+    items: [
+      { title: "Visão Geral", url: "/", icon: LayoutDashboardIcon },
+      { title: "Metas vs Realizado", url: "/metas", icon: TargetIcon },
+      { title: "Origem", url: "/origem", icon: Share2Icon },
+    ],
   },
-  { title: "Anúncios", url: "/anuncios", icon: ImageIcon },
-  { title: "Comercial SDR", url: "/sdr", icon: UserCheckIcon },
-  { title: "Comercial Atividades", url: "/atividades", icon: PhoneCallIcon },
-  { title: "Comercial Closer", url: "/closer", icon: HandshakeIcon },
-  { title: "Funil de Resgate", url: "/resgate", icon: LifeBuoyIcon },
-  { title: "Origem", url: "/origem", icon: Share2Icon },
-  { title: "Instagram", url: "/instagram", icon: InstagramIcon },
+  {
+    label: "Tráfego pago",
+    items: [
+      { title: "Aquisição", url: "/trafego", icon: MegaphoneIcon },
+      {
+        title: "Distribuição de conteúdo",
+        url: "/tp-distribuicao",
+        icon: NewspaperIcon,
+      },
+      { title: "Anúncios", url: "/anuncios", icon: ImageIcon },
+    ],
+  },
+  {
+    label: "Comercial",
+    items: [
+      { title: "SDR", url: "/sdr", icon: UserCheckIcon },
+      { title: "Atividades", url: "/atividades", icon: PhoneCallIcon },
+      { title: "Closer", url: "/closer", icon: HandshakeIcon },
+      { title: "Resgate", url: "/resgate", icon: LifeBuoyIcon },
+    ],
+  },
+  {
+    label: "Conteúdo",
+    items: [{ title: "Instagram", url: "/instagram", icon: InstagramIcon }],
+  },
 ];
 
 type SidebarUser = { name: string; email: string; avatar: string };
@@ -82,7 +102,7 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navMain} />
+        <NavMain sections={navSections} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />

@@ -8,6 +8,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -21,7 +22,9 @@ type NavItem = {
   icon: LucideIcon;
 };
 
-function NavLinks({ items, qs }: { items: NavItem[]; qs: string }) {
+type NavSection = { label: string; items: NavItem[] };
+
+function NavLinks({ sections, qs }: { sections: NavSection[]; qs: string }) {
   const pathname = usePathname();
   const { isMobile, setOpenMobile } = useSidebar();
   // Carrega os filtros atuais (data/funil/sdr/…) na navegação entre
@@ -29,11 +32,22 @@ function NavLinks({ items, qs }: { items: NavItem[]; qs: string }) {
   // "limpa" volta ao default (comportamento esperado).
   const withFilters = (url: string) => (qs ? `${url}?${qs}` : url);
 
-  return (
-    <SidebarGroup>
+  return sections.map((section, index) => (
+    <SidebarGroup
+      key={section.label}
+      className={cn(
+        "py-1",
+        // Barra recolhida: o título some e um traço separa as seções.
+        index > 0 &&
+          "group-data-[collapsible=icon]:before:absolute group-data-[collapsible=icon]:before:inset-x-3 group-data-[collapsible=icon]:before:top-0 group-data-[collapsible=icon]:before:h-px group-data-[collapsible=icon]:before:bg-sidebar-border"
+      )}
+    >
+      <SidebarGroupLabel className="h-7 text-[10px] uppercase tracking-[0.12em] text-muted-foreground group-data-[collapsible=icon]:-mt-7">
+        {section.label}
+      </SidebarGroupLabel>
       <SidebarGroupContent className="flex flex-col gap-1">
         <SidebarMenu>
-          {items.map((item) => {
+          {section.items.map((item) => {
             const isActive =
               item.url === "/"
                 ? pathname === "/"
@@ -70,19 +84,19 @@ function NavLinks({ items, qs }: { items: NavItem[]; qs: string }) {
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
-  );
+  ));
 }
 
 /** Lê os search params (precisa de Suspense sob Cache Components). */
-function NavLinksWithFilters({ items }: { items: NavItem[] }) {
+function NavLinksWithFilters({ sections }: { sections: NavSection[] }) {
   const sp = useSearchParams();
-  return <NavLinks items={items} qs={sp?.toString() ?? ""} />;
+  return <NavLinks sections={sections} qs={sp?.toString() ?? ""} />;
 }
 
-export function NavMain({ items }: { items: NavItem[] }) {
+export function NavMain({ sections }: { sections: NavSection[] }) {
   return (
-    <Suspense fallback={<NavLinks items={items} qs="" />}>
-      <NavLinksWithFilters items={items} />
+    <Suspense fallback={<NavLinks sections={sections} qs="" />}>
+      <NavLinksWithFilters sections={sections} />
     </Suspense>
   );
 }
