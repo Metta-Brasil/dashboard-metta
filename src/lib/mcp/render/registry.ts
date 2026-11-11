@@ -7,6 +7,8 @@ import { TabelaNegocios } from "@/app/(dashboard)/resgate/negocios-na-pipeline";
 import * as atvVisaoToggleMod from "@/components/dashboard/atv-visao-toggle";
 import * as barListMod from "@/components/dashboard/bar-list";
 import * as chartsMod from "@/components/dashboard/charts";
+import * as atualizadoMod from "@/components/dashboard/atualizado";
+import * as atualizarBotaoMod from "@/components/dashboard/atualizar-botao";
 import * as clearFiltersMod from "@/components/dashboard/clear-filters";
 import * as contaFilterMod from "@/components/dashboard/conta-filter";
 import * as dateRangeMod from "@/components/dashboard/date-range-popover";
@@ -83,6 +85,11 @@ export const SERIALIZERS = new Map<unknown, Serializer>([
   [origemToggleMod.OrigemToggle, S.origemToggle],
   // Botão de ação da tela (limpar filtros): não é conteúdo.
   [clearFiltersMod.ClearFilters, S.nada],
+  // Carimbo "Atualizado HH:MM" e botão de atualizar do cabeçalho: o MCP
+  // informa a atualização dos dados pela ferramenta status_atualizacao.
+  [atualizadoMod.Atualizado, S.nada],
+  [atualizadoMod.AtualizadoFallback, S.nada],
+  [atualizarBotaoMod.AtualizarBotao, S.nada],
   [contaFilterMod.ContaFilter, S.contaFilter],
   [distModoMod.DistModoToggle, S.distModoToggle],
   [igContaMod.IgContaToggle, S.igContaToggle],
@@ -131,6 +138,8 @@ export const DESCER = new Set<unknown>([
 
 /** Módulos de componente compartilhado cobertos pelo registro. */
 export const MODULOS_COMPARTILHADOS: Record<string, Record<string, unknown>> = {
+  "dashboard/atualizado": atualizadoMod,
+  "dashboard/atualizar-botao": atualizarBotaoMod,
   "dashboard/atv-visao-toggle": atvVisaoToggleMod,
   "dashboard/bar-list": barListMod,
   "dashboard/charts": chartsMod,

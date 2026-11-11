@@ -1,3 +1,6 @@
+import { Suspense } from "react";
+
+import { Atualizado, AtualizadoFallback } from "@/components/dashboard/atualizado";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -43,11 +46,17 @@ export function PageShell({
           </div>
           {/* `ml-auto`, não espaçador `flex-1`: o espaçador roubava uma
               linha inteira quando a barra quebrava. */}
-          {toolbar && (
-            <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2 sm:ml-auto">
-              {toolbar}
-            </div>
-          )}
+          <div className="flex min-w-0 max-w-full flex-wrap items-center gap-x-3 gap-y-2 sm:ml-auto">
+            {toolbar && (
+              <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2">
+                {toolbar}
+              </div>
+            )}
+            {/* Lê o Upstash: suspende sozinho, o resto do cabeçalho não espera. */}
+            <Suspense fallback={<AtualizadoFallback />}>
+              <Atualizado />
+            </Suspense>
+          </div>
         </div>
       </header>
       <div
