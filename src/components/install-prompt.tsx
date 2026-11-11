@@ -55,6 +55,8 @@ export function InstallPrompt() {
     const android = /Android/.test(ua);
 
     if (ios || iPadOs) {
+      // Detecção de plataforma: só dá para saber no cliente, depois de montar.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsIos(true);
       setShow(true);
       return;

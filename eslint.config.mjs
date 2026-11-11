@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Worktrees de agentes: cópias inteiras do repositório (com .next e
+    // node_modules próprios). Sem isto o `eslint` varre todas e estoura a
+    // memória do Node antes de terminar.
+    ".claude/**",
   ]),
 ]);
 

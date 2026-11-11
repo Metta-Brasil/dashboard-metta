@@ -610,7 +610,7 @@ function buildHistoricoMensal(opts: {
     const refYear = refDate.getUTCFullYear();
     const refMonthIdx = refDate.getUTCMonth();
 
-    const inMonth = <T extends { }>(
+    const inMonth = <T,>(
       rows: T[],
       getDate: (r: T) => Date | null
     ): T[] =>

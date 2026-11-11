@@ -18,6 +18,7 @@ export function ThemeToggle() {
 
   // next-themes só resolve o tema no cliente; sem o gate o highlight
   // do botão ativo causa mismatch de hidratação.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
   const active = mounted ? theme : undefined;
 
