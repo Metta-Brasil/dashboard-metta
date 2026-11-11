@@ -34,7 +34,7 @@ Ações contadas pelo dia em que aconteceram (horário de Brasília). Base de 30
 
 ## Agendamentos
 
-- Reuniões agendadas: 12 (Pelo dia em que a SDR agendou)
+- Reuniões agendadas: 12 (Pelo dia em que a SDR agendou; reagendar conta de novo)
 - Conexões que viraram agenda: 6 (de 6 leads com ligação de 30s+)
 - Conexões que não viraram agenda: 0 (Ligação de 30s+, sem reunião agendada no período)
 

@@ -10,6 +10,14 @@ type Props = {
 };
 
 /** "2026-11-05" → "05/11/2026" (chave de calendário, sem fuso). */
+/**
+ * "Etapa hoje" é onde o lead está agora; os números da linha são do período.
+ * Um lead trabalhado no dia 3 e agendado no dia 5 aparece no dia 3 com etapa
+ * "Reunião Agendada" e zero reuniões agendadas no período.
+ */
+const NOTA_ETAPA =
+  "Etapa hoje é a etapa atual do lead; reunião marcada fora do período não entra em Agendadas no período.";
+
 function formatDiaKey(key: string): string {
   const [y, m, d] = key.split("-");
   return y && m && d ? `${d}/${m}/${y}` : "—";
@@ -79,7 +87,12 @@ export async function LeadsDoNumero({ searchParams }: Props) {
       total: "none",
       render: (l) => (l.respondeu ? "Sim" : "—"),
     },
-    { key: "reunioes", header: "Reuniões", align: "right", render: (l) => formatInt(l.reunioes) },
+    {
+      key: "reunioes",
+      header: "Agendadas no período",
+      align: "right",
+      render: (l) => formatInt(l.reunioes),
+    },
     {
       key: "ultimoDia",
       header: "Última ação",
@@ -94,8 +107,8 @@ export async function LeadsDoNumero({ searchParams }: Props) {
         title={lista ? ATV_LISTAS[lista].titulo : "Leads trabalhados no período"}
         description={
           lista
-            ? `${formatInt(leads.length)} lead(s) por trás do número.`
-            : `${formatInt(leads.length)} lead(s) com ação no período. Clique num número acima para ver só os leads dele.`
+            ? `${formatInt(leads.length)} lead(s) por trás do número. ${NOTA_ETAPA}`
+            : `${formatInt(leads.length)} lead(s) com ação no período. Clique num número acima para ver só os leads dele. ${NOTA_ETAPA}`
         }
         toolbar={
           lista ? (

@@ -273,7 +273,7 @@ function kpisAgendamentos(s: AtvResumo, l: Listas): Kpi[] {
       label: "Reuniões agendadas",
       ...link(l, "agendados"),
       value: formatInt(s.reunioes),
-      hint: "Pelo dia em que a SDR agendou",
+      hint: "Pelo dia em que a SDR agendou; reagendar conta de novo",
     },
     {
       label: "Conexões que viraram agenda",
@@ -372,7 +372,7 @@ function Consultoria({ r }: { r: AtividadesResult }) {
     {
       label: "Reuniões agendadas",
       value: formatInt(s.reunioes),
-      hint: "Pelo dia em que foi agendada",
+      hint: "Pelo dia em que foi agendada; reagendar conta de novo",
     },
   ];
 

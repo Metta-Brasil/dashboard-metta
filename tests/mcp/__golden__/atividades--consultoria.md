@@ -32,7 +32,7 @@ Ações contadas pelo dia em que aconteceram (horário de Brasília). Base de 30
 - Registros de ligação: 72 (12 atendidas · 6 de 30s+)
 - Mensagens enviadas: 108 (Clint 12 · celular 96)
 - Leads abordados: 2 (2 responderam)
-- Reuniões agendadas: 4 (Pelo dia em que foi agendada)
+- Reuniões agendadas: 4 (Pelo dia em que foi agendada; reagendar conta de novo)
 
 ### Entradas por etapa no período
 Mudanças de etapa registradas no Clint, com o nome da etapa na época.
