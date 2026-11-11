@@ -1,16 +1,26 @@
-import type { FilterState, Funil } from "@/lib/calc/types";
+import { FUNIL_TUDO } from "@/lib/calc/shared";
+import type { FilterState } from "@/lib/calc/types";
 
-const FUNIS_VALIDOS: Funil[] = ["sala", "aplica", "sessao", "isca", "reality", "todos"];
+/** Chave de funil: uma das fixas, "sem-funil" ou o slug de um funil do dado. */
+const isFunilKey = (s: string): boolean => /^[a-z0-9][a-z0-9-]*$/.test(s);
 
-function isFunil(s: string): s is Funil {
-  return (FUNIS_VALIDOS as string[]).includes(s);
-}
+type ParseOptions = {
+  /**
+   * Página de funil dinâmico (Visão Geral, Metas, SDR, Closer, Origem,
+   * Resgate): sem `funis` na URL o recorte é TUDO o que existe na base, e
+   * valem os filtros de origem e de pipeline da Clint. Sem a opção (TP
+   * Aquisição, Anúncios), "todos" continua sendo os 5 funis pagos e os
+   * dois filtros novos são ignorados.
+   */
+  funilDinamico?: boolean;
+};
 
 /**
  * Lê filtros dos searchParams. Defaults: últimos 30 dias, todos os funis.
  */
 export function parseFilters(
-  searchParams: Record<string, string | string[] | undefined>
+  searchParams: Record<string, string | string[] | undefined>,
+  options: ParseOptions = {}
 ): FilterState {
   const now = new Date();
   const defaultFrom = new Date(now);
@@ -48,9 +58,29 @@ export function parseFilters(
   const from = fromStr ? parseBrtDate(fromStr) : defaultFrom;
   const to = toStr ? parseBrtDate(toStr) : now;
 
-  const funis = funisStr
-    ? funisStr.split(",").map((s) => s.trim().toLowerCase()).filter(isFunil)
-    : (["todos"] as Funil[]);
+  const semCorte = options.funilDinamico ? FUNIL_TUDO : "todos";
+  const funisLidos = funisStr
+    ? funisStr
+        .split(",")
+        .map((s) => s.trim().toLowerCase())
+        .filter(isFunilKey)
+        // "todos"/"tudo" na URL = sem corte, no sentido da página.
+        .map((s) => (s === "todos" || s === FUNIL_TUDO ? semCorte : s))
+    : [];
+  const funis = funisLidos.length ? funisLidos : [semCorte];
+
+  const origemRaw = options.funilDinamico ? searchParams.origem : undefined;
+  const origem: FilterState["origem"] =
+    origemRaw === "pago" || origemRaw === "organico" ? origemRaw : undefined;
+  const pipeRaw = options.funilDinamico ? searchParams.clintPipeline : undefined;
+  const pipes =
+    typeof pipeRaw === "string"
+      ? pipeRaw
+          .split(",")
+          .map((t) => t.trim())
+          .filter((t) => t !== "")
+      : [];
+  const clintPipelines = pipes.length ? pipes : undefined;
 
   const sdrDateRaw =
     typeof searchParams.sdrDate === "string" ? searchParams.sdrDate : undefined;
@@ -72,7 +102,9 @@ export function parseFilters(
   return {
     from: Number.isFinite(from.getTime()) ? from : defaultFrom,
     to: Number.isFinite(to.getTime()) ? to : now,
-    funis: funis.length ? funis : (["todos"] as Funil[]),
+    funis,
+    origem,
+    clintPipelines,
     sdr: list("sdr"),
     status: list("status"),
     sdrDate,

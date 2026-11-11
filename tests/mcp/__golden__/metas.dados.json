@@ -23,7 +23,7 @@
     },
     {
       "nome": "Negócios criados",
-      "realValor": 22,
+      "realValor": 26,
       "metaMtdValor": null,
       "pctAtingimento": null,
       "gap": null
@@ -73,13 +73,13 @@
     },
     {
       "nome": "Custo/negócio",
-      "realValor": 1054.2045454545455,
+      "realValor": 892.0192307692307,
       "metaValor": null,
       "isInverse": true
     },
     {
       "nome": "Tx MQL / Negócio",
-      "realValor": 1,
+      "realValor": 1.1818181818181819,
       "metaValor": null
     },
     {

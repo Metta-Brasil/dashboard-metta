@@ -2,6 +2,8 @@
 
 Filtros aplicados:
 - Funil (`funis`): Todos
+- Origem (`origem`): Todos
+- Pipeline Clint (`clintPipeline`): sem seleção
 - Período (`from`, `to`): 11/10/2026 a 10/11/2026
 
 ---
@@ -10,10 +12,10 @@ Metas proporcionais ao período selecionado (month-to-date): a meta mensal é pr
 
 - Investimento [meta R$ 6,7k]: R$ 23.192,50 / R$ 6,7k · barra em 100% · 347.9% atingido · +R$ 16.525,83
 - MQL [meta 20]: 22 / 20 · barra em 100% · 110.0% atingido · +2
-- Negócios criados [sem meta]: 22 · 100.0% do MQL · barra em 0% · —
+- Negócios criados [sem meta]: 26 · 118.2% do MQL · barra em 0% · —
 - CMQL [teto R$ 350,00]: R$ 1.054,20 · barra em 100% · acima do teto · teto R$ 350,00
-- Custo/negócio [sem teto]: R$ 1.054,20 · barra em 0% · abaixo do teto
-- Tx MQL → Negócio [negócios criados / MQL]: 100.0% · 22 de 22 MQL · barra em 0% · sem meta
+- Custo/negócio [sem teto]: R$ 892,02 · barra em 0% · abaixo do teto
+- Tx MQL → Negócio [negócios criados / MQL]: 118.2% · 26 de 22 MQL · barra em 0% · sem meta
 - Agendamentos [sem meta]: 12 · 54.5% do MQL · barra em 0% · —
 - Reuniões agendadas [sem meta]: 12 · 54.5% do MQL · barra em 0% · —
 - Reuniões realizadas [show (realizadas/agendadas)]: 58.3% · 7 de 12 agendadas · barra em 0% · sem meta

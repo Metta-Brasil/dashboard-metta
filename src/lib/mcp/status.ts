@@ -17,9 +17,11 @@ type Fonte = { nome: string; aba: SheetTab; campos: string[] };
 export const FONTES: Fonte[] = [
   { nome: "Meta Ads (investimento e anúncios)", aba: "fb_todos", campos: ["day"] },
   { nome: "Leads (formulários)", aba: "leads", campos: ["dataInscricao"] },
-  // Negócio antigo que muda de etapa também é dado novo: vale a criação
-  // ou a última entrada em etapa, o que for mais recente.
-  { nome: "Clint — negócios", aba: "clint", campos: ["dataCriacao", "dataEntradaEtapa"] },
+  // Duas linhas, de propósito. Juntas (valia a maior data), a mudança de
+  // etapa de um negócio antigo escondeu por dias que os negócios novos
+  // chegavam sem data de criação e não eram contados.
+  { nome: "Clint — negócios criados", aba: "clint", campos: ["dataCriacao"] },
+  { nome: "Clint — mudança de etapa", aba: "clint", campos: ["dataEntradaEtapa"] },
   { nome: "SDR (planilha, até a migração para o Clint)", aba: "sdr", campos: ["dataAgendamento"] },
   { nome: "Vendas", aba: "vendas", campos: ["dataCompra"] },
   { nome: "Instagram Metta — perfil", aba: "ig_metta_perfil", campos: ["data"] },

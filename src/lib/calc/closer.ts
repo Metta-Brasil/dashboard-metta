@@ -17,7 +17,6 @@ import type {
   CloserRow,
   CloserVendaRow,
   FilterState,
-  Funil,
   LeadRow,
   MetaRow,
   RawData,
@@ -289,7 +288,7 @@ function isSameYearMonthUtc(a: Date, b: Date): boolean {
 /** Calcula vendas e meta para os últimos 12 meses (inclui o mês de filters.to). */
 function computeEvolucao12Meses(
   vendasAll: VendaRow[],
-  funis: Funil[],
+  funis: string[],
   to: Date,
   metas: MetaRow[] | undefined
 ): CloserEvolucao12MesesPoint[] {

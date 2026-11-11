@@ -1,6 +1,8 @@
 # Funil de Resgate
 
 Filtros aplicados:
+- Funil (`funis`): Todos
+- Origem (`origem`): Todos
 - Período (`from`, `to`): 11/10/2026 a 10/11/2026
 
 ---

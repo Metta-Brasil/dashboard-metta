@@ -2,6 +2,8 @@
 
 Filtros aplicados:
 - Funil (`funis`): Todos
+- Origem (`origem`): Todos
+- Pipeline Clint (`clintPipeline`): sem seleção
 - Período (`from`, `to`): 11/10/2026 a 10/11/2026
 
 ---

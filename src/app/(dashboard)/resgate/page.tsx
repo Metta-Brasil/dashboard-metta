@@ -13,7 +13,7 @@ import {
   formatPercent,
 } from "@/lib/calc/shared";
 import type { ResgateKpi } from "@/lib/calc/types";
-import { getFilters, getResgate } from "@/lib/page-data";
+import { getFiltersDinamico, getResgate } from "@/lib/page-data";
 
 import { TabelaNegocios } from "./negocios-na-pipeline";
 
@@ -80,8 +80,12 @@ export default function ResgatePage({ searchParams }: PageProps) {
 }
 
 async function ResgateToolbar({ searchParams }: PageProps) {
-  const filters = await getFilters(searchParams);
-  return <Toolbar from={filters.from} to={filters.to} funil={false} />;
+  const filters = await getFiltersDinamico(searchParams);
+  return <Toolbar
+      from={filters.from}
+      to={filters.to}
+      escopo={{ filters, pipeline: false }}
+    />;
 }
 
 /**

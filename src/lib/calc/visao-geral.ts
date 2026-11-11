@@ -5,6 +5,7 @@ import {
   filterFbTodosByFunil,
   filterLeadsByFunil,
   filterVendasByFunil,
+  FUNIS_FIXOS,
   isMql,
   isPropostaEnviada,
   isReuniaoRealizada,
@@ -13,6 +14,7 @@ import {
   sumBy,
   type RowSource,
 } from "./shared";
+import { listFunis } from "./escopo";
 import { clintRows } from "./clint";
 import type {
   CustoPorEtapaPoint,
@@ -20,7 +22,6 @@ import type {
   Delta,
   DistribuicaoPorFunil,
   FilterState,
-  Funil,
   FunnelStep,
   NomeValor,
   RawData,
@@ -249,9 +250,11 @@ export function calcVisaoGeral(
     { etapa: "Vendas", valor: vendasCount, conversaoEtapa: safeRate(vendasCount, reunioes) },
   ];
 
-  // ----- Distribuição por funil (5 funis fixos) -----
-  const FUNIS_FIXOS: Funil[] = ["sala", "aplica", "sessao", "isca", "reality"];
-  const distribuicaoPorFunil: DistribuicaoPorFunil[] = FUNIS_FIXOS.map((f) => {
+  // ----- Distribuição por funil -----
+  // Os 5 funis de sempre aparecem sempre; funil novo (ou "Sem funil")
+  // entra quando tem algum número no período. A lista sai do dado.
+  const funisDoDado = listFunis(data);
+  const distribuicaoPorFunil: DistribuicaoPorFunil[] = funisDoDado.map(({ value: f, label }) => {
     // Filtra cada base individualmente pelo funil específico, depois aplica range
     const leadsF1 = filterByDate(
       filterLeadsByFunil(data.leads, [f]),
@@ -289,13 +292,18 @@ export function calcVisaoGeral(
 
     return {
       funil: f,
+      label,
       negociosCriados: negociosF1.length,
       mql: mqlF1,
       reunioes: reunioesF1,
       vendas: vendasCountF1,
       faturamento: faturamentoF1,
     };
-  });
+  }).filter(
+    (r) =>
+      (FUNIS_FIXOS as readonly string[]).includes(r.funil) ||
+      r.negociosCriados + r.mql + r.reunioes + r.vendas > 0
+  );
 
   // ----- Distribuição de negócios criados por segmento / subsegmento -----
   const distribuicaoPorSegmento = agrupaContagem(negociosInRange, (r) => r.segmento);

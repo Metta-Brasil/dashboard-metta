@@ -10,7 +10,7 @@ import {
   safeRate,
 } from "@/lib/calc/shared";
 import type { OrigemRow } from "@/lib/calc/types";
-import { getOrigem, getFilters } from "@/lib/page-data";
+import { getOrigem, getFiltersDinamico } from "@/lib/page-data";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -94,8 +94,8 @@ export default function OrigemPage({ searchParams }: PageProps) {
 }
 
 async function OrigemToolbar({ searchParams }: PageProps) {
-  const filters = await getFilters(searchParams);
-  return <Toolbar from={filters.from} to={filters.to} funil />;
+  const filters = await getFiltersDinamico(searchParams);
+  return <Toolbar from={filters.from} to={filters.to} escopo={{ filters }} />;
 }
 
 /** Render de célula de taxa: "—" quando o denominador é 0. */

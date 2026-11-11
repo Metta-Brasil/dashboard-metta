@@ -3,6 +3,7 @@ import { cache } from "react";
 import { calcAnuncios } from "@/lib/calc/anuncios";
 import { calcAtividades, parseAtvVisao } from "@/lib/calc/atividades";
 import { listClintTags, mergeClint } from "@/lib/calc/clint";
+import { aplicarEscopo, listFunis, listPipelines } from "@/lib/calc/escopo";
 import { calcCloser } from "@/lib/calc/closer";
 import { calcInstagram } from "@/lib/calc/instagram";
 import { calcMetas } from "@/lib/calc/metas";
@@ -12,6 +13,7 @@ import { calcSdr } from "@/lib/calc/sdr";
 import { calcTpDistribuicao } from "@/lib/calc/tp-distribuicao";
 import { calcTrafego } from "@/lib/calc/trafego";
 import { calcVisaoGeral } from "@/lib/calc/visao-geral";
+import { FUNIL_TUDO, filterLeadsByFunil } from "@/lib/calc/shared";
 import { parseFilters } from "@/lib/filters";
 import { readAllSheets } from "@/lib/sheets/read";
 
@@ -57,10 +59,19 @@ function porRequest<R>(fn: (sp: SP) => Promise<R>): (sp: SP) => Promise<R> {
   };
 }
 
+/** Páginas de funil dinâmico: funil = tudo o que existe + origem + pipeline. */
+const DINAMICO = { funilDinamico: true } as const;
+
+/** Recorte (origem e pipeline da Clint) e, depois, a fusão da Clint. */
+const comEscopo = <T extends Parameters<typeof mergeClint>[0]>(
+  data: T,
+  filters: ReturnType<typeof parseFilters>
+): T => mergeClint(aplicarEscopo(data, filters), filters);
+
 export const getVisaoGeral = porRequest(async (sp: SP) => {
-  const filters = parseFilters(await sp);
+  const filters = parseFilters(await sp, DINAMICO);
   const data = await readAllSheets(["fb_todos", "leads", "sdr", "vendas", "clint"]);
-  return calcVisaoGeral(mergeClint(data, filters), filters);
+  return calcVisaoGeral(comEscopo(data, filters), filters);
 });
 
 export const getTrafego = porRequest(async (sp: SP) => {
@@ -70,13 +81,13 @@ export const getTrafego = porRequest(async (sp: SP) => {
 });
 
 export const getSdr = porRequest(async (sp: SP) => {
-  const filters = parseFilters(await sp);
+  const filters = parseFilters(await sp, DINAMICO);
   const data = await readAllSheets(["leads", "sdr", "vendas", "clint"]);
-  return calcSdr(mergeClint(data, filters), filters);
+  return calcSdr(comEscopo(data, filters), filters);
 });
 
 export const getCloser = porRequest(async (sp: SP) => {
-  const filters = parseFilters(await sp);
+  const filters = parseFilters(await sp, DINAMICO);
   const data = await readAllSheets([
     "fb_todos",
     "leads",
@@ -85,7 +96,7 @@ export const getCloser = porRequest(async (sp: SP) => {
     "clint",
     "Metas",
   ]);
-  return calcCloser(mergeClint(data, filters), filters);
+  return calcCloser(comEscopo(data, filters), filters);
 });
 
 export const getAnuncios = porRequest(async (sp: SP) => {
@@ -107,13 +118,13 @@ export const getAnuncios = porRequest(async (sp: SP) => {
 });
 
 export const getOrigem = porRequest(async (sp: SP) => {
-  const filters = parseFilters(await sp);
+  const filters = parseFilters(await sp, DINAMICO);
   const data = await readAllSheets(["leads", "sdr", "vendas", "clint"]);
-  return calcOrigem(mergeClint(data, filters), filters);
+  return calcOrigem(comEscopo(data, filters), filters);
 });
 
 export const getMetas = porRequest(async (sp: SP) => {
-  const filters = parseFilters(await sp);
+  const filters = parseFilters(await sp, DINAMICO);
   const data = await readAllSheets([
     "fb_todos",
     "leads",
@@ -122,7 +133,7 @@ export const getMetas = porRequest(async (sp: SP) => {
     "clint",
     "Metas",
   ]);
-  return calcMetas(mergeClint(data, filters), filters);
+  return calcMetas(comEscopo(data, filters), filters);
 });
 
 export const getTpDistribuicao = porRequest(async (sp: SP) => {
@@ -152,8 +163,23 @@ export const getClintTags = cache(async () => {
   return listClintTags(data);
 });
 
+/**
+ * Opções dos filtros de funil e de pipeline da Clint. Como o inventário de
+ * tags: lista completa, sem corte de período nem de filtro, senão a opção
+ * selecionada sumiria da lista.
+ */
+export const getEscopoOpcoes = cache(async () => {
+  const data = await readAllSheets(["leads", "clint"]);
+  return { funis: listFunis(data), pipelines: listPipelines(data) };
+});
+
 /** Filtros parseados (memoizado) — pro toolbar não re-parsear. */
 export const getFilters = porRequest(async (sp: SP) => parseFilters(await sp));
+
+/** Idem, para o toolbar das páginas de funil dinâmico (origem e pipeline). */
+export const getFiltersDinamico = porRequest(async (sp: SP) =>
+  parseFilters(await sp, DINAMICO)
+);
 
 export const getInstagramMetta = cache(async (sp?: SP) => {
   const spv = sp ? await sp : {};
@@ -218,9 +244,12 @@ export const getInstagramTiago = cache(async (sp?: SP) => {
  * não podem entrar nas métricas de SDR/Closer/Metas como lead novo.
  */
 export const getResgate = porRequest(async (sp: SP) => {
-  const filters = parseFilters(await sp);
+  const filters = parseFilters(await sp, DINAMICO);
   const data = await readAllSheets(["clint"]);
-  return calcResgate(data, { from: filters.from, to: filters.to });
+  // Funil e origem valem aqui; a pipeline não: a página É uma pipeline.
+  const noEscopo = aplicarEscopo(data, { origem: filters.origem });
+  const clint = filterLeadsByFunil(noEscopo.clint, filters.funis ?? [FUNIL_TUDO]);
+  return calcResgate({ clint }, { from: filters.from, to: filters.to });
 });
 
 /**

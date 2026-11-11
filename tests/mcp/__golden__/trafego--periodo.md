@@ -62,11 +62,11 @@ Negócios criados 5
 ### MQL por temperatura
 Distribuição de MQL por temperatura (utm_source)
 
-MQL: 6
+MQL: 4
 
-- Advantage: 3 · 50.0%
-- Quente: 0 · 0.0%
-- Frio: 3 · 50.0%
+- Advantage: 0 · 0.0%
+- Quente: 2 · 50.0%
+- Frio: 2 · 50.0%
 
 ### MQL e CMQL por funil
 Recorte fixo dos 5 funis (ignora filtro de funil)

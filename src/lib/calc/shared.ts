@@ -31,41 +31,96 @@ export const FUNIL_LEAD_PATTERNS: Record<Funil, RegExp> = {
   todos: /sala|aplica|sess[ãa]o|diagn|isca|real/i,
 };
 
+// ----- Funil dinâmico ---------------------------------------------------------
+//
+// Dois modos convivem, escolhidos pelo VALOR em `funis`:
+//
+//  - "todos" (TP Aquisição, Anúncios): a união dos 5 funis pagos de sempre.
+//    O que tem outro nome, ou não tem funil, fica fora. Não muda.
+//  - "tudo" (Visão Geral, Metas, SDR, Closer, Origem, Resgate): sem corte.
+//    Entra todo funil que existir no dado, inclusive o negócio sem funil.
+//
+// Chave de funil selecionável: uma das 5 fixas, `SEM_FUNIL`, ou o slug de
+// um nome que apareceu no dado (funil novo entra sozinho na lista).
+
+/** Sem corte de funil: tudo o que existe na base. */
+export const FUNIL_TUDO = "tudo";
+/** Linha sem funil preenchido (ou com erro de planilha no campo). */
+export const SEM_FUNIL = "sem-funil";
+
+export const FUNIS_FIXOS = ["sala", "aplica", "sessao", "isca", "reality"] as const;
+export type FunilFixo = (typeof FUNIS_FIXOS)[number];
+
+const isFunilConhecido = (f: string): f is Funil =>
+  Object.prototype.hasOwnProperty.call(FUNIL_LEAD_PATTERNS, f);
+
+const slugFunil = (raw: string): string =>
+  raw
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+/**
+ * Chave canônica do funil de uma linha. As grafias dos 5 funis de sempre
+ * caem na chave fixa pelas MESMAS regex do filtro (na ordem sala, aplica,
+ * sessão, isca, reality); vazio ou erro de planilha ("#N/A") vira
+ * `SEM_FUNIL`; qualquer outro nome vira o próprio slug.
+ */
+export function funilKey(raw: string | null | undefined): string {
+  const s = String(raw ?? "").trim();
+  if (!s || s.startsWith("#")) return SEM_FUNIL;
+  for (const f of FUNIS_FIXOS) if (FUNIL_LEAD_PATTERNS[f].test(s)) return f;
+  return slugFunil(s) || SEM_FUNIL;
+}
+
+/** A linha pertence ao funil `f`? Chaves fixas usam a regex de sempre. */
+function matchFunil(raw: string, f: string): boolean {
+  if (isFunilConhecido(f)) return FUNIL_LEAD_PATTERNS[f].test(raw);
+  return funilKey(raw) === f;
+}
+
 export function filterFbTodosByFunil(
   rows: FbTodosRow[],
-  funis: Funil[]
+  funis: string[]
 ): FbTodosRow[] {
   // Case-INSENSITIVE: a planilha usa SUMIFS com "*PERP*"/"*CAPT*"/… que
   // ignora caixa. `.includes` case-sensitive perdia campanhas.
   const has = (name: string, m: string) =>
     name.toUpperCase().includes(m);
-  if (!funis.length || funis.includes("todos")) {
+  if (!funis.length || funis.includes("todos") || funis.includes(FUNIL_TUDO)) {
     return rows.filter((r) =>
       FUNIL_CAMPAIGN_MARKERS.todos.every((m) => has(r.campaignName, m))
     );
   }
+  // Funil fora dos 5 não tem marcador de campanha: sem investimento atribuído.
   return rows.filter((r) =>
-    funis.some((f) => FUNIL_CAMPAIGN_MARKERS[f].every((m) => has(r.campaignName, m)))
+    funis.some(
+      (f) =>
+        isFunilConhecido(f) &&
+        FUNIL_CAMPAIGN_MARKERS[f].every((m) => has(r.campaignName, m))
+    )
   );
 }
 
 export function filterLeadsByFunil<T extends { funil: string }>(
   rows: T[],
-  funis: Funil[]
+  funis: string[]
 ): T[] {
+  if (funis.includes(FUNIL_TUDO)) return rows;
   if (!funis.length || funis.includes("todos")) {
     return rows.filter((r) => FUNIL_LEAD_PATTERNS.todos.test(r.funil));
   }
-  return rows.filter((r) => funis.some((f) => FUNIL_LEAD_PATTERNS[f].test(r.funil)));
+  return rows.filter((r) => funis.some((f) => matchFunil(r.funil, f)));
 }
 
-export function filterVendasByFunil(rows: VendaRow[], funis: Funil[]): VendaRow[] {
+export function filterVendasByFunil(rows: VendaRow[], funis: string[]): VendaRow[] {
+  if (funis.includes(FUNIL_TUDO)) return rows;
   if (!funis.length || funis.includes("todos")) {
     return rows.filter((r) => FUNIL_LEAD_PATTERNS.todos.test(r.funilCompra));
   }
-  return rows.filter((r) =>
-    funis.some((f) => FUNIL_LEAD_PATTERNS[f].test(r.funilCompra))
-  );
+  return rows.filter((r) => funis.some((f) => matchFunil(r.funilCompra, f)));
 }
 
 // ----- Qualificação -----------------------------------------------------------

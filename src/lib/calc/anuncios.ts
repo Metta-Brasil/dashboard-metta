@@ -48,11 +48,13 @@ const FUNIL_AT_MARKER: Record<Exclude<Funil, "todos">, string> = {
   reality: "REALITY",
 };
 
-function markersFor(funis: Funil[] | undefined): string[] {
+function markersFor(funis: string[] | undefined): string[] {
   const fs = funis && funis.length ? funis : ["todos"];
   if (fs.includes("todos")) return Object.values(FUNIL_AT_MARKER);
   return fs
-    .filter((f): f is Exclude<Funil, "todos"> => f !== "todos")
+    .filter((f): f is Exclude<Funil, "todos"> =>
+      Object.prototype.hasOwnProperty.call(FUNIL_AT_MARKER, f)
+    )
     .map((f) => FUNIL_AT_MARKER[f]);
 }
 

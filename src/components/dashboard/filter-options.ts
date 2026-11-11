@@ -52,3 +52,10 @@ export const TAGS_MODOS: FilterOption<"remover" | "somente">[] = [
   { value: "remover", label: "Remover" },
   { value: "somente", label: "Somente" },
 ];
+
+/** Origem do lead (param `origem`); ausente = todos. Regra em calc/escopo.ts. */
+export const ORIGEM_OPTIONS: FilterOption<"todos" | "pago" | "organico">[] = [
+  { value: "todos", label: "Todos" },
+  { value: "pago", label: "Pagos" },
+  { value: "organico", label: "Orgânicos" },
+];

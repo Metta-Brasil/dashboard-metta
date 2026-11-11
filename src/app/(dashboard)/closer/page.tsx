@@ -14,7 +14,7 @@ import {
   sumBy,
 } from "@/lib/calc/shared";
 import type { CloserRow } from "@/lib/calc/types";
-import { getCloser, getFilters } from "@/lib/page-data";
+import { getCloser, getFiltersDinamico } from "@/lib/page-data";
 
 import { VendasDoPeriodo } from "./vendas-do-periodo";
 
@@ -33,7 +33,7 @@ export default function CloserPage({ searchParams }: PageProps) {
 async function CloserContent({ searchParams }: PageProps) {
   const [result, filters] = await Promise.all([
     getCloser(searchParams),
-    getFilters(searchParams),
+    getFiltersDinamico(searchParams),
   ]);
   const k = result.kpis;
 
@@ -186,7 +186,7 @@ async function CloserContent({ searchParams }: PageProps) {
     <PageShell
       title="Comercial Closer"
       description="Reuniões realizadas, taxa de fechamento e ticket médio por Closer."
-      toolbar={<Toolbar from={filters.from} to={filters.to} funil />}
+      toolbar={<Toolbar from={filters.from} to={filters.to} escopo={{ filters }} />}
     >
       <KpiGrid kpis={kpis} cols="grid-cols-2 lg:grid-cols-3 xl:grid-cols-6" />
 

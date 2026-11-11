@@ -22,8 +22,17 @@ export type Funil = "sala" | "aplica" | "sessao" | "isca" | "reality" | "todos";
 export type FilterState = {
   from: Date;
   to: Date;
-  /** Lista de funis (ex: ["sessao", "sala"]). Vazio/undefined = todos. */
-  funis?: Funil[];
+  /**
+   * Chaves de funil (ex: ["sessao", "sala"]). "todos" = os 5 funis pagos de
+   * sempre; "tudo" = sem corte (páginas de funil dinâmico); as demais são
+   * uma das 5 fixas, "sem-funil" ou o slug de um funil que existe no dado.
+   * Ver `funilKey` em shared.ts. Vazio/undefined = "todos".
+   */
+  funis?: string[];
+  /** Origem do lead pelo utm_source. Ausente/"todos" = sem corte. */
+  origem?: "todos" | "pago" | "organico";
+  /** `pipelineId`s da Clint. Com eles, a página lê só os negócios dessas pipelines. */
+  clintPipelines?: string[];
   /** Produto (Closer/Metas). Default operacional = "Mentoria". */
   produto?: string;
   /** Forma de pagamento (Closer). */
@@ -165,7 +174,10 @@ export type CustoPorEtapaPoint = {
 };
 
 export type DistribuicaoPorFunil = {
-  funil: Funil;
+  /** Chave do funil (uma das 5 fixas, "sem-funil" ou o slug de um funil novo). */
+  funil: string;
+  /** Nome para a tela. */
+  label: string;
   negociosCriados: number;
   mql: number;
   reunioes: number;

@@ -25,19 +25,10 @@ import type {
   TabelaDiariaRow,
   TabelaDiariaTotal,
 } from "@/lib/calc/types";
-import { getClintTags, getFilters, getVisaoGeral } from "@/lib/page-data";
+import { getClintTags, getFiltersDinamico, getVisaoGeral } from "@/lib/page-data";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
-};
-
-const FUNIL_LABELS: Record<Funil, string> = {
-  sala: "Sala",
-  aplica: "Aplicação",
-  sessao: "Sessão",
-  isca: "Isca",
-  reality: "Reality",
-  todos: "Todos",
 };
 
 function fmtDayShort(d: Date): string {
@@ -129,13 +120,14 @@ export default function VisaoGeralPage({ searchParams }: PageProps) {
 }
 
 async function VisaoGeralToolbar({ searchParams }: PageProps) {
-  const filters = await getFilters(searchParams);
+  const filters = await getFiltersDinamico(searchParams);
   // O inventário de tags depende de ler a aba `clint`; fica em Suspense
   // próprio pra não segurar o resto do toolbar (funil + datas) no ar.
   return (
     <Toolbar
       from={filters.from}
       to={filters.to}
+      escopo={{ filters }}
       leftExtras={
         <Suspense fallback={<TagsFilterFallback />}>
           <TagsFilterSlot />
@@ -315,7 +307,7 @@ async function DistribuicaoSection({ searchParams }: PageProps) {
 
   const data = result.distribuicaoPorFunil
     .map((r) => ({
-      name: FUNIL_LABELS[r.funil] ?? r.funil,
+      name: r.label,
       value: r.negociosCriados,
     }))
     .filter((d) => d.value > 0);
@@ -339,7 +331,7 @@ async function VendasPorFunilSection({ searchParams }: PageProps) {
 
   const data = result.distribuicaoPorFunil
     .map((r) => ({
-      name: FUNIL_LABELS[r.funil] ?? r.funil,
+      name: r.label,
       value: r.vendas,
     }))
     .filter((d) => d.value > 0);

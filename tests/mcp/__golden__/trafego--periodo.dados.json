@@ -202,15 +202,15 @@
   "mqlPorTemperatura": [
     {
       "temperatura": "Advantage",
-      "mql": 3
-    },
-    {
-      "temperatura": "Quente",
       "mql": 0
     },
     {
+      "temperatura": "Quente",
+      "mql": 2
+    },
+    {
       "temperatura": "Frio",
-      "mql": 3
+      "mql": 2
     }
   ],
   "funilTrafego": [

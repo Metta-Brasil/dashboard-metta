@@ -17,7 +17,7 @@ import {
   sumBy,
 } from "@/lib/calc/shared";
 import type { SDRPorDataRow, SDRRow } from "@/lib/calc/types";
-import { getSdr, getFilters } from "@/lib/page-data";
+import { getSdr, getFiltersDinamico } from "@/lib/page-data";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -52,14 +52,14 @@ export default function SdrPage({ searchParams }: PageProps) {
 
 async function SdrToolbar({ searchParams }: PageProps) {
   const [filters, result] = await Promise.all([
-    getFilters(searchParams),
+    getFiltersDinamico(searchParams),
     getSdr(searchParams),
   ]);
   return (
     <Toolbar
       from={filters.from}
       to={filters.to}
-      funil
+      escopo={{ filters }}
       extras={<FilterSelect param="sdr" label="SDR" options={result.sdrNames} />}
     />
   );

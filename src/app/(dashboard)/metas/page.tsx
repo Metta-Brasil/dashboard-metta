@@ -21,7 +21,7 @@ import type {
   MetasHistoricoRow,
   MetricaMetaReal,
 } from "@/lib/calc/types";
-import { getMetas, getFilters } from "@/lib/page-data";
+import { getMetas, getFiltersDinamico } from "@/lib/page-data";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -38,7 +38,7 @@ export default function MetasPage({ searchParams }: PageProps) {
 async function MetasContent({ searchParams }: PageProps) {
   const [result, filters] = await Promise.all([
     getMetas(searchParams),
-    getFilters(searchParams),
+    getFiltersDinamico(searchParams),
   ]);
 
   const byNome = new Map(result.tabelaFunil.map((m) => [m.nome, m]));
@@ -157,7 +157,7 @@ async function MetasContent({ searchParams }: PageProps) {
     <PageShell
       title="Metas vs Realizado"
       description="Acompanhamento de metas mensais por funil e produto."
-      toolbar={<Toolbar from={filters.from} to={filters.to} funil />}
+      toolbar={<Toolbar from={filters.from} to={filters.to} escopo={{ filters }} />}
     >
       <p className="text-xs leading-relaxed text-muted-foreground">
         Metas proporcionais ao período selecionado (month-to-date): a meta

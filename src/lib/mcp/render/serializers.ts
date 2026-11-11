@@ -9,6 +9,7 @@ import {
   CONTA_OPTIONS,
   DIST_MODO_OPTIONS,
   FUNIL_OPTIONS,
+  ORIGEM_OPTIONS,
   IG_CONTA_OPTIONS,
   SDR_DATA_OPTIONS,
   TAGS_MODOS,
@@ -214,13 +215,28 @@ export const filterSelect: Serializer = (
     mode: "plain",
   });
 
-export const funilChips: Serializer = (_props, ctx) =>
+export const funilChips: Serializer = (
+  props: { options?: FilterOption[] },
+  ctx
+) =>
   linhaMultiSelect(ctx, {
     param: "funis",
     label: "Funil",
-    options: FUNIL_OPTIONS,
+    // Páginas de funil dinâmico passam a lista tirada do dado.
+    options: props?.options ?? FUNIL_OPTIONS,
     mode: "todos",
   });
+
+export const origemToggle: Serializer = (_props, ctx) =>
+  linhaUnica(
+    ctx,
+    "origem",
+    "Origem",
+    ORIGEM_OPTIONS,
+    ctx.params.origem === "pago" || ctx.params.origem === "organico"
+      ? ctx.params.origem
+      : "todos"
+  );
 
 export const contaFilter: Serializer = (_props, ctx) =>
   linhaMultiSelect(ctx, {

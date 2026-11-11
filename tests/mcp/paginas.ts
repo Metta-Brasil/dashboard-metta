@@ -56,4 +56,11 @@ export const CENARIOS: { rota: string; variante: string; filtros: Record<string,
   { rota: "/atividades", variante: "consultoria", filtros: { pipeline: "consultoria" } },
   { rota: "/atividades", variante: "pessoa-e-canal", filtros: { from: "2026-11-05", to: "2026-11-09", pessoa: "Sdr Beta", canal: "Canal Alfa" } },
   { rota: "/instagram", variante: "tiago-por-er", filtros: { conta: "tiago", criterio: "er" } },
+  // Recorte das páginas de funil dinâmico
+  { rota: "/", variante: "organicos", filtros: { origem: "organico" } },
+  { rota: "/", variante: "pipeline-perpetuo", filtros: { clintPipeline: "a65cfcce-0883-4ad7-bab1-8a52cbafb8f2" } },
+  { rota: "/sdr", variante: "sem-funil", filtros: { funis: "sem-funil" } },
+  { rota: "/closer", variante: "pagos", filtros: { origem: "pago" } },
+  { rota: "/origem", variante: "funil-novo", filtros: { funis: "imersao-presencial" } },
+  { rota: "/resgate", variante: "funil-e-origem", filtros: { funis: "aplica", origem: "organico" } },
 ];

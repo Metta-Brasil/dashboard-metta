@@ -6,10 +6,11 @@ import {
   FUNIL_OPTIONS,
   IG_CONTA_OPTIONS,
   IG_CRITERIO_OPTIONS,
+  ORIGEM_OPTIONS,
   TAGS_MODOS,
   type FilterOption,
 } from "@/components/dashboard/filter-options";
-import { getAtividades, getClintTags, getSdr } from "@/lib/page-data";
+import { getAtividades, getClintTags, getEscopoOpcoes, getSdr } from "@/lib/page-data";
 
 import { criarRegistro } from "./render/registry";
 import { createWalker, normalizar } from "./render/walker";
@@ -65,6 +66,37 @@ const FUNIS: FiltroDef = {
   opcoes: FUNIL_OPTIONS,
 };
 
+/**
+ * Páginas de funil dinâmico: a lista de funis sai do dado (funil novo
+ * aparece sozinho, e "todos" é tudo o que existe na base, não só os 5
+ * funis pagos), mais origem do lead e pipeline da Clint.
+ */
+const FUNIS_DINAMICO: FiltroDef = {
+  param: "funis",
+  nome: "Funil",
+  tipo: "multipla",
+  padrao: "todos os funis que existem na base, inclusive negócios sem funil",
+  dinamico: true,
+};
+
+const ORIGEM: FiltroDef = {
+  param: "origem",
+  nome: "Origem do lead (pelo utm_source: pago = começa com fbads ou gads; orgânico = o resto, inclusive sem UTM)",
+  tipo: "unica",
+  padrao: "todos (pagos e orgânicos)",
+  opcoes: ORIGEM_OPTIONS,
+};
+
+const PIPELINE_CLINT: FiltroDef = {
+  param: "clintPipeline",
+  nome: "Pipeline da Clint (com ela, os números vêm só dos negócios da pipeline; investimento e MQL ficam zerados)",
+  tipo: "multipla",
+  padrao: "sem recorte por pipeline",
+  dinamico: true,
+};
+
+const ESCOPO: FiltroDef[] = [FUNIS_DINAMICO, ORIGEM, PIPELINE_CLINT];
+
 export const PAGINAS: Pagina[] = [
   {
     rota: "/",
@@ -72,7 +104,7 @@ export const PAGINAS: Pagina[] = [
     descricao: "Resumo consolidado do funil — tráfego pago, SDR, Closer.",
     filtros: [
       ...PERIODO,
-      FUNIS,
+      ...ESCOPO,
       {
         param: "tags",
         nome: "Tags Clint",
@@ -94,7 +126,7 @@ export const PAGINAS: Pagina[] = [
     rota: "/metas",
     titulo: "Metas vs Realizado",
     descricao: "Acompanhamento de metas mensais por funil e produto.",
-    filtros: [...PERIODO, FUNIS],
+    filtros: [...PERIODO, ...ESCOPO],
     carregar: () => import("@/app/(dashboard)/metas/page"),
   },
   {
@@ -141,7 +173,7 @@ export const PAGINAS: Pagina[] = [
     descricao: "Performance individual dos SDRs, agendamentos e taxa de show.",
     filtros: [
       ...PERIODO,
-      FUNIS,
+      ...ESCOPO,
       {
         param: "sdr",
         nome: "SDR",
@@ -188,7 +220,7 @@ export const PAGINAS: Pagina[] = [
     titulo: "Comercial Closer",
     descricao:
       "Reuniões realizadas, taxa de fechamento e ticket médio por Closer.",
-    filtros: [...PERIODO, FUNIS],
+    filtros: [...PERIODO, ...ESCOPO],
     carregar: () => import("@/app/(dashboard)/closer/page"),
   },
   {
@@ -196,7 +228,7 @@ export const PAGINAS: Pagina[] = [
     titulo: "Funil de Resgate",
     descricao:
       "Pipeline Operação Resgate · Reativação de Base: funil, movimentações e perfil da base.",
-    filtros: [...PERIODO],
+    filtros: [...PERIODO, FUNIS_DINAMICO, ORIGEM],
     carregar: () => import("@/app/(dashboard)/resgate/page"),
   },
   {
@@ -204,7 +236,7 @@ export const PAGINAS: Pagina[] = [
     titulo: "Origem",
     descricao:
       "Distribuição do funil por UTM, qualificação, cargo, faturamento e segmento.",
-    filtros: [...PERIODO, FUNIS],
+    filtros: [...PERIODO, ...ESCOPO],
     carregar: () => import("@/app/(dashboard)/origem/page"),
   },
   {
@@ -260,8 +292,16 @@ export async function opcoesDinamicas(
   params: Record<string, string>
 ): Promise<FilterOption[]> {
   const base: Record<string, string> = {};
-  for (const k of ["from", "to", "funis"]) if (params[k]) base[k] = params[k];
+  for (const k of ["from", "to", "funis", "origem", "clintPipeline"]) {
+    if (params[k]) base[k] = params[k];
+  }
 
+  // Funil e pipeline: a lista completa da base, a mesma do controle na tela.
+  if (param === "funis" || param === "clintPipeline") {
+    const { funis, pipelines } = await getEscopoOpcoes();
+    const lista = param === "funis" ? funis : pipelines;
+    return lista.map((o) => ({ value: o.value, label: `${o.label} · ${o.count}` }));
+  }
   if (pagina.rota === "/" && param === "tags") {
     const tags = await getClintTags();
     return tags.map((t) => ({

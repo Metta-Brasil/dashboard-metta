@@ -1,15 +1,15 @@
 {
   "kpis": {
     "investimento": 23192.5,
-    "negociosCriados": 22,
+    "negociosCriados": 26,
     "negociosCriadosDelta": {
-      "value": 0.5714285714285714,
+      "value": 0.8571428571428571,
       "direction": "up"
     },
-    "custoPorNegocio": 1054.2045454545455,
+    "custoPorNegocio": 892.0192307692307,
     "mql": 22,
     "cmql": 1054.2045454545455,
-    "txNegocioParaMql": 1,
+    "txNegocioParaMql": 0.8461538461538461,
     "agendamentos": 12,
     "reunioesAgendadas": 12,
     "reunioes": 7,
@@ -120,7 +120,7 @@
     {
       "dia": "2026-10-18T03:00:00.000Z",
       "investimento": 739.5,
-      "negociosCriados": 0,
+      "negociosCriados": 1,
       "mql": 0,
       "cmql": null,
       "agendamentos": 0,
@@ -133,7 +133,7 @@
     {
       "dia": "2026-10-19T03:00:00.000Z",
       "investimento": 700.5,
-      "negociosCriados": 1,
+      "negociosCriados": 2,
       "mql": 2,
       "cmql": 350.25,
       "agendamentos": 1,
@@ -146,7 +146,7 @@
     {
       "dia": "2026-10-20T03:00:00.000Z",
       "investimento": 801.5,
-      "negociosCriados": 0,
+      "negociosCriados": 1,
       "mql": 0,
       "cmql": null,
       "agendamentos": 0,
@@ -159,7 +159,7 @@
     {
       "dia": "2026-10-21T03:00:00.000Z",
       "investimento": 762.5,
-      "negociosCriados": 1,
+      "negociosCriados": 2,
       "mql": 1,
       "cmql": 762.5,
       "agendamentos": 0,
@@ -438,13 +438,13 @@
     },
     {
       "etapa": "Negócios criados",
-      "valor": 22,
-      "conversaoEtapa": 1
+      "valor": 26,
+      "conversaoEtapa": 1.1818181818181819
     },
     {
       "etapa": "Reuniões agendadas",
       "valor": 12,
-      "conversaoEtapa": 0.5454545454545454
+      "conversaoEtapa": 0.46153846153846156
     },
     {
       "etapa": "Reuniões realizadas",
@@ -502,25 +502,25 @@
     },
     {
       "dia": "2026-10-18T03:00:00.000Z",
-      "custoPorNegocio": null,
+      "custoPorNegocio": 739.5,
       "cmql": null,
       "cac": null
     },
     {
       "dia": "2026-10-19T03:00:00.000Z",
-      "custoPorNegocio": 700.5,
+      "custoPorNegocio": 350.25,
       "cmql": 350.25,
       "cac": 700.5
     },
     {
       "dia": "2026-10-20T03:00:00.000Z",
-      "custoPorNegocio": null,
+      "custoPorNegocio": 801.5,
       "cmql": null,
       "cac": null
     },
     {
       "dia": "2026-10-21T03:00:00.000Z",
-      "custoPorNegocio": 762.5,
+      "custoPorNegocio": 381.25,
       "cmql": 762.5,
       "cac": null
     },
@@ -648,6 +648,7 @@
   "distribuicaoPorFunil": [
     {
       "funil": "sala",
+      "label": "Sala",
       "negociosCriados": 7,
       "mql": 7,
       "reunioes": 2,
@@ -656,6 +657,7 @@
     },
     {
       "funil": "aplica",
+      "label": "Aplicação",
       "negociosCriados": 8,
       "mql": 8,
       "reunioes": 3,
@@ -664,14 +666,16 @@
     },
     {
       "funil": "sessao",
-      "negociosCriados": 7,
-      "mql": 7,
+      "label": "Sessão",
+      "negociosCriados": 6,
+      "mql": 6,
       "reunioes": 2,
       "vendas": 0,
       "faturamento": 0
     },
     {
       "funil": "isca",
+      "label": "Isca",
       "negociosCriados": 0,
       "mql": 0,
       "reunioes": 0,
@@ -680,7 +684,26 @@
     },
     {
       "funil": "reality",
+      "label": "Reality",
       "negociosCriados": 0,
+      "mql": 0,
+      "reunioes": 0,
+      "vendas": 0,
+      "faturamento": 0
+    },
+    {
+      "funil": "imersao-presencial",
+      "label": "Imersão Presencial",
+      "negociosCriados": 1,
+      "mql": 1,
+      "reunioes": 0,
+      "vendas": 0,
+      "faturamento": 0
+    },
+    {
+      "funil": "sem-funil",
+      "label": "Sem funil",
+      "negociosCriados": 4,
       "mql": 0,
       "reunioes": 0,
       "vendas": 0,
@@ -703,6 +726,10 @@
     {
       "name": "Agronegócio",
       "value": 5
+    },
+    {
+      "name": "Não informado",
+      "value": 4
     }
   ],
   "distribuicaoPorSubsegmento": [
@@ -717,6 +744,10 @@
     {
       "name": "Subsegmento 3",
       "value": 7
+    },
+    {
+      "name": "Não informado",
+      "value": 4
     }
   ],
   "tabelaDiaria": [
@@ -851,8 +882,8 @@
       "investimento": 739.5,
       "mql": 0,
       "custoPorMql": null,
-      "negociosCriados": 0,
-      "custoPorNegocio": null,
+      "negociosCriados": 1,
+      "custoPorNegocio": 739.5,
       "mqlParaNegocio": null,
       "agendamentos": 0,
       "mqlParaAgend": null,
@@ -869,9 +900,9 @@
       "investimento": 700.5,
       "mql": 2,
       "custoPorMql": 350.25,
-      "negociosCriados": 1,
-      "custoPorNegocio": 700.5,
-      "mqlParaNegocio": 0.5,
+      "negociosCriados": 2,
+      "custoPorNegocio": 350.25,
+      "mqlParaNegocio": 1,
       "agendamentos": 1,
       "mqlParaAgend": 0.5,
       "reunioesAgendadas": 1,
@@ -887,8 +918,8 @@
       "investimento": 801.5,
       "mql": 0,
       "custoPorMql": null,
-      "negociosCriados": 0,
-      "custoPorNegocio": null,
+      "negociosCriados": 1,
+      "custoPorNegocio": 801.5,
       "mqlParaNegocio": null,
       "agendamentos": 0,
       "mqlParaAgend": null,
@@ -905,9 +936,9 @@
       "investimento": 762.5,
       "mql": 1,
       "custoPorMql": 762.5,
-      "negociosCriados": 1,
-      "custoPorNegocio": 762.5,
-      "mqlParaNegocio": 1,
+      "negociosCriados": 2,
+      "custoPorNegocio": 381.25,
+      "mqlParaNegocio": 2,
       "agendamentos": 0,
       "mqlParaAgend": 0,
       "reunioesAgendadas": 0,
@@ -1284,9 +1315,9 @@
     "investimento": 23192.5,
     "mql": 22,
     "custoPorMql": 1054.2045454545455,
-    "negociosCriados": 22,
-    "custoPorNegocio": 1054.2045454545455,
-    "mqlParaNegocio": 1,
+    "negociosCriados": 26,
+    "custoPorNegocio": 892.0192307692307,
+    "mqlParaNegocio": 1.1818181818181819,
     "agendamentos": 12,
     "mqlParaAgend": 0.5454545454545454,
     "reunioesAgendadas": 12,

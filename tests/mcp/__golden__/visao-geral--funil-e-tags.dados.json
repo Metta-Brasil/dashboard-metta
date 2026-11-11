@@ -648,6 +648,7 @@
   "distribuicaoPorFunil": [
     {
       "funil": "sala",
+      "label": "Sala",
       "negociosCriados": 2,
       "mql": 7,
       "reunioes": 2,
@@ -656,6 +657,7 @@
     },
     {
       "funil": "aplica",
+      "label": "Aplicação",
       "negociosCriados": 4,
       "mql": 8,
       "reunioes": 3,
@@ -664,14 +666,16 @@
     },
     {
       "funil": "sessao",
+      "label": "Sessão",
       "negociosCriados": 1,
-      "mql": 7,
+      "mql": 6,
       "reunioes": 2,
       "vendas": 0,
       "faturamento": 0
     },
     {
       "funil": "isca",
+      "label": "Isca",
       "negociosCriados": 0,
       "mql": 0,
       "reunioes": 0,
@@ -680,8 +684,18 @@
     },
     {
       "funil": "reality",
+      "label": "Reality",
       "negociosCriados": 0,
       "mql": 0,
+      "reunioes": 0,
+      "vendas": 0,
+      "faturamento": 0
+    },
+    {
+      "funil": "imersao-presencial",
+      "label": "Imersão Presencial",
+      "negociosCriados": 0,
+      "mql": 1,
       "reunioes": 0,
       "vendas": 0,
       "faturamento": 0

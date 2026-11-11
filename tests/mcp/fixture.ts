@@ -91,6 +91,10 @@ export const DONOS = ["Dono Epsilon", "Dono Zeta"];
 // ---------------------------------------------------------------------------
 
 const FUNIS = ["Aplicação", "Sessão estratégica", "Sala"];
+/** Funil que não é um dos 5 de sempre: tem que aparecer sozinho nos filtros. */
+export const FUNIL_NOVO = "Imersão Presencial";
+/** Três pagos (começam com fbads) e um orgânico, para o filtro de origem. */
+const UTM_SOURCES = ["fbads_quente", "fbads_frio", "fbads_advantage", "organico"];
 const QUALIF = ["MQL 1", "MQL 2", "Não qualificado", "Interprise"];
 const CARGOS = ["Sócio", "CEO", "Empresário", "Gerente", "Diretor de vendas", "Analista"];
 const FATURAMENTOS = [
@@ -222,8 +226,8 @@ function leads(): LeadRow[] {
       faturamento: FATURAMENTOS[i % FATURAMENTOS.length],
       segmento: SEGMENTOS[i % SEGMENTOS.length],
       qualificacao: QUALIF[i % QUALIF.length],
-      funil: FUNIS[i % FUNIS.length],
-      utmSource: ["quente", "frio", "advantage"][i % 3],
+      funil: i === 7 ? FUNIL_NOVO : FUNIS[i % FUNIS.length],
+      utmSource: UTM_SOURCES[i % UTM_SOURCES.length],
       utmMedium: "pago",
       utmCampaign: CAMPANHAS[i % CAMPANHAS.length],
       utmId: `id-${dois(i)}`,
@@ -257,8 +261,8 @@ function clint(): ClintRow[] {
       qualificacao: QUALIF[i % QUALIF.length],
       segmento: SEGMENTOS[i % SEGMENTOS.length],
       subsegmento: `Subsegmento ${(i % 3) + 1}`,
-      funil: FUNIS[i % FUNIS.length],
-      utmSource: ["quente", "frio", "advantage"][i % 3],
+      funil: i === 7 ? FUNIL_NOVO : FUNIS[i % FUNIS.length],
+      utmSource: UTM_SOURCES[i % UTM_SOURCES.length],
       utmMedium: "pago",
       utmCampaign: CAMPANHAS[i % CAMPANHAS.length],
       utmContent: ANUNCIOS[i % ANUNCIOS.length],
@@ -412,7 +416,7 @@ function vendasLegado(): VendaRow[] {
       segmentoSnap: SEGMENTOS[i % SEGMENTOS.length],
       qualificacaoSnap: QUALIF[i % QUALIF.length],
       funilSnap: FUNIS[i % FUNIS.length],
-      utmSourceSnap: "quente",
+      utmSourceSnap: "fbads_quente",
       utmMediumSnap: "pago",
       utmCampaignSnap: CAMPANHAS[i % CAMPANHAS.length],
       utmIdSnap: "",

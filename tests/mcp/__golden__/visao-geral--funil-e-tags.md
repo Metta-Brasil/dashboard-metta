@@ -2,6 +2,8 @@
 
 Filtros aplicados:
 - Funil (`funis`): Aplicação
+- Origem (`origem`): Todos
+- Pipeline Clint (`clintPipeline`): sem seleção
 - Tags Clint (`tags`, `tagsMode`): somente evento-teste · 9
 - Período (`from`, `to`): 11/10/2026 a 10/11/2026
 

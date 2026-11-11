@@ -10,6 +10,7 @@ import * as contaFilterMod from "@/components/dashboard/conta-filter";
 import * as dateRangeMod from "@/components/dashboard/date-range-popover";
 import * as distModoMod from "@/components/dashboard/dist-modo-toggle";
 import * as filterSelectMod from "@/components/dashboard/filter-select";
+import * as escopoFiltersMod from "@/components/dashboard/escopo-filters";
 import * as funilChipsMod from "@/components/dashboard/funil-chips";
 import * as funnelHMod from "@/components/dashboard/funnel-horizontal";
 import * as funnelVMod from "@/components/dashboard/funnel-vertical";
@@ -22,6 +23,7 @@ import * as metricTableMod from "@/components/dashboard/metric-table";
 import * as metricTableInteractiveMod from "@/components/dashboard/metric-table-interactive";
 import * as multiSelectMod from "@/components/dashboard/multi-select-filter";
 import * as progressCardMod from "@/components/dashboard/progress-card";
+import * as origemToggleMod from "@/components/dashboard/origem-toggle";
 import * as sdrDataToggleMod from "@/components/dashboard/sdr-data-toggle";
 import * as sdrHeatmapMod from "@/components/dashboard/sdr-heatmap";
 import * as tagsClintMod from "@/components/dashboard/tags-clint-filter";
@@ -74,6 +76,7 @@ export const SERIALIZERS = new Map<unknown, Serializer>([
   [multiSelectMod.MultiSelectFilter, S.multiSelectFilter],
   [filterSelectMod.FilterSelect, S.filterSelect],
   [funilChipsMod.FunilChips, S.funilChips],
+  [origemToggleMod.OrigemToggle, S.origemToggle],
   [contaFilterMod.ContaFilter, S.contaFilter],
   [distModoMod.DistModoToggle, S.distModoToggle],
   [igContaMod.IgContaToggle, S.igContaToggle],
@@ -107,6 +110,9 @@ export const DESCER = new Set<unknown>([
   // que é quem tem serializer: o total do MCP é o total da tela.
   metricTableMod.MetricTable,
   toolbarMod.Toolbar,
+  // Só compõe Funil + Origem + Pipeline, cada um com serializer próprio.
+  escopoFiltersMod.EscopoFilters,
+  escopoFiltersMod.EscopoFiltersFallback,
   funnelVMod.FunnelVertical,
   funnelHMod.FunnelHorizontal,
   sdrHeatmapMod.SDRHeatmap,
@@ -123,6 +129,7 @@ export const MODULOS_COMPARTILHADOS: Record<string, Record<string, unknown>> = {
   "dashboard/conta-filter": contaFilterMod,
   "dashboard/date-range-popover": dateRangeMod,
   "dashboard/dist-modo-toggle": distModoMod,
+  "dashboard/escopo-filters": escopoFiltersMod,
   "dashboard/filter-select": filterSelectMod,
   "dashboard/funil-chips": funilChipsMod,
   "dashboard/funnel-horizontal": funnelHMod,
@@ -135,6 +142,7 @@ export const MODULOS_COMPARTILHADOS: Record<string, Record<string, unknown>> = {
   "dashboard/metric-table": metricTableMod,
   "dashboard/metric-table-interactive": metricTableInteractiveMod,
   "dashboard/multi-select-filter": multiSelectMod,
+  "dashboard/origem-toggle": origemToggleMod,
   "dashboard/progress-card": progressCardMod,
   "dashboard/sdr-data-toggle": sdrDataToggleMod,
   "dashboard/sdr-heatmap": sdrHeatmapMod,

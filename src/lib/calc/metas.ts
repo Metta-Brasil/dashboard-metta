@@ -13,7 +13,6 @@ import {
 import { clintRows } from "./clint";
 import type {
   FilterState,
-  Funil,
   MetaComparacao,
   MetasCardTaxa,
   MetasHero,
@@ -55,7 +54,7 @@ export function calcMetas(
   filters: FilterState
 ): MetasResult {
   const metas = data.Metas ?? [];
-  const funis = filters.funis && filters.funis.length ? filters.funis : (["todos"] as Funil[]);
+  const funis = filters.funis && filters.funis.length ? filters.funis : ["todos"];
 
   // Produto: default "Mentoria". "Todos"/vazio = sem filtro.
   const produtoRaw = filters.produto ?? "Mentoria";
@@ -578,7 +577,7 @@ function buildHistoricoMensal(opts: {
   year: number;
   monthIdx: number;
   data: Pick<RawData, "fb_todos" | "leads" | "sdr" | "vendas">;
-  funis: Funil[];
+  funis: string[];
   produtoNorm: string;
   produtoAll: boolean;
   metas: MetaRow[];

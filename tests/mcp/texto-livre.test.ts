@@ -78,7 +78,8 @@ describe("ferramentas de apoio", () => {
     const texto = await statusAtualizacao();
     expect(texto).toContain("10/11/2026, 14:55");
     expect(texto).toContain("| Meta Ads (investimento e anúncios) | 10/11/2026 |");
-    expect(texto).toContain("| Clint — negócios | 10/11/2026 |");
+    expect(texto).toMatch(/\| Clint — negócios criados \| \d{2}\/\d{2}\/2026 \|/);
+    expect(texto).toContain("| Clint — mudança de etapa | 10/11/2026 |");
     expect(texto).toContain("| Vendas | 15/05/2026 |");
   });
 
@@ -90,7 +91,10 @@ describe("ferramentas de apoio", () => {
     await expect(verPagina("/sdr", { from: "10/11/2026" })).rejects.toThrow(/AAAA-MM-DD/);
     await expect(verPagina("/sdr", { from: "2026-02-30" })).rejects.toThrow(/AAAA-MM-DD/);
     await expect(verPagina("/sdr", { from: "2026-11-10", to: "2026-11-01" })).rejects.toThrow(/depois/);
-    await expect(verPagina("/resgate", { funis: "sala" })).rejects.toThrow(/não tem o filtro/);
+    await expect(verPagina("/resgate", { clintPipeline: "x" })).rejects.toThrow(/não tem o filtro/);
+    await expect(verPagina("/trafego", { origem: "pago" })).rejects.toThrow(/não tem o filtro/);
+    await expect(verPagina("/", { origem: "frio" })).rejects.toThrow(/opcoes_de_filtro/);
+    await expect(verPagina("/", { clintPipeline: "nao-existe" })).rejects.toThrow(/opcoes_de_filtro/);
     await expect(verPagina("/tp-distribuicao", { modo: "video,seguidores" })).rejects.toThrow();
     await expect(opcoesDeFiltro("/x")).rejects.toThrow(/Rota desconhecida/);
   });

@@ -1,6 +1,6 @@
 {
   "kpis": {
-    "negociosCriados": 22,
+    "negociosCriados": 26,
     "sal": 8,
     "sql": 6,
     "agendamentos": 12,
@@ -20,13 +20,13 @@
   "funilSdr": [
     {
       "etapa": "Negócios criados",
-      "valor": 22,
+      "valor": 26,
       "conversaoEtapa": 1
     },
     {
       "etapa": "Agendamentos",
       "valor": 12,
-      "conversaoEtapa": 0.5454545454545454
+      "conversaoEtapa": 0.46153846153846156
     },
     {
       "etapa": "Reuniões marcadas",
@@ -51,6 +51,23 @@
   ],
   "porSdr": [
     {
+      "sdr": "Sdr Beta",
+      "negociosCriados": 14,
+      "taxaAgendamento": 0.35714285714285715,
+      "agendou": 5,
+      "realizou": 0,
+      "show": 0,
+      "noShow": 1,
+      "propostas": 0,
+      "txProposta": 0,
+      "valorProp": 0,
+      "vendas": 0,
+      "close": 0,
+      "leadsAtribuidos": 5,
+      "tentativas": 5,
+      "taxaContato": 1
+    },
+    {
       "sdr": "Sdr Alfa",
       "negociosCriados": 12,
       "taxaAgendamento": 0.5833333333333334,
@@ -63,23 +80,6 @@
       "valorProp": 240000,
       "vendas": 3,
       "close": 0.6,
-      "leadsAtribuidos": 5,
-      "tentativas": 5,
-      "taxaContato": 1
-    },
-    {
-      "sdr": "Sdr Beta",
-      "negociosCriados": 10,
-      "taxaAgendamento": 0.5,
-      "agendou": 5,
-      "realizou": 0,
-      "show": 0,
-      "noShow": 1,
-      "propostas": 0,
-      "txProposta": 0,
-      "valorProp": 0,
-      "vendas": 0,
-      "close": 0,
       "leadsAtribuidos": 5,
       "tentativas": 5,
       "taxaContato": 1
@@ -3783,6 +3783,20 @@
     },
     {
       "dia": "2026-10-21T15:00:00.000Z",
+      "negociosCriados": 2,
+      "taxaAgendamento": 0,
+      "agendou": 0,
+      "realizou": 0,
+      "show": 0,
+      "noShow": 0,
+      "propostas": 0,
+      "txProposta": 0,
+      "valorProp": 0,
+      "vendas": 0,
+      "close": 0
+    },
+    {
+      "dia": "2026-10-20T15:00:00.000Z",
       "negociosCriados": 1,
       "taxaAgendamento": 0,
       "agendou": 0,
@@ -3797,8 +3811,8 @@
     },
     {
       "dia": "2026-10-19T03:00:00.000Z",
-      "negociosCriados": 1,
-      "taxaAgendamento": 1,
+      "negociosCriados": 2,
+      "taxaAgendamento": 0.5,
       "agendou": 1,
       "realizou": 1,
       "show": 1,
@@ -3808,6 +3822,20 @@
       "valorProp": 48000,
       "vendas": 1,
       "close": 1
+    },
+    {
+      "dia": "2026-10-18T15:00:00.000Z",
+      "negociosCriados": 1,
+      "taxaAgendamento": 0,
+      "agendou": 0,
+      "realizou": 0,
+      "show": 0,
+      "noShow": 0,
+      "propostas": 0,
+      "txProposta": 0,
+      "valorProp": 0,
+      "vendas": 0,
+      "close": 0
     },
     {
       "dia": "2026-10-17T15:00:00.000Z",
