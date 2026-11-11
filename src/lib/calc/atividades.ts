@@ -230,11 +230,18 @@ function resumoVazio(): AtvResumo {
  * Resumo de um conjunto de linhas. `canais` corta só as linhas de mensagem:
  * ligação e agendamento não têm canal e não podem sumir quando o filtro de
  * canal está ligado.
+ *
+ * `agendadosNoPeriodo` = todo lead que teve reunião agendada no período, por
+ * QUALQUER pessoa e em qualquer pipeline. Os cruzamentos ("conexão que virou
+ * agenda", "respondeu e agendou") olham para o lead: se a Larissa conectou e
+ * a Kárita agendou, a conexão da Larissa virou agenda. Já "reuniões
+ * agendadas" continua sendo só o que a própria pessoa agendou.
  */
 function resumir(
   contatos: AtvContatoRow[],
   acoes: AtvAcaoRow[],
-  canais: Set<string> | null
+  canais: Set<string> | null,
+  agendadosNoPeriodo: Set<string>
 ): AtvResumo {
   const r = resumoVazio();
   let dur30 = 0;
@@ -275,9 +282,13 @@ function resumir(
   r.abordadosClint = abordadosClint.size;
   r.responderam = responderam.size;
   r.contatosAgendados = agendaram.size;
-  for (const c of responderam) if (agendaram.has(c)) r.responderamAgendaram += 1;
+  for (const c of responderam) {
+    if (agendadosNoPeriodo.has(c)) r.responderamAgendaram += 1;
+  }
   r.responderamNaoAgendaram = r.responderam - r.responderamAgendaram;
-  for (const c of unicos30) if (agendaram.has(c)) r.conexoesAgendaram += 1;
+  for (const c of unicos30) {
+    if (agendadosNoPeriodo.has(c)) r.conexoesAgendaram += 1;
+  }
   r.conexoesNaoAgendaram = r.unicos30 - r.conexoesAgendaram;
   return r;
 }
@@ -346,7 +357,12 @@ export function calcAtividades(
   const contatos = contatosPeriodo.filter((c) => daPessoa(c.pessoa));
   const acoes = acoesPeriodo.filter((a) => daPessoa(a.pessoa));
 
-  const resumo = resumir(contatos, acoes, canaisSel);
+  const agendadosNoPeriodo = new Set<string>();
+  for (const c of data.atv_contatos) {
+    if (c.reunioes > 0 && noPeriodo(c.dia)) agendadosNoPeriodo.add(c.contato);
+  }
+
+  const resumo = resumir(contatos, acoes, canaisSel, agendadosNoPeriodo);
 
   // Por pessoa: cada uma com os SEUS distintos (a soma das linhas pode passar
   // do total — o mesmo lead pode ter sido abordado por duas pessoas).
@@ -366,7 +382,7 @@ export function calcAtividades(
   }
   const porPessoa: AtvPessoaRow[] = Array.from(porPessoaMap, ([pessoa, g]) => ({
     pessoa,
-    ...resumir(g.c, g.a, canaisSel),
+    ...resumir(g.c, g.a, canaisSel, agendadosNoPeriodo),
   }))
     .filter(
       (r) =>

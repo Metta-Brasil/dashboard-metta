@@ -135,7 +135,8 @@ async function main(): Promise<void> {
   check("Kárita · ligações 30s+", k.lig30, 24);
   check("Kárita · leads únicos 30s+", k.unicos30, 17);
   check("Kárita · ligações 2min+", k.lig120, 6);
-  check("Kárita · duração média 30s+ (s)", Math.floor(k.duracaoMedia30), 158);
+  // 3.782s em 24 ligações = 157,58s → 2:38 (a página arredonda, como a tabela do comercial)
+  check("Kárita · duração média 30s+ (s)", Math.round(k.duracaoMedia30), 158);
   check("Kárita · mensagens pelo Clint", k.msgClint, 79);
   check("Kárita · abordados pelo Clint", k.abordadosClint, 25);
   check("Kárita · reuniões agendadas", k.reunioes, 3);
@@ -148,18 +149,46 @@ async function main(): Promise<void> {
   check("Larissa · ligações 30s+", l.lig30, 5);
   check("Larissa · leads únicos 30s+", l.unicos30, 4);
   check("Larissa · ligações 2min+", l.lig120, 1);
-  check("Larissa · duração média 30s+ (s)", Math.floor(l.duracaoMedia30), 101);
+  check("Larissa · duração média 30s+ (s)", Math.round(l.duracaoMedia30), 101);
   check("Larissa · reuniões agendadas", l.reunioes, 1);
+  // A conexão foi da Larissa e quem agendou foi a Kárita: conta para a conexão.
   check("Larissa · conexões que viraram agenda", l.conexoesAgendaram, 1);
+
+  // Segundo período de referência (22 a 27/10), só ligações.
+  const k2 = calcAtividades(data, {
+    from: new Date("2026-10-22T00:00:00-03:00"),
+    to: new Date("2026-10-27T00:00:00-03:00"),
+    visao: "todas",
+    pessoas: ["Kárita de Oliveira"],
+  }).resumo;
+  check("Kárita 22–27/10 · ligações feitas", k2.ligFeitas, 128);
+  check("Kárita 22–27/10 · atendidas", k2.ligAtendidas, 65);
+  check("Kárita 22–27/10 · atendidas até 10s", k2.ligAte10, 32);
+  check("Kárita 22–27/10 · ligações 30s+", k2.lig30, 32);
+  check("Kárita 22–27/10 · leads únicos 30s+", k2.unicos30, 25);
+  check("Kárita 22–27/10 · ligações 2min+", k2.lig120, 13);
+  check("Kárita 22–27/10 · duração média 30s+ (s)", Math.round(k2.duracaoMedia30), 239);
 
   check("Perpétuo · ligações feitas", calc("perpetuo").resumo.ligFeitas, 72);
   check("Resgate · ligações feitas", calc("resgate").resumo.ligFeitas, 21);
 
-  const c = calc("consultoria");
+  // Consultoria: sem tabela de referência do comercial. Informativo, em
+  // outubro inteiro, para ver que etapas e atividades chegam à página.
+  const c = calcAtividades(data, {
+    from: new Date("2026-10-01T00:00:00-03:00"),
+    to: new Date("2026-10-31T00:00:00-03:00"),
+    visao: "consultoria",
+  });
   console.log(
-    `consultoria (informativo): follow up 1 ${c.consultoria?.followUp1} | follow up 2 ${c.consultoria?.followUp2} | ` +
+    `consultoria em out/2026 (informativo): follow up 1 ${c.consultoria?.followUp1} | follow up 2 ${c.consultoria?.followUp2} | ` +
       `ABM enviado ${c.consultoria?.abmEnviado} | ABM recebido ${c.consultoria?.abmRecebido} | ` +
-      `etapas hoje ${c.consultoria?.etapasHoje.length} | atividades ${JSON.stringify(c.consultoria?.atividadesPorClasse)}`
+      `etapas com entrada ${c.consultoria?.entradasPorEtapa.length} | etapas hoje ${c.consultoria?.etapasHoje.length} | ` +
+      `atividades ${JSON.stringify(c.consultoria?.atividadesPorClasse)} | pessoas ${c.pessoas.join(", ")}`
+  );
+  check(
+    "consultoria · há mudança de etapa e atividade em outubro",
+    Number((c.consultoria?.entradasPorEtapa.length ?? 0) > 0 && (c.consultoria?.atividades.length ?? 0) > 0),
+    1
   );
 
   console.log(falhas === 0 ? "\nRESULTADO: todos os números batem" : `\nRESULTADO: ${falhas} diferença(s)`);

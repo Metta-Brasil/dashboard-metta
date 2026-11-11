@@ -201,7 +201,7 @@ function kpisMensagens(s: AtvResumo): Kpi[] {
     {
       label: "Responderam e não agendaram",
       value: formatInt(s.responderamNaoAgendaram),
-      hint: "Responderam, sem reunião no período",
+      hint: "Responderam, sem reunião agendada no período",
     },
     {
       label: "Mensagens recebidas",
@@ -231,7 +231,7 @@ function kpisAgendamentos(s: AtvResumo): Kpi[] {
     {
       label: "Conexões que não viraram agenda",
       value: formatInt(s.conexoesNaoAgendaram),
-      hint: "Ligação de 30s+, sem reunião no período",
+      hint: "Ligação de 30s+, sem reunião agendada no período",
     },
   ];
 }
@@ -457,7 +457,7 @@ function TabelaPorPessoa({ r }: { r: AtividadesResult }) {
   return (
     <MetricTable
       title="Por pessoa"
-      description="Mensagem enviada pelo celular entra para a dona do canal. Os únicos são de cada pessoa: o total conta cada lead uma vez."
+      description="Mensagem enviada pelo celular entra para a dona do canal. Os únicos são de cada pessoa: o total conta cada lead uma vez. Conexão virou agenda quando o lead teve reunião agendada no período, por qualquer pessoa."
       columns={columns}
       rows={r.porPessoa}
       footer={{ pessoa: "Total", ...r.resumo }}
