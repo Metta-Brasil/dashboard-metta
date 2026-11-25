@@ -68,8 +68,9 @@ async function main(): Promise<void> {
     return data.values as unknown[][] | undefined;
   }
 
-  const [contatos, acoes, etapas, atividades, clint] = await Promise.all([
+  const [contatos, dim, acoes, etapas, atividades, clint] = await Promise.all([
     values(ATIVIDADES_SPREADSHEET_ID, "diario_contatos!A:Q"),
+    values(ATIVIDADES_SPREADSHEET_ID, "contatos!A:D"),
     values(ATIVIDADES_SPREADSHEET_ID, "diario_acoes!A:AD"),
     values(ATIVIDADES_SPREADSHEET_ID, "etapas!A:J"),
     values(ATIVIDADES_SPREADSHEET_ID, "atividades!A:K"),
@@ -79,6 +80,12 @@ async function main(): Promise<void> {
     atv_contatos: parseSheetData(S.AtvContatoRowSchema, contatos, S.ATV_CONTATOS_COLUMN_MAP, {
       tab: "atv_contatos",
     }),
+    atv_contatos_dim: parseSheetData(
+      S.AtvContatoDimRowSchema,
+      dim,
+      S.ATV_CONTATOS_DIM_COLUMN_MAP,
+      { tab: "atv_contatos_dim" }
+    ),
     atv_acoes: parseSheetData(S.AtvAcaoRowSchema, acoes, S.ATV_ACOES_COLUMN_MAP, {
       tab: "atv_acoes",
     }),
@@ -171,6 +178,40 @@ async function main(): Promise<void> {
 
   check("Perpétuo · ligações feitas", calc("perpetuo").resumo.ligFeitas, 72);
   check("Resgate · ligações feitas", calc("resgate").resumo.ligFeitas, 21);
+
+  // Contato com negócio em mais de uma pipeline (quase metade dos contatos
+  // trabalhados). Caso conferido na linha do tempo do Clint: em 03/11 a
+  // Larissa reagendou, pelo card do Perpétuo, a reunião de um lead que também
+  // tem negócio na Campanha Resgate, e criou o agendamento duas vezes.
+  const dia3 = { from: new Date("2026-11-03T00:00:00-03:00"), to: new Date("2026-11-03T00:00:00-03:00") };
+  check(
+    "Perpétuo 03/11 · reuniões agendadas (reagendamento, contado uma vez)",
+    calcAtividades(data, { ...dia3, visao: "perpetuo" }).resumo.reunioes,
+    1
+  );
+  check(
+    "Resgate 03/11 · reuniões agendadas",
+    calcAtividades(data, { ...dia3, visao: "resgate" }).resumo.reunioes,
+    0
+  );
+  // A lista mostra o negócio da pipeline da ação. Sobra fora da visão só o
+  // lead cujo negócio daquela pipeline não está mais na aba `clint`.
+  const desde = { from: new Date("2026-10-01T00:00:00-03:00"), to };
+  const daVisao = {
+    perpetuo: (p: string) => p.includes("Perpétuo"),
+    resgate: (p: string) => p.includes("Campanha Resgate"),
+    consultoria: (p: string) => p.startsWith("B2B - Consultoria"),
+  };
+  for (const visao of ["perpetuo", "resgate", "consultoria"] as const) {
+    const r = calcAtividades(data, { ...desde, visao });
+    const comNegocio = r.leads.filter((l) => l.nome !== "");
+    const fora = comNegocio.filter((l) => !daVisao[visao](l.pipeline)).length;
+    console.log(
+      `${visao} desde 01/10 (informativo): ${r.leads.length} leads | sem negócio ${r.leads.length - comNegocio.length} | ` +
+        `com pipeline de outra visão na lista ${fora} | mensagens ${r.resumo.msgEnviadas} | ` +
+        `abordados ${r.resumo.abordados} | reuniões ${r.resumo.reunioes}`
+    );
+  }
 
   // Consultoria: sem tabela de referência do comercial. Informativo, em
   // outubro inteiro, para ver que etapas e atividades chegam à página.
