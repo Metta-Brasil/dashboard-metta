@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chart · Adaptação Metta</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+
+<style>
+  :root{
+    --metta-yellow:#FFBE18;
+    --metta-blue-night:#0C161B;
+    --metta-blue-gray:#435965;
+    --metta-blue-gray-claro:#688594;
+
+    --bg:#FFFFFF;
+    --text:#0C161B;
+    --muted:#688594;
+    --border:rgba(67,89,101,0.15);
+    --r:12px;
+
+    --font-sans:'SF Pro','SF Pro Display','SF Pro Text',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;padding:32px;
+    font-family:var(--font-sans);
+    background:linear-gradient(180deg,#FFFFFF 0%,#E0E6E9 100%);
+    color:var(--text);
+    min-height:100vh;
+    font-feature-settings:'cv11','ss01';
+    -webkit-font-smoothing:antialiased;
+  }
+  .container{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+  h1{font-size:24px;letter-spacing:-0.02em;margin:0 0 4px;font-weight:600}
+  .lead{font-size:13px;color:var(--muted);margin:0 0 20px;max-width:680px;line-height:1.5}
+  .card{
+    background:#FFFFFF;
+    border:1px solid var(--border);
+    border-radius:var(--r);
+    padding:20px;
+    box-shadow:0 1px 2px rgba(12,22,27,0.04);
+  }
+  .card-title{font-size:14px;font-weight:600;margin:0 0 4px;letter-spacing:-0.005em}
+  .card-sub{font-size:11.5px;color:var(--muted);margin:0 0 16px}
+
+  .chart-box{position:relative;height:340px;width:100%}
+
+  .chart-legend{
+    display:flex;align-items:center;justify-content:center;gap:18px;
+    padding-top:12px;font-size:11.5px;color:var(--muted);
+    flex-wrap:wrap;
+  }
+  .chart-legend-item{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;transition:opacity .15s}
+  .chart-legend-item.off{opacity:0.35}
+  .chart-legend-indicator{width:12px;height:12px;border-radius:2px;flex-shrink:0}
+  .chart-legend-indicator.line{height:2px;width:14px;border-radius:0}
+  .chart-legend-indicator.dashed{height:0;width:14px;border-top:2px dashed currentColor;background:none}
+
+  #ct-tooltip{
+    position:absolute;pointer-events:none;
+    background:#FFFFFF;
+    border:1px solid rgba(67,89,101,0.2);
+    border-radius:8px;
+    padding:8px 12px;
+    box-shadow:0 8px 24px rgba(12,22,27,0.12);
+    font-size:12px;
+    min-width:200px;
+    display:grid;gap:6px;
+    opacity:0;transition:opacity .12s;
+    z-index:10;
+    font-family:var(--font-sans);
+  }
+  #ct-tooltip.on{opacity:1}
+  .tt-label{font-weight:600;color:var(--text)}
+  .tt-row{display:flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums}
+  .tt-ind{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+  .tt-name{color:var(--muted);flex:1}
+  .tt-val{color:var(--text);font-weight:600;font-family:'SF Mono',Menlo,Consolas,monospace}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Adaptação shadcn/ui chart — paleta Metta</h1>
+    <p class="lead">Mesmo visual, mesma paleta, mesma estrutura de tokens — renderizado com Chart.js (lib UMD que funciona em HTML standalone). Quando migrar pro Next.js, o código <code>chart.tsx</code>+Recharts que você passou funciona direto.</p>
+  </header>
+
+  <div class="card">
+    <h2 class="card-title">Evolução: MQL · Reuniões realizadas · Vendas</h2>
+    <p class="card-sub">31 dias · totais: 482 MQL · 38 reuniões · 7 vendas · linha = % Conv acumulada</p>
+    <div class="chart-box">
+      <canvas id="ctChart"></canvas>
+      <div id="ct-tooltip"></div>
+    </div>
+    <div class="chart-legend" id="ct-legend"></div>
+  </div>
+</div>
+
+<script>
+  // ====== Tokens Metta (equivalente ao ChartConfig do shadcn) ======
+  const config = {
+    mql:  { label: 'MQL/dia',             color: '#688594', type: 'bar' },
+    reun: { label: 'Reuniões realizadas', color: '#2E3E47', type: 'line', dashed: true },
+    conv: { label: '% Conv acumulada',    color: '#FFC531', type: 'line', axis: 'right' },
+  };
+
+  // ====== Dados (totais reais: 482 MQL, 38 reuniões, 7 vendas em 31 dias) ======
+  const mqlDaily = [5,6,8,10,12,14,16,18,20,18,17,19,16,18,20,19,17,18,16,17,18,19,16,14,15,17,18,19,17,15,12];
+  const reunDaily = [0,0,0,1,1,1,1,1,2,1,1,2,2,1,2,1,1,2,2,1,1,2,1,1,1,2,2,1,1,1,1];
+  const vendDaily = [0,0,0,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,1];
+  const labels = mqlDaily.map((_, i) => String(i + 1));
+
+  const convDaily = mqlDaily.map((_, i) => {
+    const vAcum = vendDaily.slice(0, i + 1).reduce((a, b) => a + b, 0);
+    const rAcum = reunDaily.slice(0, i + 1).reduce((a, b) => a + b, 0);
+    return rAcum > 0 ? Number(((vAcum / rAcum) * 100).toFixed(1)) : 0;
+  });
+
+  // ====== Tooltip externo (formato shadcn) ======
+  const externalTooltip = (ctx) => {
+    const { tooltip, chart } = ctx;
+    const el = document.getElementById('ct-tooltip');
+
+    if (tooltip.opacity === 0) {
+      el.classList.remove('on');
+      return;
+    }
+
+    const dataIndex = tooltip.dataPoints[0]?.dataIndex;
+    if (dataIndex === undefined) return;
+
+    const vendasDoDia = vendDaily[dataIndex];
+    const rows = tooltip.dataPoints.map(dp => {
+      const key = dp.dataset.metaKey;
+      const cfg = config[key];
+      const isPct = key === 'conv';
+      const value = dp.parsed.y;
+      return `
+        <div class="tt-row">
+          <span class="tt-ind" style="background:${cfg.color}"></span>
+          <span class="tt-name">${cfg.label}</span>
+          <span class="tt-val">${isPct ? value.toFixed(1) + '%' : value.toLocaleString('pt-BR')}</span>
+        </div>`;
+    }).join('');
+
+    const vendasRow = vendasDoDia > 0
+      ? `<div class="tt-row"><span class="tt-ind" style="background:#FFBE18"></span><span class="tt-name">Vendas</span><span class="tt-val">${vendasDoDia}</span></div>`
+      : '';
+
+    el.innerHTML = `<div class="tt-label">Dia ${labels[dataIndex]}</div>${rows}${vendasRow}`;
+    el.classList.add('on');
+
+    // Posicionamento
+    const canvasRect = chart.canvas.getBoundingClientRect();
+    const parentRect = chart.canvas.parentElement.getBoundingClientRect();
+    let x = tooltip.caretX + (canvasRect.left - parentRect.left) + 14;
+    let y = tooltip.caretY + (canvasRect.top - parentRect.top) - 10;
+
+    // Evita sair da direita
+    const elW = el.offsetWidth;
+    if (x + elW > parentRect.width) x = tooltip.caretX + (canvasRect.left - parentRect.left) - elW - 14;
+
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+  };
+
+  // ====== Marcadores de vendas (plugin custom) ======
+  const vendasMarker = {
+    id: 'vendasMarker',
+    afterDatasetsDraw(chart) {
+      const c = chart.ctx;
+      const x = chart.scales.x;
+      const y = chart.scales.yLeft;
+      vendDaily.forEach((v, i) => {
+        if (v > 0) {
+          const px = x.getPixelForValue(i);
+          const py = y.getPixelForValue(reunDaily[i] || 1);
+          c.beginPath();
+          c.arc(px, py, 5, 0, Math.PI * 2);
+          c.fillStyle = '#FFBE18';
+          c.strokeStyle = '#FFFFFF';
+          c.lineWidth = 2;
+          c.fill();
+          c.stroke();
+        }
+      });
+    }
+  };
+
+  // ====== Chart ======
+  const ctx = document.getElementById('ctChart').getContext('2d');
+
+  const chart = new Chart(ctx, {
+    data: {
+      labels,
+      datasets: [
+        {
+          metaKey: 'mql',
+          type: 'bar',
+          label: config.mql.label,
+          data: mqlDaily,
+          backgroundColor: config.mql.color,
+          borderRadius: 3,
+          maxBarThickness: 16,
+          yAxisID: 'yLeft',
+          order: 3,
+        },
+        {
+          metaKey: 'reun',
+          type: 'line',
+          label: config.reun.label,
+          data: reunDaily,
+          borderColor: config.reun.color,
+          backgroundColor: config.reun.color,
+          borderWidth: 2,
+          borderDash: [3, 2],
+          tension: 0.35,
+          pointRadius: 2,
+          pointBackgroundColor: config.reun.color,
+          yAxisID: 'yLeft',
+          order: 2,
+        },
+        {
+          metaKey: 'conv',
+          type: 'line',
+          label: config.conv.label,
+          data: convDaily,
+          borderColor: config.conv.color,
+          backgroundColor: config.conv.color,
+          borderWidth: 2.5,
+          tension: 0.35,
+          pointRadius: 0,
+          yAxisID: 'yRight',
+          order: 1,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          enabled: false,
+          external: externalTooltip,
+        },
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: {
+            color: '#688594',
+            font: { family: "-apple-system, 'SF Pro', sans-serif", size: 11 },
+            maxTicksLimit: 8,
+          },
+          border: { color: 'rgba(67,89,101,0.25)' },
+        },
+        yLeft: {
+          position: 'left',
+          min: 0,
+          max: 25,
+          grid: { color: 'rgba(67,89,101,0.12)', drawTicks: false },
+          ticks: {
+            color: '#688594',
+            font: { family: "-apple-system, 'SF Pro', sans-serif", size: 11 },
+            padding: 8,
+          },
+          border: { display: false },
+        },
+        yRight: {
+          position: 'right',
+          min: 0,
+          max: 30,
+          grid: { display: false },
+          ticks: {
+            color: '#688594',
+            font: { family: "-apple-system, 'SF Pro', sans-serif", size: 11 },
+            padding: 8,
+            callback: (v) => v + '%',
+          },
+          border: { display: false },
+        },
+      },
+    },
+    plugins: [vendasMarker],
+  });
+
+  // ====== Legenda customizada ======
+  const legendEl = document.getElementById('ct-legend');
+  const legendItems = [
+    { key: 'mql',  cls: '' },
+    { key: 'reun', cls: 'dashed' },
+    { key: 'vend-pseudo', cls: '', label: 'Vendas', color: '#FFBE18' },
+    { key: 'conv', cls: 'line' },
+  ];
+
+  legendItems.forEach((it, idx) => {
+    const cfg = it.key === 'vend-pseudo' ? { label: it.label, color: it.color } : config[it.key];
+    const dsIdx = idx === 0 ? 0 : idx === 1 ? 1 : idx === 3 ? 2 : -1;
+    const item = document.createElement('div');
+    item.className = 'chart-legend-item';
+    item.innerHTML =
+      '<span class="chart-legend-indicator ' + it.cls + '" style="' +
+      (it.cls === 'dashed' ? 'color:' + cfg.color : 'background:' + cfg.color) + '"></span>' +
+      cfg.label;
+
+    if (dsIdx >= 0) {
+      item.addEventListener('click', () => {
+        const visible = chart.isDatasetVisible(dsIdx);
+        chart.setDatasetVisibility(dsIdx, !visible);
+        item.classList.toggle('off', visible);
+        chart.update();
+      });
+    }
+    legendEl.appendChild(item);
+  });
+</script>
+
+</body>
+</html>

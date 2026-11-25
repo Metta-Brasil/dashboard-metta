@@ -1,0 +1,1536 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Dashboard Metta — Wireframes</title>
+<style>
+  /* ============================================================
+     IDENTIDADE VISUAL METTA
+     Paleta: amarelo (#FFBE18) + azul-noite (#0C161B) + branco gelo + azul-acinzentado
+     Fonte: SF Pro (única família)
+     Cantos: 12px cards, 33px pills/badges
+     Fundo principal: branco
+     ============================================================ */
+  :root{
+    /* Cores Metta — primárias */
+    --metta-yellow: #FFBE18;
+    --metta-yellow-soft: #FFE4A1;
+    --metta-blue-night: #0C161B;
+    --metta-blue-night-deep: #0A1013;
+    --metta-blue-gray: #435965;
+    --metta-blue-gray-light: #688594;
+    --metta-blue-gray-subtle: #A8B3B9;
+    --metta-ice: #FAFCFD;
+    --metta-ice-blue: #EBF3F7;
+
+    /* Aliases do design system existente — apontam pros tokens Metta */
+    --bg:        #FFFFFF;          /* fundo principal branco (decisão Metta) */
+    --bg-soft:   #FAFCFD;          /* zebra/seções alternadas */
+    --panel:     #FFFFFF;
+    --line:      #EFF3F5;
+    --line-strong: rgba(12, 22, 27, 0.12);
+    --text:      #0C161B;
+    --muted:     #688594;
+    --muted-2:   #435965;
+    --accent:        #FFBE18;
+    --accent-soft:   #dbeafe;
+    --accent-strong: #0C161B;      /* botões primários "dark" */
+    --warn:    #D97706;
+    --success: #16A34A;
+    --danger:  #DC2626;
+
+    /* Sidebar — tema escuro */
+    --sidebar:        #0C161B;
+    --sidebar-2:      #1E2A30;
+    --sidebar-text:   #A8B3B9;
+    --sidebar-text-active: #FFFFFF;
+    --sidebar-accent: #FFBE18;
+
+    /* Cantos */
+    --r-sm: 6px;
+    --r:    12px;     /* Metta: 12px nos cards */
+    --r-pill: 33px;   /* Metta: 33-48px em badges/pills */
+
+    --shadow: 0 1px 2px rgba(12, 22, 27, 0.04);
+    --shadow-md: 0 4px 12px rgba(12, 22, 27, 0.08);
+
+    /* Tipografia */
+    --font-sans: 'SF Pro', 'SF Pro Display', 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:14px/1.5 var(--font-sans);background:var(--bg);color:var(--text);font-feature-settings:'cv11','ss01';-webkit-font-smoothing:antialiased}
+  .app{display:grid;grid-template-columns:260px 1fr;min-height:100vh;transition:grid-template-columns 200ms ease}
+  .app.collapsed{grid-template-columns:56px 1fr}
+  aside{
+    background:linear-gradient(45deg, #0C161B 0%, #1E2D36 50%, #435965 100%);
+    background-color:#0C161B;
+    color:#FAFCFD;
+    display:flex;flex-direction:column;
+    position:sticky;top:0;height:100vh;
+    border-right:1px solid rgba(10,16,19,0.12);
+    overflow:hidden;
+  }
+
+  /* Icon-only mode */
+  .app.collapsed .sb-head{padding:14px 8px}
+  .app.collapsed .sb-brand{justify-content:center;padding:6px}
+  .app.collapsed .sb-brand .brand-text{display:none}
+  .app.collapsed .sb-brand .chev{display:none}
+  .app.collapsed .sb-content{padding:10px 8px;align-items:stretch}
+  .app.collapsed .sb-group-label{display:none}
+  .app.collapsed .sb-item{justify-content:center;padding:9px 0;font-size:0;gap:0}
+  .app.collapsed .sb-item svg{width:18px;height:18px}
+  .app.collapsed .sb-footer{padding:8px 6px}
+  .app.collapsed .sb-user{justify-content:center;padding:4px}
+  .app.collapsed .sb-user .user-info{display:none}
+  .app.collapsed .sb-user .chev{display:none}
+
+  /* Topbar dentro do main */
+  .topbar{
+    display:flex;align-items:center;gap:12px;
+    padding:12px 32px;
+    border-bottom:1px solid var(--line);
+    background:var(--bg);
+    position:sticky;top:0;z-index:30;
+  }
+  .topbar .sb-toggle{
+    width:30px;height:30px;border-radius:6px;
+    background:transparent;border:none;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--muted);cursor:pointer;
+    transition:background 120ms, color 120ms;
+  }
+  .topbar .sb-toggle:hover{background:#eef0f3;color:var(--text)}
+  .topbar .sep{width:1px;height:18px;background:var(--line)}
+  .topbar .page-name{font-size:13.5px;font-weight:600;color:var(--text);letter-spacing:-.005em}
+
+  /* Header / brand */
+  .sb-head{padding:14px 12px;border-bottom:1px solid rgba(10,16,19,0.12)}
+  .sb-brand{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:6px;cursor:pointer}
+  .sb-brand:hover{background:rgba(10,16,19,0.06)}
+  .sb-brand .logo{
+    width:32px;height:32px;border-radius:7px;
+    background:transparent;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .sb-brand .logo svg{width:24px;height:auto;display:block}
+  .sb-brand .brand-text{display:flex;flex-direction:column;min-width:0;flex:1}
+  .sb-brand .brand-text b{color:#FAFCFD;font-weight:600;font-size:13px;letter-spacing:-.005em}
+  .sb-brand .brand-text small{color:rgba(250,252,253,0.7);font-size:11px;font-weight:400}
+  .sb-brand .chev{color:rgba(250,252,253,0.7);flex-shrink:0;margin-left:auto}
+
+  /* Content */
+  .sb-content{flex:1;display:flex;flex-direction:column;overflow:auto;padding:10px 8px}
+  .sb-group{margin-bottom:4px}
+  .sb-group.secondary{margin-top:auto}
+  .sb-group-label{
+    font-size:11px;color:rgba(250,252,253,0.65);font-weight:600;
+    padding:8px 12px 6px;
+    letter-spacing:.02em;
+  }
+  .sb-item{
+    display:flex;align-items:center;gap:10px;
+    padding:7px 12px;
+    color:#FAFCFD;text-decoration:none;
+    font-size:13.5px;font-weight:500;
+    border-radius:6px;
+    cursor:pointer;
+    transition:background 120ms, color 120ms;
+  }
+  .sb-item:hover{background:rgba(10,16,19,0.08);color:#FAFCFD}
+  .sb-item.active{background:rgba(10,16,19,0.12);color:#FAFCFD}
+  .sb-item svg{flex-shrink:0;color:#FAFCFD}
+  .sb-item.active svg,.sb-item:hover svg{color:#FAFCFD}
+
+  /* Footer / user */
+  .sb-footer{padding:8px;border-top:1px solid rgba(10,16,19,0.12)}
+  .sb-user{
+    display:flex;align-items:center;gap:10px;
+    padding:8px;border-radius:7px;cursor:pointer;
+    transition:background 120ms;
+  }
+  .sb-user:hover{background:rgba(10,16,19,0.08)}
+  .sb-user .avatar{
+    width:32px;height:32px;border-radius:7px;
+    background:#0A1013;color:#FAFCFD;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:600;font-size:12.5px;flex-shrink:0;
+  }
+  .sb-user .user-info{display:flex;flex-direction:column;min-width:0;flex:1}
+  .sb-user .user-info b{color:#FAFCFD;font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sb-user .user-info small{color:rgba(250,252,253,0.7);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sb-user .chev{color:rgba(250,252,253,0.7);flex-shrink:0}
+  main{padding:0;overflow:auto;height:100vh;background:linear-gradient(180deg, #FFFFFF 0%, #E0E6E9 100%)}
+  .page{display:none;padding:20px 32px 80px}
+  .page.active{display:block}
+  .page-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+  .page-head h2{margin:0;font-size:22px;font-weight:600}
+  .page-head .desc{color:var(--muted);font-size:13px;max-width:680px;margin-top:4px}
+  .filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--panel);padding:14px 16px;border-radius:var(--r);border:1px solid var(--line);box-shadow:var(--shadow);margin-bottom:18px}
+  .filter{display:flex;flex-direction:column;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+  .filter > div{margin-top:5px;padding:7px 11px;border:1px solid var(--line);border-radius:6px;background:#fafbfc;font-size:13px;color:var(--text);font-weight:400;text-transform:none;letter-spacing:0;min-width:100px;display:flex;align-items:center;gap:6px}
+  .chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+  .chip{padding:5px 10px;border:1px solid var(--line);border-radius:99px;background:#fafbfc;font-size:12px}
+  .chip.on{background:#EBF3F7;border-color:#75919F;color:#2E3E47;font-weight:500}
+  .grid{display:grid;gap:14px}
+  .g-kpi{grid-template-columns:repeat(5,1fr)}
+  .g-kpi-4{grid-template-columns:repeat(4,1fr)}
+  .g-2{grid-template-columns:1fr 1fr}
+  .g-3{grid-template-columns:1fr 1fr 1fr}
+  .g-2-1{grid-template-columns:2fr 1fr}
+  .g-1-2{grid-template-columns:1fr 2fr}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column}
+  .card > .ph{flex:1}
+  .kpi .label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+  .kpi .val{font-size:24px;font-weight:600;margin-top:6px}
+  .kpi .sub{font-size:12px;color:var(--muted);margin-top:4px}
+  .kpi .sub.up{color:#059669}
+  .kpi .sub.down{color:#dc2626}
+  .card .title{font-size:13px;font-weight:600;margin:0 0 12px;display:flex;align-items:center;justify-content:space-between}
+  .card .title small{display:none}
+  .ph{background:repeating-linear-gradient(45deg,#f8fafc,#f8fafc 10px,#f1f5f9 10px,#f1f5f9 20px);border:1px dashed #cbd5e1;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#64748b;font-size:12px;text-align:center;padding:14px;min-height:200px}
+  .ph .tag{display:inline-block;padding:3px 9px;background:#fff;border:1px solid #cbd5e1;border-radius:99px;font-weight:600;color:#334155;margin-bottom:6px}
+  .ph .desc{font-size:11.5px;max-width:80%;line-height:1.5;color:#64748b}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{padding:8px 10px;text-align:left;border-bottom:1px solid #eef0f3}
+  th{background:#f9fafb;font-weight:600;color:#374151;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+  tbody tr:hover{background:#f9fafb}
+  th.num{text-align:left}
+  td.num{text-align:center;font-variant-numeric:tabular-nums}
+  .card.tall{min-height:500px}
+
+  /* charts (SVG inline) */
+  .chart{width:100%;height:220px;display:block;flex:1;min-height:200px}
+  .chart text{font-family:var(--font-sans);font-size:10px;fill:var(--muted)}
+  .chart .grid-line{stroke:rgba(67,89,101,0.12);stroke-width:1}
+  .chart .axis-line{stroke:rgba(67,89,101,0.25);stroke-width:1}
+  .chart .axis-label{font-size:10px;fill:var(--muted)}
+  .chart .ser-1{stroke:#688594;fill:none;stroke-width:2}
+  .chart .ser-2{stroke:#2E3E47;fill:none;stroke-width:2}
+  .chart .ser-3{stroke:#FFC531;fill:none;stroke-width:2}
+  .chart .ser-bar{fill:#B3C2CA}
+  .chart .ser-bar-alt{fill:#688594}
+  .chart .ser-area{fill:#688594;fill-opacity:0.12}
+  .chart .meta-line{stroke:#FFC531;stroke-width:1.5;stroke-dasharray:4 4}
+  .chart .proj-line{stroke:#688594;stroke-width:2;stroke-dasharray:5 4;fill:none}
+  .chart .ser-dot{fill:#688594;stroke:#fff;stroke-width:1.5}
+  .chart-wrap{display:flex;flex-direction:column;flex:1}
+  .chart-title{font-size:11px;color:var(--muted);font-weight:500;margin:0 0 4px;text-transform:uppercase;letter-spacing:.04em}
+
+  /* funil */
+  .funnel{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0}
+  .funnel .step{padding:10px 18px;background:#75919F;color:#FFFFFF;font-weight:500;border-radius:6px;text-align:center;font-size:13px;display:flex;flex-direction:column;align-items:center}
+  .funnel .step small{color:rgba(255,255,255,0.85);font-size:11px;margin-top:2px}
+  .funnel .arrow{color:#A8B3B9;font-size:11px}
+
+  /* bars mini */
+  .bars{display:flex;align-items:end;gap:6px;height:140px;padding:8px 4px;border-bottom:1px solid #e5e7eb}
+  .bars .b{flex:1;background:linear-gradient(180deg,#435965,#688594);border-radius:3px 3px 0 0;position:relative}
+  .bars .b.alt{background:linear-gradient(180deg,#FFBE18,#FFC531)}
+  .line-over{position:absolute;inset:0;pointer-events:none}
+
+  /* bars dual (pares de barras agrupadas por categoria) */
+  .bars-dual{display:flex;align-items:stretch;gap:18px;height:200px;padding:12px 4px 0;flex:1}
+  .bars-dual .group{flex:1;display:flex;flex-direction:column;align-items:stretch;gap:8px}
+  .bars-dual .pair{display:flex;align-items:end;gap:6px;flex:1;justify-content:center;border-bottom:1px solid var(--line)}
+  .bars-dual .b{width:22px;border-radius:3px 3px 0 0;min-height:4px;background:#0f172a}
+  .bars-dual .b.alt{background:linear-gradient(180deg,#3b82f6,#60a5fa)}
+  .bars-dual .lbl{font-size:12px;color:var(--muted);text-align:center;font-weight:500}
+
+  /* progress */
+  .progress{display:flex;flex-direction:column;gap:14px}
+  .progress .row{display:flex;flex-direction:column;gap:5px}
+  .progress .row .top{display:flex;justify-content:space-between;font-size:12.5px}
+  .progress .bar{height:10px;background:#eef0f3;border-radius:99px;overflow:hidden}
+  .progress .bar > div{height:100%;background:#688594;border-radius:99px}
+  .progress .bar > div.danger{background:#dc2626}
+  .progress .bar > div.warn{background:#FFC531}
+
+  /* mini cards inside */
+  .mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}
+  .mini{padding:10px;border:1px solid var(--line);border-radius:6px;background:#fafbfc}
+  .mini .l{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+  .mini .v{font-size:17px;font-weight:600;margin-top:3px}
+
+  /* creative gallery */
+  .gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .crt{border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#fff}
+  .crt .img{aspect-ratio:1;background:repeating-linear-gradient(45deg,#f1f5f9,#f1f5f9 6px,#e2e8f0 6px,#e2e8f0 12px);display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:11px}
+  .crt .info{padding:8px}
+  .crt .info .info-top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:4px}
+  .crt .info b{display:block;font-size:12px;line-height:1.3;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .crt .info small{color:var(--muted);font-size:11px}
+  .crt .ig-btn{flex-shrink:0;width:22px;height:22px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);text-decoration:none;cursor:pointer;transition:opacity 150ms}
+  .crt .ig-btn:hover{opacity:.85}
+  .crt .ig-btn svg{width:12px;height:12px}
+
+  /* heatmap */
+  .heat{display:grid;grid-template-columns:60px repeat(7,1fr);grid-auto-rows:1fr;gap:2px;flex:1}
+  .heat .h{font-size:11px;color:var(--muted);text-align:center;padding:3px;align-self:center}
+  .heat .c{min-height:22px;border-radius:3px;border:1px solid rgba(67,89,101,0.15)}
+  .h0{background:#FFFFFF}.h1{background:#D9E0E4}.h2{background:#B3C2CA}.h3{background:#8EA3AF}.h4{background:#688594}
+
+  /* legend */
+  .legend{display:flex;gap:14px;font-size:11.5px;color:var(--muted);margin-top:8px;justify-content:center}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:middle;border:1px solid rgba(67,89,101,0.15)}
+  .dot-b{background:#3b82f6}.dot-o{background:#f59e0b}.dot-g{background:#10b981}.dot-r{background:#dc2626}
+
+  .note{background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;padding:10px 12px;font-size:12.5px;color:#78350f;margin-bottom:14px;display:flex;gap:8px;align-items:start}
+  .note b{color:#92400e}
+
+  .ribbon{display:inline-block;background:#1e293b;color:#fff;font-size:10px;padding:2px 8px;border-radius:99px;letter-spacing:.05em;font-weight:600;margin-left:8px;text-transform:uppercase;vertical-align:middle}
+
+  /* Select padronizado (estilo shadcn/ui) */
+  .select{
+    display:inline-flex;align-items:center;justify-content:space-between;gap:8px;
+    height:34px;padding:0 10px 0 12px;
+    background:#fff;border:1px solid var(--line);border-radius:7px;
+    font:13px/1 inherit;color:var(--text);cursor:pointer;
+    transition:border-color 120ms, background 120ms;
+    min-width:120px;
+  }
+  .select:hover{border-color:#94a3b8}
+  .select:focus,.select.open{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+  .select .sv{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
+  .select .sv-label{color:var(--muted);font-weight:400;white-space:nowrap}
+  .select .sv-value{color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .select .chev{flex-shrink:0;color:var(--muted)}
+  .select.ghost{background:transparent;border-color:transparent}
+  .select.ghost:hover{background:#f1f5f9}
+
+  /* Toolbar dentro de card de tabela */
+  .tbl-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+  .tbl-toolbar-right{display:flex;align-items:center;gap:8px}
+  .segmented{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:#fafbfc}
+  .segmented .seg{padding:6px 12px;border:none;background:transparent;font-size:12.5px;cursor:pointer;color:var(--muted);font-family:inherit;font-weight:500}
+  .segmented .seg.active{background:#fff;color:var(--text);box-shadow:0 1px 2px rgba(15,23,42,.06)}
+  .segmented .seg:hover:not(.active){color:var(--text)}
+  .pill{padding:6px 11px;border:1px solid var(--line);border-radius:7px;background:#fff;font-size:12.5px;cursor:pointer;color:var(--text);font-family:inherit;font-weight:500}
+  .pill:hover{border-color:#94a3b8}
+  .search{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--muted)}
+  .search input{border:none;outline:none;font:13px inherit;background:transparent;width:140px;color:var(--text)}
+  .search input::placeholder{color:var(--muted)}
+
+  /* Date Range Picker trigger (mesma régua do .select) */
+  .date-trigger{
+    display:inline-flex;align-items:center;gap:8px;
+    height:34px;padding:0 10px 0 12px;
+    border:1px solid var(--line);border-radius:7px;
+    background:#fff;font:13px/1 inherit;color:var(--text);cursor:pointer;
+    transition:border-color 120ms, background 120ms;
+  }
+  .date-trigger:hover{border-color:#94a3b8}
+  .date-trigger.open,.date-trigger:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+  .date-trigger .ico{color:var(--muted);flex-shrink:0}
+  .date-trigger .pill{font-size:11px;background:#f1f5f9;color:#475569;padding:2px 8px;border-radius:99px;font-weight:600}
+  .date-trigger .chev{color:var(--muted);flex-shrink:0}
+
+  /* Date Picker popover (ancorado) */
+  .dp{position:absolute;display:none;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px 20px;box-shadow:0 12px 28px rgba(15,23,42,.16), 0 2px 6px rgba(15,23,42,.06);width:560px;max-width:calc(100vw - 40px);z-index:50}
+  .dp.open{display:block}
+  .dp .dp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .dp .dp-head h3{margin:0;font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px;color:#334155}
+  .dp .dp-head .close{width:24px;height:24px;border-radius:5px;border:1px solid var(--line);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:15px;line-height:1}
+  .dp .dp-head .close:hover{background:#fafbfc;color:var(--text)}
+  .dp .presets{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #f1f5f9}
+  .dp .preset{padding:6px 12px;border:1px solid #e2e8f0;border-radius:7px;background:#fff;font-size:12px;cursor:pointer;font-weight:500;color:#334155;font-family:inherit}
+  .dp .preset:hover{border-color:#94a3b8}
+  .dp .preset.active{background:#2563eb;color:#fff;border-color:#2563eb}
+  .dp .cals{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:14px;position:relative}
+  .dp .cal h4{margin:0 0 10px;font-size:12.5px;font-weight:600;text-align:center;color:#334155;position:relative}
+  .dp .cal h4 .arr{position:absolute;top:-2px;font-size:16px;cursor:pointer;color:#94a3b8;font-weight:400;padding:0 4px}
+  .dp .cal:first-child h4 .arr{left:0}
+  .dp .cal:last-child h4 .arr{right:0}
+  .dp .week{display:grid;grid-template-columns:repeat(7,1fr);gap:1px}
+  .dp .dow{font-size:10.5px;color:#94a3b8;text-align:center;padding:4px 0;font-weight:500}
+  .dp .day{text-align:center;padding:5px 0;font-size:12px;color:#1f2328;cursor:pointer;border-radius:99px;position:relative}
+  .dp .day:hover{background:#f1f5f9}
+  .dp .day.muted{color:#cbd5e1}
+  .dp .day.in-range{background:#f1f5f9;border-radius:0}
+  .dp .day.range-start,.dp .day.range-end{background:#0f172a;color:#fff;border-radius:99px;font-weight:600;z-index:1}
+  .dp .dp-foot{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid #f1f5f9}
+  .dp .dp-foot .range-text{font-size:12.5px;color:#475569}
+  .dp .dp-foot .range-text b{color:#0f172a;font-weight:600}
+  .dp .dp-foot .right{display:flex;align-items:center;gap:10px}
+  .dp .dp-foot .count{font-size:12px;color:#64748b}
+  .dp .apply{background:#2563eb;color:#fff;border:none;padding:6px 16px;border-radius:6px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+  .dp .apply:hover{background:#1d4ed8}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+<aside>
+  <!-- Header -->
+  <div class="sb-head">
+    <div class="sb-brand">
+      <div class="logo" aria-label="Metta">
+        <svg viewBox="0 0 133 123" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+          <path d="M88.1027 0.367798C96.743 4.41161 104.504 10.1193 110.939 17.1617C117.373 24.204 122.358 32.4451 125.609 41.4137C128.859 50.3824 130.31 59.9044 129.881 69.4342C129.452 78.964 127.148 88.3166 123.105 96.9567L108.792 90.2574C104.028 100.435 96.3547 108.974 86.7404 114.792C77.1226 120.611 65.9941 123.449 54.7639 122.945C43.5339 122.441 32.705 118.618 23.6477 111.96C14.5901 105.301 7.70904 96.1051 3.87715 85.5367C0.0453871 74.9684 -0.566021 63.4997 2.11934 52.5836C4.80483 41.6677 10.6677 31.7931 18.965 24.2086C21.7264 21.6846 24.718 19.454 27.8879 17.5358C34.2433 13.69 41.322 11.1052 48.7365 9.97327C59.8493 8.277 71.2162 9.91495 81.3986 14.6783L74.8215 28.7379C79.7558 31.0475 84.1851 34.3106 87.8537 38.3385C91.5239 42.3684 94.3608 47.0856 96.2004 52.2164C98.0398 57.3474 98.8462 62.7931 98.5725 68.2369C98.3036 73.5808 96.9957 78.8197 94.7297 83.6647L108.762 90.2291C111.92 83.4768 113.718 76.1682 114.054 68.7213C114.39 61.2698 113.255 53.824 110.714 46.8112C108.173 39.7982 104.274 33.3539 99.2424 27.8473C94.2108 22.3409 88.1436 17.8792 81.3879 14.7174L88.1027 0.367798ZM74.7941 28.775C67.4027 25.3192 59.1523 24.1317 51.0861 25.3629C45.7021 26.1848 40.5613 28.0605 35.9465 30.8531C33.645 32.2459 31.4728 33.8663 29.468 35.6989C23.4433 41.2059 19.1865 48.3764 17.2365 56.3024C15.2867 64.2287 15.7316 72.5563 18.5139 80.2301C21.2962 87.9038 26.2917 94.5809 32.8684 99.4156C39.4451 104.25 47.3087 107.027 55.4631 107.393C63.617 107.759 71.6966 105.699 78.6799 101.473L78.6809 101.472C85.5791 97.2979 91.1001 91.194 94.5676 83.9196L81.01 77.4576C78.8042 82.0873 75.2914 85.9721 70.9016 88.6285C66.5978 91.2328 61.6392 92.5451 56.6174 92.4127L56.132 92.3942L56.1311 92.3951C50.9439 92.1621 45.9416 90.3954 41.758 87.3199C37.5745 84.2444 34.3962 79.9972 32.6262 75.1158C30.8562 70.2343 30.5744 64.9364 31.8146 59.8942C33.0551 54.852 35.7633 50.2901 39.5959 46.7867C43.4286 43.2835 48.2148 40.9961 53.3479 40.2125C58.4787 39.4294 63.7262 40.1844 68.4279 42.3824L74.7941 28.775ZM61.9602 56.2233C59.9937 55.3034 57.7986 54.9865 55.6525 55.3141C53.5066 55.6417 51.5059 56.5986 49.9035 58.0631C48.3012 59.5278 47.1683 61.4355 46.6496 63.5436C46.1311 65.6517 46.2495 67.8669 46.9895 69.9078C47.7295 71.9487 49.0577 73.7255 50.8068 75.0114C52.556 76.2971 54.6479 77.035 56.8166 77.1324C58.9853 77.2298 61.135 76.682 62.9924 75.5582C64.8496 74.4343 66.3321 72.7842 67.2521 70.818L81.0197 77.2584C82.4571 74.1868 83.2867 70.8644 83.4572 67.4762C83.6307 64.0264 83.119 60.5753 81.9533 57.3239C80.7876 54.0725 78.99 51.0836 76.6643 48.5299C74.3394 45.9773 71.5325 43.9086 68.4055 42.4449L61.9602 56.2233Z" fill="#FAFCFD"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <b>Metta</b>
+        <small>Dashboard interno</small>
+      </div>
+      <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="sb-content">
+
+    <div class="sb-group">
+      <div class="sb-group-label">Páginas</div>
+      <a class="sb-item nav active" data-p="p1">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+        Visão Geral
+      </a>
+      <a class="sb-item nav" data-p="p6">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        Metas vs Realizado
+      </a>
+      <a class="sb-item nav" data-p="p2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        Tráfego Pago
+      </a>
+      <a class="sb-item nav" data-p="p7">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+        Anúncios
+      </a>
+      <a class="sb-item nav" data-p="p3">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        Comercial SDR
+      </a>
+      <a class="sb-item nav" data-p="p4">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Comercial Closer
+      </a>
+      <a class="sb-item nav" data-p="p8">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+        Origem
+      </a>
+    </div>
+
+    <div class="sb-group secondary">
+      <a class="sb-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+        Ajuda
+      </a>
+      <a class="sb-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Feedback
+      </a>
+    </div>
+
+  </div>
+
+  <!-- Footer / User -->
+  <div class="sb-footer">
+    <div class="sb-user">
+      <div class="avatar">AO</div>
+      <div class="user-info">
+        <b>Alisson Oliveira</b>
+        <small>alisson.oliveira@mettabrasil.com.br</small>
+      </div>
+      <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
+    </div>
+  </div>
+</aside>
+
+<main>
+
+<div class="topbar">
+  <button class="sb-toggle" id="sbToggle" title="Mostrar/ocultar sidebar (⌘B)" aria-label="Alternar sidebar">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
+  </button>
+  <span class="sep"></span>
+  <span class="page-name" id="pageName">Visão Geral</span>
+</div>
+
+<!-- ============== P1 VISÃO GERAL ============== -->
+<section id="p1" class="page active">
+  <div class="filters">
+    <div class="filter">Período
+      <div class="date-trigger" data-dp style="margin-top:5px"><svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>01/05/2026 — 31/05/2026 <span class="pill">31 dias</span><svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
+    </div>
+    <div class="filter" style="flex:1;min-width:280px">Funis
+      <div class="chips" style="margin-top:5px">
+        <span class="chip on" style="background:#1e293b;border-color:#1e293b;color:#fff">Todos</span>
+        <span class="chip on">Sala</span>
+        <span class="chip on">Aplicação</span>
+        <span class="chip on">Sessão</span>
+        <span class="chip">Isca</span>
+        <span class="chip">Reality</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g-kpi" style="margin-bottom:14px">
+    <div class="card kpi"><div class="label">Investido</div><div class="val">R$ 45.230</div><div class="sub">CPL R$ 19,67</div></div>
+    <div class="card kpi"><div class="label">Leads</div><div class="val">2.300</div><div class="sub up">+12% vs mês ant.</div></div>
+    <div class="card kpi"><div class="label">MQL</div><div class="val">482</div><div class="sub">CMQL R$ 93,84 · Tx 20,9%</div></div>
+    <div class="card kpi"><div class="label">Reuniões realizadas</div><div class="val">38</div><div class="sub">Show 65%</div></div>
+    <div class="card kpi"><div class="label">Vendas</div><div class="val">7</div><div class="sub">Conv. R→V 18,4%</div></div>
+  </div>
+  <div class="grid g-kpi" style="margin-bottom:18px">
+    <div class="card kpi"><div class="label">Receita</div><div class="val">R$ 290.000</div><div class="sub">soma valor de contrato</div></div>
+    <div class="card kpi"><div class="label">Ticket médio</div><div class="val">R$ 41.428</div></div>
+    <div class="card kpi"><div class="label">ROAS</div><div class="val">6,4x</div><div class="sub up">acima da meta (5x)</div></div>
+    <div class="card kpi"><div class="label">CAC</div><div class="val">R$ 6.461</div></div>
+    <div class="card kpi"><div class="label">Pipeline (proposta)</div><div class="val">R$ 780k</div><div class="sub">9 propostas em aberto</div></div>
+  </div>
+
+  <div class="grid g-2-1" style="margin-bottom:14px">
+    <div class="card">
+      <div class="title">Evolução: MQL · Reuniões Realizadas · Vendas <small>barras + linha (conversão)</small></div>
+      <div class="chart-wrap">
+        <svg viewBox="0 0 600 200" preserveAspectRatio="none" class="chart" aria-label="Combo MQL Reuniões Vendas e linha de conversão">
+          <line class="grid-line" x1="40" y1="40" x2="580" y2="40"/>
+          <line class="grid-line" x1="40" y1="80" x2="580" y2="80"/>
+          <line class="grid-line" x1="40" y1="120" x2="580" y2="120"/>
+          <line class="axis-line" x1="40" y1="160" x2="580" y2="160"/>
+          <text class="axis-label" x="34" y="44" text-anchor="end">100</text>
+          <text class="axis-label" x="34" y="84" text-anchor="end">75</text>
+          <text class="axis-label" x="34" y="124" text-anchor="end">50</text>
+          <text class="axis-label" x="34" y="164" text-anchor="end">0</text>
+          <text class="axis-label" x="34" y="44" text-anchor="end">25</text>
+          <text class="axis-label" x="34" y="84" text-anchor="end">15</text>
+          <text class="axis-label" x="34" y="124" text-anchor="end">5</text>
+          <text class="axis-label" x="34" y="164" text-anchor="end">0</text>
+          <text class="axis-label" x="586" y="44">30%</text>
+          <text class="axis-label" x="586" y="84">20%</text>
+          <text class="axis-label" x="586" y="124">10%</text>
+          <text class="axis-label" x="586" y="164">0%</text>
+          <!-- 31 dias, totais corretos: 482 MQL / 38 reuniões / 7 vendas -->
+          <!-- Escala Y esquerda 0-25 → h = val * 5.6 -->
+          <!-- Largura por dia: 540/31 ≈ 17.4 px; barra única MQL (10px) centralizada -->
+          <!-- MQL diário (range 5-20) -->
+          <g fill="#688594">
+            <rect x="44" y="132" width="10" height="28"/><rect x="61.4" y="126.4" width="10" height="33.6"/><rect x="78.8" y="115.2" width="10" height="44.8"/><rect x="96.2" y="104" width="10" height="56"/><rect x="113.6" y="92.8" width="10" height="67.2"/><rect x="131" y="81.6" width="10" height="78.4"/><rect x="148.4" y="70.4" width="10" height="89.6"/><rect x="165.8" y="59.2" width="10" height="100.8"/><rect x="183.2" y="48" width="10" height="112"/><rect x="200.6" y="59.2" width="10" height="100.8"/><rect x="218" y="64.8" width="10" height="95.2"/><rect x="235.4" y="53.6" width="10" height="106.4"/><rect x="252.8" y="70.4" width="10" height="89.6"/><rect x="270.2" y="59.2" width="10" height="100.8"/><rect x="287.6" y="48" width="10" height="112"/><rect x="305" y="53.6" width="10" height="106.4"/><rect x="322.4" y="64.8" width="10" height="95.2"/><rect x="339.8" y="59.2" width="10" height="100.8"/><rect x="357.2" y="70.4" width="10" height="89.6"/><rect x="374.6" y="64.8" width="10" height="95.2"/><rect x="392" y="59.2" width="10" height="100.8"/><rect x="409.4" y="53.6" width="10" height="106.4"/><rect x="426.8" y="70.4" width="10" height="89.6"/><rect x="444.2" y="81.6" width="10" height="78.4"/><rect x="461.6" y="76" width="10" height="84"/><rect x="479" y="64.8" width="10" height="95.2"/><rect x="496.4" y="59.2" width="10" height="100.8"/><rect x="513.8" y="53.6" width="10" height="106.4"/><rect x="531.2" y="64.8" width="10" height="95.2"/><rect x="548.6" y="76" width="10" height="84"/><rect x="566" y="92.8" width="10" height="67.2"/>
+          </g>
+          <!-- Reuniões realizadas (linha) — escala 0-25, range 0-2/dia -->
+          <polyline class="ser-2" stroke-dasharray="3 2" points="49,160 66.4,160 83.8,160 101.2,154.4 118.6,154.4 136,154.4 153.4,154.4 170.8,154.4 188.2,148.8 205.6,154.4 223,154.4 240.4,148.8 257.8,148.8 275.2,154.4 292.6,148.8 310,154.4 327.4,154.4 344.8,148.8 362.2,148.8 379.6,154.4 397,154.4 414.4,148.8 431.8,154.4 449.2,154.4 466.6,154.4 484,148.8 501.4,148.8 518.8,154.4 536.2,154.4 553.6,154.4 571,154.4"/>
+          <!-- Vendas (dots amarelos nos dias com venda: 8, 11, 15, 19, 25, 28, 31) -->
+          <circle fill="#FFC531" stroke="#fff" stroke-width="1.5" cx="170.8" cy="154.4" r="4"/>
+          <circle fill="#FFC531" stroke="#fff" stroke-width="1.5" cx="223" cy="154.4" r="4"/>
+          <circle fill="#FFC531" stroke="#fff" stroke-width="1.5" cx="292.6" cy="154.4" r="4"/>
+          <circle fill="#FFC531" stroke="#fff" stroke-width="1.5" cx="362.2" cy="154.4" r="4"/>
+          <circle fill="#FFC531" stroke="#fff" stroke-width="1.5" cx="466.6" cy="154.4" r="4"/>
+          <circle fill="#FFC531" stroke="#fff" stroke-width="1.5" cx="518.8" cy="154.4" r="4"/>
+          <circle fill="#FFC531" stroke="#fff" stroke-width="1.5" cx="571" cy="154.4" r="4"/>
+          <!-- Linha % Conv acumulada (vendas/reuniões cumulativo) — eixo direito 0-30% -->
+          <!-- 0→0→0→0→0→0→0→20→14→12→22→18→15→14→19→18→17→15→18→17→17→15→15→14→17→16→15→18→17→17→19 -->
+          <polyline stroke="#2E3E47" stroke-width="2" fill="none" points="49,160 66.4,160 83.8,160 101.2,160 118.6,160 136,160 153.4,160 170.8,66 188.2,94 205.6,104 223,57 240.4,76 257.8,90 275.2,94 292.6,71 310,76 327.4,81 344.8,90 362.2,76 379.6,81 397,81 414.4,90 431.8,90 449.2,94 466.6,81 484,85 501.4,90 518.8,76 536.2,81 553.6,81 571,71"/>
+          <!-- Labels dos dias -->
+          <text class="axis-label" x="49" y="178" text-anchor="middle">1</text>
+          <text class="axis-label" x="136" y="178" text-anchor="middle">7</text>
+          <text class="axis-label" x="257.8" y="178" text-anchor="middle">14</text>
+          <text class="axis-label" x="379.6" y="178" text-anchor="middle">21</text>
+          <text class="axis-label" x="501.4" y="178" text-anchor="middle">28</text>
+          <text class="axis-label" x="571" y="178" text-anchor="middle">31</text>
+        </svg>
+      </div>
+      <div class="legend">
+        <span><i style="background:#688594"></i>MQL/dia</span>
+        <span><i style="background:#2E3E47;height:2px;width:14px;border-radius:0"></i>Reuniões realizadas</span>
+        <span><i style="background:#FFC531;border-radius:50%"></i>Vendas</span>
+        <span><i style="background:#2E3E47;height:2px;width:14px;border-radius:0"></i>% Conv acumulada (eixo dir.)</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="title">Funil <small>do mês</small></div>
+      <div class="funnel">
+        <div class="step" style="width:100%">Leads<br><small>2.300 · 100%</small></div>
+        <div class="arrow">↓</div>
+        <div class="step" style="width:80%;background:#637C89">MQL<br><small>482 · 20,9%</small></div>
+        <div class="arrow">↓</div>
+        <div class="step" style="width:55%;background:#526873">Agendamentos<br><small>89 · 18,5% do MQL</small></div>
+        <div class="arrow">↓</div>
+        <div class="step" style="width:40%;background:#40535D">Reuniões realizadas<br><small>38 · 7,9% do MQL</small></div>
+        <div class="arrow">↓</div>
+        <div class="step" style="width:25%;background:#2E3E47">Vendas<br><small>7 · 1,4% do MQL</small></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g-2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="title">Custo por etapa <small>tempo · escala dupla</small></div>
+      <div class="chart-wrap">
+        <svg viewBox="0 0 600 200" preserveAspectRatio="none" class="chart" aria-label="Linhas CPL CMQL CAC com escala dupla">
+          <line class="grid-line" x1="40" y1="40" x2="580" y2="40"/>
+          <line class="grid-line" x1="40" y1="80" x2="580" y2="80"/>
+          <line class="grid-line" x1="40" y1="120" x2="580" y2="120"/>
+          <line class="axis-line" x1="40" y1="160" x2="580" y2="160"/>
+          <!-- Eixo esquerdo: CPL/CMQL escala 0-R$ 150 -->
+          <text class="axis-label" x="34" y="44" text-anchor="end">R$ 150</text>
+          <text class="axis-label" x="34" y="84" text-anchor="end">R$ 100</text>
+          <text class="axis-label" x="34" y="124" text-anchor="end">R$ 50</text>
+          <text class="axis-label" x="34" y="164" text-anchor="end">R$ 0</text>
+          <!-- Eixo direito: CAC escala 0-R$ 15k (CAC começa alto na 1a venda) -->
+          <text class="axis-label" x="586" y="44">R$ 15k</text>
+          <text class="axis-label" x="586" y="84">R$ 10k</text>
+          <text class="axis-label" x="586" y="124">R$ 5k</text>
+          <text class="axis-label" x="586" y="164">R$ 0</text>
+          <!-- CAC running (eixo direito): só onde há venda. d8: R$ 11k (1a venda), cai conforme vendas acumulam até R$ 6.461 -->
+          <polyline class="ser-2" points="170.8,72 223,100 292.6,101 362.2,104 466.6,105.6 518.8,107.2 571,108.3"/>
+          <circle class="ser-dot" cx="170.8" cy="72" r="3" fill="#2E3E47"/>
+          <circle class="ser-dot" cx="571" cy="108.3" r="3.5" fill="#2E3E47"/>
+          <!-- CMQL (eixo esquerdo 0-150): R$ 88-100, média R$ 93,80 -->
+          <polyline class="ser-1" points="49,88 118.6,84 188.2,76 257.8,82 327.4,86 397,80 466.6,84 536.2,89 571,87"/>
+          <circle class="ser-dot" cx="571" cy="87" r="3" fill="#688594"/>
+          <!-- CPL (eixo esquerdo): R$ 15-27, média R$ 19,67 -->
+          <polyline class="ser-3" points="49,144 118.6,142 188.2,148 257.8,138 327.4,142 397,140 466.6,146 536.2,144 571,142"/>
+          <circle class="ser-dot" cx="571" cy="142" r="3" fill="#FFC531"/>
+          <text class="axis-label" x="49" y="178" text-anchor="middle">d1</text>
+          <text class="axis-label" x="136" y="178" text-anchor="middle">d7</text>
+          <text class="axis-label" x="257.8" y="178" text-anchor="middle">d14</text>
+          <text class="axis-label" x="379.6" y="178" text-anchor="middle">d21</text>
+          <text class="axis-label" x="501.4" y="178" text-anchor="middle">d28</text>
+          <text class="axis-label" x="571" y="178" text-anchor="middle">d31</text>
+        </svg>
+      </div>
+      <div class="legend">
+        <span><i style="background:#FFC531"></i>CPL · R$ 19,67</span>
+        <span><i style="background:#688594"></i>CMQL · R$ 93,80</span>
+        <span><i style="background:#2E3E47"></i>CAC · R$ 6.461 (eixo dir.)</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="title">Distribuição por funil <small>share do mês</small></div>
+      <div class="chart-wrap" style="flex-direction:row;align-items:center;gap:20px;padding:8px 0">
+        <svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet" style="width:200px;height:200px;flex-shrink:0" aria-label="Donut distribuição por funil">
+          <!-- Donut chart: 5 segmentos -->
+          <!-- Sala 35% — 0 to 126deg / pct 0 to 0.35 -->
+          <circle r="60" cx="100" cy="100" fill="transparent" stroke="#75919F" stroke-width="32" stroke-dasharray="131.95 376.99" stroke-dashoffset="0" transform="rotate(-90 100 100)"/>
+          <!-- Aplicação 28% — 0.35 to 0.63 -->
+          <circle r="60" cx="100" cy="100" fill="transparent" stroke="#637C89" stroke-width="32" stroke-dasharray="105.56 376.99" stroke-dashoffset="-131.95" transform="rotate(-90 100 100)"/>
+          <!-- Sessão 20% -->
+          <circle r="60" cx="100" cy="100" fill="transparent" stroke="#526873" stroke-width="32" stroke-dasharray="75.4 376.99" stroke-dashoffset="-237.51" transform="rotate(-90 100 100)"/>
+          <!-- Isca 12% -->
+          <circle r="60" cx="100" cy="100" fill="transparent" stroke="#40535D" stroke-width="32" stroke-dasharray="45.24 376.99" stroke-dashoffset="-312.91" transform="rotate(-90 100 100)"/>
+          <!-- Reality 5% -->
+          <circle r="60" cx="100" cy="100" fill="transparent" stroke="#2E3E47" stroke-width="32" stroke-dasharray="18.85 376.99" stroke-dashoffset="-358.15" transform="rotate(-90 100 100)"/>
+          <text x="100" y="96" text-anchor="middle" style="font-size:11px;fill:var(--muted);font-weight:500">MQL total</text>
+          <text x="100" y="116" text-anchor="middle" style="font-size:20px;fill:#0C161B;font-weight:600;font-variant-numeric:tabular-nums">482</text>
+        </svg>
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px;font-size:12.5px">
+          <div style="display:flex;justify-content:space-between"><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#75919F;margin-right:6px;vertical-align:middle"></i>Sala</span><b>169 · 35%</b></div>
+          <div style="display:flex;justify-content:space-between"><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#637C89;margin-right:6px;vertical-align:middle"></i>Aplicação</span><b>135 · 28%</b></div>
+          <div style="display:flex;justify-content:space-between"><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#526873;margin-right:6px;vertical-align:middle"></i>Sessão</span><b>96 · 20%</b></div>
+          <div style="display:flex;justify-content:space-between"><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#40535D;margin-right:6px;vertical-align:middle"></i>Isca</span><b>58 · 12%</b></div>
+          <div style="display:flex;justify-content:space-between"><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#2E3E47;margin-right:6px;vertical-align:middle"></i>Reality</span><b>24 · 5%</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card tall">
+    <div class="title">Tabela diária <small>réplica do bloco da Análise Geral</small></div>
+    <table>
+      <thead><tr><th>Data</th><th class="num">Investimento</th><th class="num">MQL</th><th class="num">Custo por MQL</th><th class="num">Agendamentos</th><th class="num">MQL → Agend.</th><th class="num">Reuniões agendadas</th><th class="num">MQL → Reun. ag.</th><th class="num">Reuniões realizadas</th><th class="num">Show</th><th class="num">Vendas</th><th class="num">Conversão</th><th class="num">Faturamento</th></tr></thead>
+      <tbody>
+        <tr><td>01/05</td><td class="num">R$ 555</td><td class="num">5</td><td class="num">R$ 111</td><td class="num">0</td><td class="num">0%</td><td class="num">0</td><td class="num">0%</td><td class="num">0</td><td class="num">—</td><td class="num">0</td><td class="num">—</td><td class="num">—</td></tr>
+        <tr><td>02/05</td><td class="num">R$ 535</td><td class="num">6</td><td class="num">R$ 89</td><td class="num">0</td><td class="num">0%</td><td class="num">0</td><td class="num">0%</td><td class="num">0</td><td class="num">—</td><td class="num">0</td><td class="num">—</td><td class="num">—</td></tr>
+        <tr><td>03/05</td><td class="num">R$ 612</td><td class="num">7</td><td class="num">R$ 87</td><td class="num">1</td><td class="num">14%</td><td class="num">0</td><td class="num">0%</td><td class="num">0</td><td class="num">—</td><td class="num">0</td><td class="num">—</td><td class="num">—</td></tr>
+        <tr><td>04/05</td><td class="num">R$ 720</td><td class="num">8</td><td class="num">R$ 90</td><td class="num">2</td><td class="num">25%</td><td class="num">1</td><td class="num">13%</td><td class="num">1</td><td class="num">100%</td><td class="num">0</td><td class="num">—</td><td class="num">—</td></tr>
+        <tr><td>05/05</td><td class="num">R$ 1.240</td><td class="num">12</td><td class="num">R$ 103</td><td class="num">3</td><td class="num">25%</td><td class="num">2</td><td class="num">17%</td><td class="num">1</td><td class="num">50%</td><td class="num">0</td><td class="num">—</td><td class="num">—</td></tr>
+        <tr><td>06/05</td><td class="num">R$ 1.180</td><td class="num">11</td><td class="num">R$ 107</td><td class="num">4</td><td class="num">36%</td><td class="num">3</td><td class="num">27%</td><td class="num">2</td><td class="num">67%</td><td class="num">0</td><td class="num">0%</td><td class="num">—</td></tr>
+        <tr><td>07/05</td><td class="num">R$ 1.520</td><td class="num">15</td><td class="num">R$ 101</td><td class="num">5</td><td class="num">33%</td><td class="num">4</td><td class="num">27%</td><td class="num">3</td><td class="num">75%</td><td class="num">0</td><td class="num">0%</td><td class="num">—</td></tr>
+        <tr><td>08/05</td><td class="num">R$ 1.610</td><td class="num">16</td><td class="num">R$ 101</td><td class="num">6</td><td class="num">38%</td><td class="num">4</td><td class="num">25%</td><td class="num">3</td><td class="num">75%</td><td class="num">1</td><td class="num">33%</td><td class="num">R$ 38.000</td></tr>
+        <tr><td>09/05</td><td class="num">R$ 1.740</td><td class="num">17</td><td class="num">R$ 102</td><td class="num">7</td><td class="num">41%</td><td class="num">5</td><td class="num">29%</td><td class="num">3</td><td class="num">60%</td><td class="num">1</td><td class="num">33%</td><td class="num">R$ 42.000</td></tr>
+        <tr><td>10/05</td><td class="num">R$ 1.890</td><td class="num">18</td><td class="num">R$ 105</td><td class="num">7</td><td class="num">39%</td><td class="num">6</td><td class="num">33%</td><td class="num">4</td><td class="num">67%</td><td class="num">1</td><td class="num">25%</td><td class="num">R$ 45.000</td></tr>
+        <tr><td>11/05</td><td class="num">R$ 2.010</td><td class="num">20</td><td class="num">R$ 101</td><td class="num">8</td><td class="num">40%</td><td class="num">7</td><td class="num">35%</td><td class="num">5</td><td class="num">71%</td><td class="num">2</td><td class="num">40%</td><td class="num">R$ 84.000</td></tr>
+        <tr><td>...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td></tr>
+        <tr class="total"><td>TOTAL</td><td class="num">R$ 45.230</td><td class="num">482</td><td class="num">R$ 93,84</td><td class="num">89</td><td class="num">18,5%</td><td class="num">76</td><td class="num">15,8%</td><td class="num">38</td><td class="num">65%</td><td class="num">7</td><td class="num">18,4%</td><td class="num">R$ 290.000</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============== P2 TRÁFEGO ============== -->
+<section id="p2" class="page">
+  <div class="filters">
+    <div class="filter">Período
+      <div class="date-trigger" data-dp style="margin-top:5px"><svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>01/05/2026 — 31/05/2026 <span class="pill">31 dias</span><svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
+    </div>
+    <div class="filter" style="flex:1;min-width:280px">Funis
+      <div class="chips" style="margin-top:5px">
+        <span class="chip on" style="background:#1e293b;border-color:#1e293b;color:#fff">Todos</span>
+        <span class="chip">Sala</span>
+        <span class="chip">Aplicação</span>
+        <span class="chip on">Sessão</span>
+        <span class="chip">Isca</span>
+        <span class="chip">Reality</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g-kpi" style="margin-bottom:14px">
+    <div class="card kpi"><div class="label">Investido</div><div class="val">R$ 45.230</div></div>
+    <div class="card kpi"><div class="label">Impressões</div><div class="val">1,2M</div><div class="sub">CPM R$ 37,69</div></div>
+    <div class="card kpi"><div class="label">Cliques</div><div class="val">21.000</div><div class="sub">CTR 1,75% · CPC R$ 2,15</div></div>
+    <div class="card kpi"><div class="label">Leads</div><div class="val">2.300</div><div class="sub">CPL R$ 19,67 · Conv 11%</div></div>
+    <div class="card kpi"><div class="label">MQL</div><div class="val">482</div><div class="sub">CMQL R$ 93,84</div></div>
+  </div>
+
+  <div class="grid g-2-1" style="margin-bottom:14px">
+    <div style="display:grid;grid-template-rows:1fr 1fr;gap:14px">
+      <div class="card">
+        <div class="title">Investimento, MQL e CMQL · diário</div>
+        <div class="chart-wrap">
+          <svg viewBox="0 0 600 200" preserveAspectRatio="none" class="chart" aria-label="Investimento MQL CMQL diário">
+            <line class="grid-line" x1="40" y1="40" x2="580" y2="40"/>
+            <line class="grid-line" x1="40" y1="80" x2="580" y2="80"/>
+            <line class="grid-line" x1="40" y1="120" x2="580" y2="120"/>
+            <line class="axis-line" x1="40" y1="160" x2="580" y2="160"/>
+            <text class="axis-label" x="34" y="44" text-anchor="end">R$ 2k</text>
+            <text class="axis-label" x="34" y="84" text-anchor="end">R$ 1,5k</text>
+            <text class="axis-label" x="34" y="124" text-anchor="end">R$ 1k</text>
+            <text class="axis-label" x="34" y="164" text-anchor="end">R$ 0</text>
+            <text class="axis-label" x="586" y="44">R$ 150</text>
+            <text class="axis-label" x="586" y="84">R$ 100</text>
+            <text class="axis-label" x="586" y="124">R$ 50</text>
+            <text class="axis-label" x="586" y="164">R$ 0</text>
+            <!-- 31 dias · Invest total R$ 45.230 · MQL 482 -->
+            <!-- Invest: barra clara (R$ 0-2k). MQL: barra escura (escala 0-25 sobreposta visualmente) -->
+            <g>
+              <rect class="ser-bar" x="44" y="119.4" width="6" height="40.6"/><rect class="ser-bar-alt" x="51" y="132" width="6" height="28"/>
+              <rect class="ser-bar" x="61.4" y="109.6" width="6" height="50.4"/><rect class="ser-bar-alt" x="68.4" y="126.4" width="6" height="33.6"/>
+              <rect class="ser-bar" x="78.8" y="93.5" width="6" height="66.5"/><rect class="ser-bar-alt" x="85.8" y="115.2" width="6" height="44.8"/>
+              <rect class="ser-bar" x="96.2" y="77.4" width="6" height="82.6"/><rect class="ser-bar-alt" x="103.2" y="104" width="6" height="56"/>
+              <rect class="ser-bar" x="113.6" y="67.6" width="6" height="92.4"/><rect class="ser-bar-alt" x="120.6" y="92.8" width="6" height="67.2"/>
+              <rect class="ser-bar" x="131" y="58.5" width="6" height="101.5"/><rect class="ser-bar-alt" x="138" y="81.6" width="6" height="78.4"/>
+              <rect class="ser-bar" x="148.4" y="49.4" width="6" height="110.6"/><rect class="ser-bar-alt" x="155.4" y="70.4" width="6" height="89.6"/>
+              <rect class="ser-bar" x="165.8" y="39.6" width="6" height="120.4"/><rect class="ser-bar-alt" x="172.8" y="59.2" width="6" height="100.8"/>
+              <rect class="ser-bar" x="183.2" y="28.4" width="6" height="131.6"/><rect class="ser-bar-alt" x="190.2" y="48" width="6" height="112"/>
+              <rect class="ser-bar" x="200.6" y="46.6" width="6" height="113.4"/><rect class="ser-bar-alt" x="207.6" y="59.2" width="6" height="100.8"/>
+              <rect class="ser-bar" x="218" y="52.2" width="6" height="107.8"/><rect class="ser-bar-alt" x="225" y="64.8" width="6" height="95.2"/>
+              <rect class="ser-bar" x="235.4" y="38.2" width="6" height="121.8"/><rect class="ser-bar-alt" x="242.4" y="53.6" width="6" height="106.4"/>
+              <rect class="ser-bar" x="252.8" y="56.4" width="6" height="103.6"/><rect class="ser-bar-alt" x="259.8" y="70.4" width="6" height="89.6"/>
+              <rect class="ser-bar" x="270.2" y="46.6" width="6" height="113.4"/><rect class="ser-bar-alt" x="277.2" y="59.2" width="6" height="100.8"/>
+              <rect class="ser-bar" x="287.6" y="30.5" width="6" height="129.5"/><rect class="ser-bar-alt" x="294.6" y="48" width="6" height="112"/>
+              <rect class="ser-bar" x="305" y="37.5" width="6" height="122.5"/><rect class="ser-bar-alt" x="312" y="53.6" width="6" height="106.4"/>
+              <rect class="ser-bar" x="322.4" y="49.4" width="6" height="110.6"/><rect class="ser-bar-alt" x="329.4" y="64.8" width="6" height="95.2"/>
+              <rect class="ser-bar" x="339.8" y="39.6" width="6" height="120.4"/><rect class="ser-bar-alt" x="346.8" y="59.2" width="6" height="100.8"/>
+              <rect class="ser-bar" x="357.2" y="56.4" width="6" height="103.6"/><rect class="ser-bar-alt" x="364.2" y="70.4" width="6" height="89.6"/>
+              <rect class="ser-bar" x="374.6" y="46.6" width="6" height="113.4"/><rect class="ser-bar-alt" x="381.6" y="64.8" width="6" height="95.2"/>
+              <rect class="ser-bar" x="392" y="38.2" width="6" height="121.8"/><rect class="ser-bar-alt" x="399" y="59.2" width="6" height="100.8"/>
+              <rect class="ser-bar" x="409.4" y="30.5" width="6" height="129.5"/><rect class="ser-bar-alt" x="416.4" y="53.6" width="6" height="106.4"/>
+              <rect class="ser-bar" x="426.8" y="56.4" width="6" height="103.6"/><rect class="ser-bar-alt" x="433.8" y="70.4" width="6" height="89.6"/>
+              <rect class="ser-bar" x="444.2" y="69" width="6" height="91"/><rect class="ser-bar-alt" x="451.2" y="81.6" width="6" height="78.4"/>
+              <rect class="ser-bar" x="461.6" y="63.4" width="6" height="96.6"/><rect class="ser-bar-alt" x="468.6" y="76" width="6" height="84"/>
+              <rect class="ser-bar" x="479" y="46.6" width="6" height="113.4"/><rect class="ser-bar-alt" x="486" y="64.8" width="6" height="95.2"/>
+              <rect class="ser-bar" x="496.4" y="38.2" width="6" height="121.8"/><rect class="ser-bar-alt" x="503.4" y="59.2" width="6" height="100.8"/>
+              <rect class="ser-bar" x="513.8" y="30.5" width="6" height="129.5"/><rect class="ser-bar-alt" x="520.8" y="53.6" width="6" height="106.4"/>
+              <rect class="ser-bar" x="531.2" y="46.6" width="6" height="113.4"/><rect class="ser-bar-alt" x="538.2" y="64.8" width="6" height="95.2"/>
+              <rect class="ser-bar" x="548.6" y="63.4" width="6" height="96.6"/><rect class="ser-bar-alt" x="555.6" y="76" width="6" height="84"/>
+              <rect class="ser-bar" x="566" y="83" width="6" height="77"/><rect class="ser-bar-alt" x="573" y="92.8" width="6" height="67.2"/>
+            </g>
+            <!-- Linha CMQL diária (eixo direito R$ 0-150, média R$ 93,80) -->
+            <polyline class="ser-3" points="50.5,67.2 102.7,65.6 154.9,80.8 207.1,88 259.3,85.6 311.5,86.4 363.7,85.6 415.9,82.4 468.1,86.4 520.3,82.4 572.5,86.4"/>
+            <text class="axis-label" x="50.5" y="178" text-anchor="middle">d1</text>
+            <text class="axis-label" x="154.9" y="178" text-anchor="middle">d7</text>
+            <text class="axis-label" x="259.3" y="178" text-anchor="middle">d14</text>
+            <text class="axis-label" x="363.7" y="178" text-anchor="middle">d21</text>
+            <text class="axis-label" x="468.1" y="178" text-anchor="middle">d28</text>
+            <text class="axis-label" x="572.5" y="178" text-anchor="middle">d31</text>
+          </svg>
+        </div>
+        <div class="legend">
+          <span><i style="background:#B3C2CA"></i>Investimento</span>
+          <span><i style="background:#688594"></i>MQL</span>
+          <span><i style="background:#FFC531"></i>CMQL (linha)</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="title">MQL e CMQL por funil</div>
+        <div class="bars-dual">
+          <div class="group">
+            <div class="pair">
+              <div class="b" style="height:55%"></div>
+              <div class="b alt" style="height:28%"></div>
+            </div>
+            <div class="lbl">Sala</div>
+          </div>
+          <div class="group">
+            <div class="pair">
+              <div class="b" style="height:70%"></div>
+              <div class="b alt" style="height:52%"></div>
+            </div>
+            <div class="lbl">Aplicação</div>
+          </div>
+          <div class="group">
+            <div class="pair">
+              <div class="b" style="height:90%"></div>
+              <div class="b alt" style="height:68%"></div>
+            </div>
+            <div class="lbl">Sessão</div>
+          </div>
+          <div class="group">
+            <div class="pair">
+              <div class="b" style="height:42%"></div>
+              <div class="b alt" style="height:40%"></div>
+            </div>
+            <div class="lbl">Isca</div>
+          </div>
+          <div class="group">
+            <div class="pair">
+              <div class="b" style="height:48%"></div>
+              <div class="b alt" style="height:85%"></div>
+            </div>
+            <div class="lbl">Reality</div>
+          </div>
+        </div>
+        <div class="legend">
+          <span><i class="dot-text" style="background:#0f172a"></i>MQL</span>
+          <span><i class="dot-b"></i>CMQL</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="title">Funil de tráfego</div>
+      <div class="funnel" style="flex:1;justify-content:space-around">
+        <div class="step" style="width:100%">Impressões<br><small>1.200.000 · 100% · CPM R$ 37,69</small></div>
+        <div class="arrow">↓</div>
+        <div class="step" style="width:78%;background:#637C89">Cliques<br><small>21.000 · CTR 1,75% · CPC R$ 2,15</small></div>
+        <div class="arrow">↓</div>
+        <div class="step" style="width:60%;background:#526873">Visualizações de página<br><small>17.500 · 83%</small></div>
+        <div class="arrow">↓</div>
+        <div class="step" style="width:40%;background:#40535D">Leads<br><small>2.300 · 13,1%</small></div>
+        <div class="arrow">↓</div>
+        <div class="step" style="width:22%;background:#2E3E47">MQL<br><small>482 · 20,9%</small></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card tall">
+    <div class="title">
+      <span>Ranking de mídia <small>ordenado por CMQL</small></span>
+    </div>
+    <div class="tbl-toolbar">
+      <div class="segmented">
+        <button class="seg active">Campanha</button>
+        <button class="seg">Conjunto de anúncio</button>
+      </div>
+      <div class="tbl-toolbar-right">
+        <button class="select"><span class="sv"><span class="sv-label">Temperatura:</span><span class="sv-value">Todas</span></span><svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
+        <div class="search">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Buscar...">
+        </div>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>Campanha</th><th class="num">Invest.</th><th class="num">Impr.</th><th class="num">CTR</th><th class="num">CPC</th><th class="num">CPM</th><th class="num">LP Views</th><th class="num">Leads</th><th class="num">CPL</th><th class="num">MQL</th><th class="num">CMQL</th></tr></thead>
+      <tbody>
+        <tr><td>TIAGO01|PERP|SESSAO|CAPT|FRIO|Teste_criativos</td><td class="num">R$ 12.450</td><td class="num">340k</td><td class="num">1,93%</td><td class="num">R$ 4,71</td><td class="num">R$ 91</td><td class="num">2.300</td><td class="num">120</td><td class="num">R$ 103</td><td class="num">28</td><td class="num">R$ 444</td></tr>
+        <tr><td>TIAGO01|PERP|SESSAO|CAPT|QUENTE|Manutencao</td><td class="num">R$ 8.230</td><td class="num">180k</td><td class="num">1,89%</td><td class="num">R$ 3,99</td><td class="num">R$ 75</td><td class="num">1.800</td><td class="num">95</td><td class="num">R$ 86</td><td class="num">22</td><td class="num">R$ 374</td></tr>
+        <tr><td>TIAGO01|PERP|SESSAO|CAPT|ADV|Teste_publicos</td><td class="num">R$ 6.140</td><td class="num">142k</td><td class="num">2,15%</td><td class="num">R$ 4,12</td><td class="num">R$ 84</td><td class="num">1.420</td><td class="num">88</td><td class="num">R$ 69</td><td class="num">19</td><td class="num">R$ 323</td></tr>
+        <tr><td>TIAGO01|PERP|APLICA|CAPT|FRIO|Conversao</td><td class="num">R$ 4.880</td><td class="num">110k</td><td class="num">1,72%</td><td class="num">R$ 4,55</td><td class="num">R$ 88</td><td class="num">1.180</td><td class="num">62</td><td class="num">R$ 78</td><td class="num">14</td><td class="num">R$ 348</td></tr>
+        <tr><td>TIAGO01|PERP|APLICA|CAPT|QUENTE|Remarketing</td><td class="num">R$ 3.520</td><td class="num">86k</td><td class="num">2,04%</td><td class="num">R$ 3,68</td><td class="num">R$ 81</td><td class="num">920</td><td class="num">54</td><td class="num">R$ 65</td><td class="num">13</td><td class="num">R$ 271</td></tr>
+        <tr><td>TIAGO01|PERP|SALA|CAPT|FRIO|Captacao_aluno</td><td class="num">R$ 3.110</td><td class="num">72k</td><td class="num">1,81%</td><td class="num">R$ 4,18</td><td class="num">R$ 79</td><td class="num">820</td><td class="num">48</td><td class="num">R$ 65</td><td class="num">11</td><td class="num">R$ 283</td></tr>
+        <tr><td>TIAGO01|PERP|SALA|CAPT|QUENTE|Lookalike_2</td><td class="num">R$ 2.640</td><td class="num">58k</td><td class="num">1,95%</td><td class="num">R$ 4,02</td><td class="num">R$ 73</td><td class="num">670</td><td class="num">40</td><td class="num">R$ 66</td><td class="num">9</td><td class="num">R$ 293</td></tr>
+        <tr><td>TIAGO01|PERP|ISCA|CAPT|FRIO|Ebook_lider</td><td class="num">R$ 2.180</td><td class="num">62k</td><td class="num">1,68%</td><td class="num">R$ 3,84</td><td class="num">R$ 70</td><td class="num">580</td><td class="num">38</td><td class="num">R$ 57</td><td class="num">8</td><td class="num">R$ 273</td></tr>
+        <tr><td>TIAGO01|PERP|REALITY|CAPT|FRIO|Audicao</td><td class="num">R$ 1.420</td><td class="num">48k</td><td class="num">1,42%</td><td class="num">R$ 4,93</td><td class="num">R$ 82</td><td class="num">340</td><td class="num">22</td><td class="num">R$ 65</td><td class="num">5</td><td class="num">R$ 284</td></tr>
+        <tr><td>TIAGO01|PERP|SESSAO|CAPT|FRIO|Teste_video_02</td><td class="num">R$ 1.090</td><td class="num">28k</td><td class="num">2,38%</td><td class="num">R$ 4,07</td><td class="num">R$ 88</td><td class="num">280</td><td class="num">18</td><td class="num">R$ 61</td><td class="num">4</td><td class="num">R$ 273</td></tr>
+        <tr><td>...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============== P3 SDR ============== -->
+<section id="p3" class="page">
+  <div class="filters">
+    <div class="filter">Período
+      <div class="date-trigger" data-dp style="margin-top:5px"><svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>01/05/2026 — 31/05/2026 <span class="pill">31 dias</span><svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
+    </div>
+    <div class="filter">Funil<button class="select" style="margin-top:5px"><span class="sv"><span class="sv-value">Todos</span></span><svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button></div>
+    <div class="filter">SDR<button class="select" style="margin-top:5px"><span class="sv"><span class="sv-value">Todos</span></span><svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button></div>
+    <div class="filter">Status<button class="select" style="margin-top:5px"><span class="sv"><span class="sv-value">Todos</span></span><svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button></div>
+  </div>
+
+  <div class="grid g-kpi" style="margin-bottom:14px">
+    <div class="card kpi"><div class="label">Agendamentos</div><div class="val">89</div></div>
+    <div class="card kpi"><div class="label">Reuniões agendadas</div><div class="val">76</div><div class="sub">no calendário</div></div>
+    <div class="card kpi"><div class="label">Realizadas</div><div class="val">38</div><div class="sub">Show 65%</div></div>
+    <div class="card kpi"><div class="label">Propostas enviadas</div><div class="val">12</div><div class="sub">Tx 31,5% das realizadas</div></div>
+    <div class="card kpi"><div class="label">Valor em propostas</div><div class="val">R$ 780k</div></div>
+  </div>
+
+  <div class="grid g-2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="title">Funil SDR</div>
+      <div class="funnel">
+        <div class="step" style="width:100%">Agendamentos<br><small>89</small></div>
+        <div class="arrow">↓</div>
+        <div class="step" style="width:75%;background:#637C89">Reuniões marcadas<br><small>76 · 85%</small></div>
+        <div class="arrow">↓</div>
+        <div class="step" style="width:50%;background:#526873">Realizadas<br><small>38 · 50% show</small></div>
+        <div class="arrow">↓</div>
+        <div class="step" style="width:32%;background:#40535D">Propostas<br><small>12 · 31% prop.</small></div>
+        <div class="arrow">↓</div>
+        <div class="step" style="width:18%;background:#2E3E47">Vendas<br><small>7 · 58% close</small></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="title">Heatmap reuniões <small>dia da semana × hora</small></div>
+      <div class="heat">
+        <div></div><div class="h">SEG</div><div class="h">TER</div><div class="h">QUA</div><div class="h">QUI</div><div class="h">SEX</div><div class="h">SAB</div><div class="h">DOM</div>
+        <div class="h">07h</div><div class="c h0"></div><div class="c h0"></div><div class="c h1"></div><div class="c h0"></div><div class="c h0"></div><div class="c h0"></div><div class="c h0"></div>
+        <div class="h">08h</div><div class="c h0"></div><div class="c h1"></div><div class="c h1"></div><div class="c h1"></div><div class="c h0"></div><div class="c h0"></div><div class="c h0"></div>
+        <div class="h">09h</div><div class="c h1"></div><div class="c h2"></div><div class="c h3"></div><div class="c h2"></div><div class="c h2"></div><div class="c h0"></div><div class="c h0"></div>
+        <div class="h">10h</div><div class="c h2"></div><div class="c h3"></div><div class="c h4"></div><div class="c h3"></div><div class="c h2"></div><div class="c h1"></div><div class="c h0"></div>
+        <div class="h">11h</div><div class="c h2"></div><div class="c h3"></div><div class="c h3"></div><div class="c h3"></div><div class="c h2"></div><div class="c h1"></div><div class="c h0"></div>
+        <div class="h">12h</div><div class="c h1"></div><div class="c h1"></div><div class="c h2"></div><div class="c h1"></div><div class="c h1"></div><div class="c h0"></div><div class="c h0"></div>
+        <div class="h">13h</div><div class="c h0"></div><div class="c h1"></div><div class="c h1"></div><div class="c h1"></div><div class="c h0"></div><div class="c h0"></div><div class="c h0"></div>
+        <div class="h">14h</div><div class="c h1"></div><div class="c h2"></div><div class="c h2"></div><div class="c h2"></div><div class="c h1"></div><div class="c h0"></div><div class="c h0"></div>
+        <div class="h">15h</div><div class="c h1"></div><div class="c h2"></div><div class="c h3"></div><div class="c h2"></div><div class="c h2"></div><div class="c h0"></div><div class="c h0"></div>
+        <div class="h">16h</div><div class="c h1"></div><div class="c h2"></div><div class="c h3"></div><div class="c h2"></div><div class="c h1"></div><div class="c h0"></div><div class="c h0"></div>
+        <div class="h">17h</div><div class="c h0"></div><div class="c h1"></div><div class="c h2"></div><div class="c h2"></div><div class="c h1"></div><div class="c h0"></div><div class="c h0"></div>
+        <div class="h">18h</div><div class="c h0"></div><div class="c h1"></div><div class="c h1"></div><div class="c h1"></div><div class="c h0"></div><div class="c h0"></div><div class="c h0"></div>
+        <div class="h">19h</div><div class="c h0"></div><div class="c h0"></div><div class="c h1"></div><div class="c h0"></div><div class="c h0"></div><div class="c h0"></div><div class="c h0"></div>
+        <div class="h">20h</div><div class="c h0"></div><div class="c h0"></div><div class="c h0"></div><div class="c h0"></div><div class="c h0"></div><div class="c h0"></div><div class="c h0"></div>
+      </div>
+      <div class="legend"><span><i class="h0"></i>0</span><span><i class="h1"></i>1-2</span><span><i class="h2"></i>3-5</span><span><i class="h3"></i>6-9</span><span><i class="h4"></i>10+</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="title">Performance por SDR</div>
+    <table>
+      <thead><tr><th>SDR</th><th class="num">Agendou</th><th class="num">Realizou</th><th class="num">Show</th><th class="num">Propostas</th><th class="num">Tx prop.</th><th class="num">Valor prop.</th><th class="num">Vendas</th><th class="num">Close</th></tr></thead>
+      <tbody>
+        <tr><td>Vanessa</td><td class="num">28</td><td class="num">14</td><td class="num">50%</td><td class="num">5</td><td class="num">36%</td><td class="num">R$ 280.000</td><td class="num">3</td><td class="num">60%</td></tr>
+        <tr><td>Iago</td><td class="num">22</td><td class="num">12</td><td class="num">55%</td><td class="num">3</td><td class="num">25%</td><td class="num">R$ 180.000</td><td class="num">2</td><td class="num">67%</td></tr>
+        <tr><td>Bruno</td><td class="num">19</td><td class="num">8</td><td class="num">42%</td><td class="num">2</td><td class="num">25%</td><td class="num">R$ 120.000</td><td class="num">1</td><td class="num">50%</td></tr>
+        <tr><td>Larissa</td><td class="num">17</td><td class="num">9</td><td class="num">53%</td><td class="num">3</td><td class="num">33%</td><td class="num">R$ 160.000</td><td class="num">1</td><td class="num">33%</td></tr>
+        <tr><td>Camila</td><td class="num">14</td><td class="num">6</td><td class="num">43%</td><td class="num">2</td><td class="num">33%</td><td class="num">R$ 90.000</td><td class="num">0</td><td class="num">0%</td></tr>
+        <tr><td>...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============== P4 VENDAS ============== -->
+<section id="p4" class="page">
+  <div class="filters">
+    <div class="filter">Período
+      <div class="date-trigger" data-dp style="margin-top:5px"><svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>01/05/2026 — 31/05/2026 <span class="pill">31 dias</span><svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
+    </div>
+    <div class="filter">Funil<button class="select" style="margin-top:5px"><span class="sv"><span class="sv-value">Todos</span></span><svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button></div>
+    <div class="filter">Produto<button class="select" style="margin-top:5px"><span class="sv"><span class="sv-value">Todos</span></span><svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button></div>
+    <div class="filter">Pagamento<button class="select" style="margin-top:5px"><span class="sv"><span class="sv-value">Todos</span></span><svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button></div>
+  </div>
+
+  <div class="grid g-kpi" style="margin-bottom:14px">
+    <div class="card kpi"><div class="label">Vendas</div><div class="val">7</div></div>
+    <div class="card kpi"><div class="label">Receita</div><div class="val">R$ 290.000</div></div>
+    <div class="card kpi"><div class="label">Ticket médio</div><div class="val">R$ 41.428</div></div>
+    <div class="card kpi"><div class="label">ROAS</div><div class="val">6,4x</div><div class="sub up">acima da meta</div></div>
+    <div class="card kpi"><div class="label">Ciclo médio</div><div class="val">14 dias</div><div class="sub">inscrição → aceite</div></div>
+  </div>
+
+  <div class="grid g-2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="title">Receita por funil <small>share do mês</small></div>
+      <div class="chart-wrap" style="flex-direction:row;align-items:center;gap:20px;padding:8px 0">
+        <svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet" style="width:200px;height:200px;flex-shrink:0" aria-label="Donut receita por funil">
+          <circle r="60" cx="100" cy="100" fill="transparent" stroke="#75919F" stroke-width="32" stroke-dasharray="150.80 376.99" stroke-dashoffset="0" transform="rotate(-90 100 100)"/>
+          <circle r="60" cx="100" cy="100" fill="transparent" stroke="#637C89" stroke-width="32" stroke-dasharray="97.92 376.99" stroke-dashoffset="-150.80" transform="rotate(-90 100 100)"/>
+          <circle r="60" cx="100" cy="100" fill="transparent" stroke="#526873" stroke-width="32" stroke-dasharray="71.49 376.99" stroke-dashoffset="-248.72" transform="rotate(-90 100 100)"/>
+          <circle r="60" cx="100" cy="100" fill="transparent" stroke="#40535D" stroke-width="32" stroke-dasharray="37.69 376.99" stroke-dashoffset="-320.21" transform="rotate(-90 100 100)"/>
+          <circle r="60" cx="100" cy="100" fill="transparent" stroke="#2E3E47" stroke-width="32" stroke-dasharray="18.85 376.99" stroke-dashoffset="-357.90" transform="rotate(-90 100 100)"/>
+          <text x="100" y="96" text-anchor="middle" style="font-size:11px;fill:var(--muted);font-weight:500">Receita</text>
+          <text x="100" y="116" text-anchor="middle" style="font-size:18px;fill:#0C161B;font-weight:600;font-variant-numeric:tabular-nums">R$ 290k</text>
+        </svg>
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px;font-size:12.5px">
+          <div style="display:flex;justify-content:space-between"><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#75919F;margin-right:6px;vertical-align:middle"></i>Sessão</span><b>R$ 116k · 40%</b></div>
+          <div style="display:flex;justify-content:space-between"><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#637C89;margin-right:6px;vertical-align:middle"></i>Aplicação</span><b>R$ 75k · 26%</b></div>
+          <div style="display:flex;justify-content:space-between"><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#526873;margin-right:6px;vertical-align:middle"></i>Sala</span><b>R$ 55k · 19%</b></div>
+          <div style="display:flex;justify-content:space-between"><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#40535D;margin-right:6px;vertical-align:middle"></i>Isca</span><b>R$ 29k · 10%</b></div>
+          <div style="display:flex;justify-content:space-between"><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#2E3E47;margin-right:6px;vertical-align:middle"></i>Reality</span><b>R$ 15k · 5%</b></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="title">Evolução de receita <small>mês a mês</small></div>
+      <div class="chart-wrap">
+        <svg viewBox="0 0 600 200" preserveAspectRatio="none" class="chart" aria-label="Linha e área de receita 12 meses">
+          <line class="grid-line" x1="40" y1="40" x2="580" y2="40"/>
+          <line class="grid-line" x1="40" y1="80" x2="580" y2="80"/>
+          <line class="grid-line" x1="40" y1="120" x2="580" y2="120"/>
+          <line class="axis-line" x1="40" y1="160" x2="580" y2="160"/>
+          <text class="axis-label" x="34" y="44" text-anchor="end">R$ 500k</text>
+          <text class="axis-label" x="34" y="84" text-anchor="end">R$ 375k</text>
+          <text class="axis-label" x="34" y="124" text-anchor="end">R$ 250k</text>
+          <text class="axis-label" x="34" y="164" text-anchor="end">R$ 0</text>
+          <!-- Meta horizontal R$ 400k -->
+          <line class="meta-line" x1="40" y1="64" x2="580" y2="64"/>
+          <text class="axis-label" x="576" y="60" text-anchor="end" style="fill:#FFC531">meta R$ 400k</text>
+          <!-- 12 meses: jun/25 220k → mai/26 290k (parcial). Mar=380k, Abr=410k, Mai*=290k batem com tabela. -->
+          <polygon class="ser-area" points="60,107.2 105,101.2 150,97.6 195,92.8 240,89.2 285,85.6 330,78.4 375,74.8 420,72.4 465,68.8 510,61.6 555,90.4 555,160 60,160"/>
+          <polyline class="ser-1" points="60,107.2 105,101.2 150,97.6 195,92.8 240,89.2 285,85.6 330,78.4 375,74.8 420,72.4 465,68.8 510,61.6 555,90.4"/>
+          <circle class="ser-dot" cx="60" cy="107.2" r="3"/>
+          <circle class="ser-dot" cx="105" cy="101.2" r="3"/>
+          <circle class="ser-dot" cx="150" cy="97.6" r="3"/>
+          <circle class="ser-dot" cx="195" cy="92.8" r="3"/>
+          <circle class="ser-dot" cx="240" cy="89.2" r="3"/>
+          <circle class="ser-dot" cx="285" cy="85.6" r="3"/>
+          <circle class="ser-dot" cx="330" cy="78.4" r="3"/>
+          <circle class="ser-dot" cx="375" cy="74.8" r="3"/>
+          <circle class="ser-dot" cx="420" cy="72.4" r="3"/>
+          <circle class="ser-dot" cx="465" cy="68.8" r="3"/>
+          <circle class="ser-dot" cx="510" cy="61.6" r="3"/>
+          <circle class="ser-dot" cx="555" cy="90.4" r="3" fill="#FFC531"/>
+          <text class="axis-label" x="60" y="178" text-anchor="middle">jun</text>
+          <text class="axis-label" x="150" y="178" text-anchor="middle">ago</text>
+          <text class="axis-label" x="240" y="178" text-anchor="middle">out</text>
+          <text class="axis-label" x="330" y="178" text-anchor="middle">dez</text>
+          <text class="axis-label" x="420" y="178" text-anchor="middle">fev</text>
+          <text class="axis-label" x="510" y="178" text-anchor="middle">abr</text>
+          <text class="axis-label" x="555" y="178" text-anchor="middle">mai*</text>
+        </svg>
+      </div>
+      <div class="legend">
+        <span><i style="background:#688594"></i>Receita</span>
+        <span><i style="background:#FFC531"></i>Meta</span>
+        <span style="color:var(--muted)">* mês parcial</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card tall">
+    <div class="title">Vendas do período</div>
+    <table>
+      <thead><tr><th>Data</th><th>Comprador</th><th>Funil</th><th>Produto</th><th class="num">Valor</th><th>SDR</th><th>Pagamento</th><th class="num">Ciclo</th></tr></thead>
+      <tbody>
+        <tr><td>08/05</td><td>Ana Paula Ribeiro</td><td>Aplicação</td><td>Mentoria</td><td class="num">R$ 38.000</td><td>Vanessa</td><td>Pix</td><td class="num">5d</td></tr>
+        <tr><td>09/05</td><td>Roberto Lima</td><td>Sessão</td><td>Mentoria</td><td class="num">R$ 42.000</td><td>Iago</td><td>Cartão 6x</td><td class="num">9d</td></tr>
+        <tr><td>10/05</td><td>Patrícia Souza</td><td>Sessão</td><td>Mentoria</td><td class="num">R$ 45.000</td><td>Vanessa</td><td>Pix</td><td class="num">14d</td></tr>
+        <tr><td>11/05</td><td>Carlos Mendes</td><td>Aplicação</td><td>Mentoria</td><td class="num">R$ 48.000</td><td>Bruno</td><td>Cartão 12x</td><td class="num">18d</td></tr>
+        <tr><td>11/05</td><td>Juliana Costa</td><td>Sessão</td><td>Up-sell</td><td class="num">R$ 36.000</td><td>Larissa</td><td>Pix</td><td class="num">6d</td></tr>
+        <tr><td>12/05</td><td>Bruno Henrique</td><td>Sessão</td><td>Up-sell</td><td class="num">R$ 11.200</td><td>Vanessa</td><td>Pix</td><td class="num">7d</td></tr>
+        <tr><td>13/05</td><td>Fernando Alves</td><td>Sala</td><td>Mentoria</td><td class="num">R$ 24.000</td><td>Iago</td><td>Boleto</td><td class="num">21d</td></tr>
+        <tr><td>14/05</td><td>Marcus Vinícius</td><td>Sessão</td><td>Mentoria</td><td class="num">R$ 22.400</td><td>Iago</td><td>Cartão 12x</td><td class="num">12d</td></tr>
+        <tr><td>14/05</td><td>Marcela Pereira</td><td>Sessão</td><td>Mentoria</td><td class="num">R$ 41.000</td><td>Camila</td><td>Pix</td><td class="num">11d</td></tr>
+        <tr><td>14/05</td><td>Diego Ramos</td><td>Aplicação</td><td>Mentoria</td><td class="num">R$ 22.400</td><td>Vanessa</td><td>Cartão 10x</td><td class="num">8d</td></tr>
+        <tr><td>...</td><td>...</td><td>...</td><td>...</td><td class="num">...</td><td>...</td><td>...</td><td class="num">...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <div class="title">Performance por closer</div>
+    <table>
+      <thead><tr><th>Closer</th><th class="num">Agendou</th><th class="num">Realizou</th><th class="num">Show</th><th class="num">Propostas</th><th class="num">Tx prop.</th><th class="num">Valor prop.</th><th class="num">Vendas</th><th class="num">Close</th></tr></thead>
+      <tbody>
+        <tr><td>Rafael</td><td class="num">18</td><td class="num">12</td><td class="num">67%</td><td class="num">6</td><td class="num">50%</td><td class="num">R$ 320.000</td><td class="num">4</td><td class="num">67%</td></tr>
+        <tr><td>Mariana</td><td class="num">15</td><td class="num">10</td><td class="num">67%</td><td class="num">5</td><td class="num">50%</td><td class="num">R$ 240.000</td><td class="num">3</td><td class="num">60%</td></tr>
+        <tr><td>Eduardo</td><td class="num">12</td><td class="num">7</td><td class="num">58%</td><td class="num">3</td><td class="num">43%</td><td class="num">R$ 140.000</td><td class="num">2</td><td class="num">67%</td></tr>
+        <tr><td>Beatriz</td><td class="num">10</td><td class="num">6</td><td class="num">60%</td><td class="num">2</td><td class="num">33%</td><td class="num">R$ 96.000</td><td class="num">1</td><td class="num">50%</td></tr>
+        <tr><td>Felipe</td><td class="num">8</td><td class="num">3</td><td class="num">38%</td><td class="num">1</td><td class="num">33%</td><td class="num">R$ 48.000</td><td class="num">0</td><td class="num">0%</td></tr>
+        <tr><td>...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============== P6 METAS ============== -->
+<section id="p6" class="page">
+  <div class="filters">
+    <div class="filter">Período
+      <div class="date-trigger" data-dp style="margin-top:5px"><svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>01/05/2026 — 31/05/2026 <span class="pill">31 dias</span><svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
+    </div>
+    <div class="filter">Funil<button class="select" style="margin-top:5px"><span class="sv"><span class="sv-value">Todos</span></span><svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button></div>
+    <div class="filter">Produto<button class="select" style="margin-top:5px"><span class="sv"><span class="sv-value">Mentoria</span></span><svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button></div>
+  </div>
+
+  <p style="font-size:12px;color:var(--muted);margin:0 0 14px;line-height:1.5">Metas proporcionais ao período selecionado (month-to-date). Meta mensal R$ 400k em mês de 31 dias → filtro dia 1–14 retorna meta R$ 180,6k.</p>
+
+  <!-- Topo do funil -->
+  <div class="grid g-3" style="margin-bottom:14px">
+    <div class="card">
+      <div class="title">Investimento <small>meta R$ 50k (mtd)</small></div>
+      <div class="kpi" style="margin-bottom:10px"><div class="val">R$ 45.230 <span style="font-size:14px;color:var(--muted)">/ R$ 50k</span></div></div>
+      <div class="progress"><div class="row"><div class="bar"><div style="width:90%"></div></div><div class="top"><span>90% atingido</span><span style="color:var(--muted)">faltam R$ 4.770</span></div></div></div>
+    </div>
+    <div class="card">
+      <div class="title">MQL <small>meta 500</small></div>
+      <div class="kpi" style="margin-bottom:10px"><div class="val">482 <span style="font-size:14px;color:var(--muted)">/ 500</span></div></div>
+      <div class="progress"><div class="row"><div class="bar"><div style="width:96%"></div></div><div class="top"><span>96% atingido</span><span style="color:var(--muted)">faltam 18</span></div></div></div>
+    </div>
+    <div class="card">
+      <div class="title">CMQL <small>teto R$ 100</small></div>
+      <div class="kpi" style="margin-bottom:10px"><div class="val">R$ 93,80 <span style="font-size:12px;color:#059669;font-weight:500">abaixo do teto</span></div></div>
+      <div class="progress"><div class="row"><div class="bar"><div class="warn" style="width:94%"></div></div><div class="top"><span>6% abaixo (bom)</span><span style="color:var(--muted)">teto R$ 100</span></div></div></div>
+    </div>
+  </div>
+
+  <!-- Conversões -->
+  <div class="grid g-3" style="margin-bottom:14px">
+    <div class="card">
+      <div class="title">Agendamentos <small>meta 95 · 19% do MQL</small></div>
+      <div class="kpi" style="margin-bottom:10px"><div class="val">89 <span style="font-size:14px;color:var(--muted)">/ 95</span></div><div class="sub">18,5% do MQL <span style="color:var(--muted)">· meta 19%</span></div></div>
+      <div class="progress"><div class="row"><div class="bar"><div style="width:94%"></div></div><div class="top"><span>94% atingido (abs)</span><span style="color:var(--muted)">faltam 6</span></div></div></div>
+    </div>
+    <div class="card">
+      <div class="title">Reuniões agendadas <small>meta 80 · 16% do MQL</small></div>
+      <div class="kpi" style="margin-bottom:10px"><div class="val">76 <span style="font-size:14px;color:var(--muted)">/ 80</span></div><div class="sub">15,8% do MQL <span style="color:var(--muted)">· meta 16%</span></div></div>
+      <div class="progress"><div class="row"><div class="bar"><div style="width:95%"></div></div><div class="top"><span>95% atingido (abs)</span><span style="color:var(--muted)">faltam 4</span></div></div></div>
+    </div>
+    <div class="card">
+      <div class="title">Reuniões realizadas <small>meta 55% show</small></div>
+      <div class="kpi" style="margin-bottom:10px"><div class="val">50% <span style="font-size:14px;color:var(--muted)">/ 55%</span></div><div class="sub">38 de 76 agendadas</div></div>
+      <div class="progress"><div class="row"><div class="bar"><div class="warn" style="width:91%"></div></div><div class="top"><span>91% da meta</span><span style="color:var(--muted)">faltam 5pp</span></div></div></div>
+    </div>
+  </div>
+
+  <!-- Fim do funil -->
+  <div class="grid g-3" style="margin-bottom:14px">
+    <div class="card">
+      <div class="title">Vendas <small>meta 10</small></div>
+      <div class="kpi" style="margin-bottom:10px"><div class="val">7 <span style="font-size:14px;color:var(--muted)">/ 10</span></div></div>
+      <div class="progress"><div class="row"><div class="bar"><div style="width:70%"></div></div><div class="top"><span>70%</span><span style="color:var(--muted)">faltam 3</span></div></div></div>
+    </div>
+    <div class="card">
+      <div class="title">Conversão de vendas <small>meta 25%</small></div>
+      <div class="kpi" style="margin-bottom:10px"><div class="val">18,4% <span style="font-size:14px;color:var(--muted)">/ 25%</span></div><div class="sub">7 vendas / 38 reuniões realizadas</div></div>
+      <div class="progress"><div class="row"><div class="bar"><div class="warn" style="width:74%"></div></div><div class="top"><span>74% da meta</span><span style="color:var(--muted)">faltam 6,6pp</span></div></div></div>
+    </div>
+    <div class="card">
+      <div class="title">Faturamento <small>meta R$ 400k (mtd)</small></div>
+      <div class="kpi" style="margin-bottom:10px"><div class="val">R$ 290k <span style="font-size:14px;color:var(--muted)">/ R$ 400k</span></div></div>
+      <div class="progress"><div class="row"><div class="bar"><div style="width:72%"></div></div><div class="top"><span>72% atingido</span><span style="color:var(--muted)">faltam R$ 110k</span></div></div></div>
+    </div>
+  </div>
+
+  <div class="grid g-2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="title">Projeção do mês <small>baseada no ritmo atual</small></div>
+      <div class="chart-wrap">
+        <svg viewBox="0 0 600 200" preserveAspectRatio="none" class="chart" aria-label="Projeção do mês: realizado, projetado e meta">
+          <line class="grid-line" x1="40" y1="40" x2="580" y2="40"/>
+          <line class="grid-line" x1="40" y1="80" x2="580" y2="80"/>
+          <line class="grid-line" x1="40" y1="120" x2="580" y2="120"/>
+          <line class="axis-line" x1="40" y1="160" x2="580" y2="160"/>
+          <text class="axis-label" x="34" y="44" text-anchor="end">R$ 500k</text>
+          <text class="axis-label" x="34" y="84" text-anchor="end">R$ 375k</text>
+          <text class="axis-label" x="34" y="124" text-anchor="end">R$ 250k</text>
+          <text class="axis-label" x="34" y="164" text-anchor="end">R$ 0</text>
+          <!-- Meta R$ 400k -->
+          <line class="meta-line" x1="40" y1="64" x2="580" y2="64"/>
+          <text class="axis-label" x="576" y="60" text-anchor="end" style="fill:#FFC531">meta R$ 400k</text>
+          <!-- Vertical: dia atual (14 de 31) ≈ x=283 -->
+          <line x1="283" y1="20" x2="283" y2="160" stroke="rgba(67,89,101,0.3)" stroke-width="1" stroke-dasharray="2 3"/>
+          <text class="axis-label" x="283" y="32" text-anchor="middle">hoje · 14/31</text>
+          <!-- Realizado: 14 dias, curva ascendente até R$ 290k → y = 160 - (290/500)*120 = 160-69.6 ≈ 90 -->
+          <polyline class="ser-1" points="60,158 100,150 140,138 180,124 220,112 260,98 283,90"/>
+          <!-- Projeção: continua até dia 31 com mesma inclinação → chega em ~R$ 500k? Não, pacing mostra R$ 6111/dia × 17 dias = 103k + 290 = 393k → y ≈ 66 -->
+          <polyline class="proj-line" points="283,90 320,82 360,76 400,72 440,70 480,68 520,67 555,66"/>
+          <!-- Dots realizado -->
+          <circle class="ser-dot" cx="60" cy="158" r="3"/>
+          <circle class="ser-dot" cx="140" cy="138" r="3"/>
+          <circle class="ser-dot" cx="220" cy="112" r="3"/>
+          <circle class="ser-dot" cx="283" cy="90" r="3"/>
+          <!-- Dot final projetado -->
+          <circle cx="555" cy="66" r="4" fill="#FFC531" stroke="#fff" stroke-width="1.5"/>
+          <!-- Labels de valor -->
+          <text x="272" y="84" text-anchor="end" style="font-size:11px;font-weight:600;fill:#0C161B">R$ 290k</text>
+          <text x="552" y="60" text-anchor="end" style="font-size:11px;font-weight:600;fill:#0C161B">R$ 394k</text>
+          <text class="axis-label" x="60" y="178" text-anchor="middle">d1</text>
+          <text class="axis-label" x="180" y="178" text-anchor="middle">d8</text>
+          <text class="axis-label" x="320" y="178" text-anchor="middle">d16</text>
+          <text class="axis-label" x="460" y="178" text-anchor="middle">d24</text>
+          <text class="axis-label" x="555" y="178" text-anchor="middle">d31</text>
+        </svg>
+      </div>
+      <div class="legend">
+        <span><i style="background:#688594"></i>Realizado</span>
+        <span><i style="background:#688594;border:1px dashed #688594;background-clip:content-box"></i>Projeção</span>
+        <span><i style="background:#FFC531"></i>Meta</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="title">Pacing <small>quanto precisa por dia restante</small></div>
+      <div class="progress">
+        <div class="row"><div class="top"><span>Faturamento/dia necessário</span><span><b>R$ 6.111</b></span></div><div class="bar"><div style="width:62%"></div></div></div>
+        <div class="row"><div class="top"><span>Vendas/dia necessária</span><span><b>0,21</b></span></div><div class="bar"><div style="width:60%"></div></div></div>
+        <div class="row"><div class="top"><span>MQL/dia necessário</span><span><b>14</b></span></div><div class="bar"><div class="warn" style="width:88%"></div></div></div>
+        <div class="row"><div class="top"><span>Investimento/dia necessário</span><span><b>R$ 265</b></span></div><div class="bar"><div style="width:55%"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="title">Histórico mensal</div>
+    <table>
+      <thead><tr><th>Mês</th><th class="num">Invest.</th><th class="num">MQL</th><th class="num">CMQL</th><th class="num">Agend.</th><th class="num">Reun. real.</th><th class="num">Vendas</th><th class="num">Conv.</th><th class="num">Faturamento</th><th class="num">% meta</th></tr></thead>
+      <tbody>
+        <tr><td>Mar/26</td><td class="num">R$ 48k</td><td class="num">510</td><td class="num">R$ 94</td><td class="num">98</td><td class="num">42</td><td class="num">10</td><td class="num">23,8%</td><td class="num">R$ 380k</td><td class="num" style="color:#059669">108%</td></tr>
+        <tr><td>Abr/26</td><td class="num">R$ 50k</td><td class="num">530</td><td class="num">R$ 94</td><td class="num">102</td><td class="num">45</td><td class="num">11</td><td class="num">24,4%</td><td class="num">R$ 410k</td><td class="num" style="color:#059669">107%</td></tr>
+        <tr><td>Mai/26 (parcial)</td><td class="num">R$ 45k</td><td class="num">482</td><td class="num">R$ 94</td><td class="num">89</td><td class="num">38</td><td class="num">7</td><td class="num">18,4%</td><td class="num">R$ 290k</td><td class="num" style="color:#FFC531">72%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============== P7 CRIATIVO ============== -->
+<section id="p7" class="page">
+  <div class="filters">
+    <div class="filter">Período
+      <div class="date-trigger" data-dp style="margin-top:5px"><svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>01/05/2026 — 31/05/2026 <span class="pill">31 dias</span><svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
+    </div>
+    <div class="filter">Funil<button class="select" style="margin-top:5px"><span class="sv"><span class="sv-value">Todos</span></span><svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button></div>
+    <div class="filter">Temperatura<button class="select" style="margin-top:5px"><span class="sv"><span class="sv-value">Todas</span></span><svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button></div>
+  </div>
+
+  <div class="grid g-3" style="margin-bottom:14px">
+    <div class="card">
+      <div class="title">Top por CPL <small>melhor entrega</small></div>
+      <div class="mini-grid" style="grid-template-columns:1fr">
+        <div class="mini"><div class="l">#1 Quando_um_vendedor_e_promovido</div><div class="v">R$ 12,30 <small style="font-weight:400;color:#6b7280">— 180 leads</small></div></div>
+        <div class="mini"><div class="l">#2 Novo_Ana_Laura</div><div class="v">R$ 14,80</div></div>
+        <div class="mini"><div class="l">#3 Método_Jesus_liderar</div><div class="v">R$ 15,40</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="title">Top por CMQL <small>qualidade</small></div>
+      <div class="mini-grid" style="grid-template-columns:1fr">
+        <div class="mini"><div class="l">#1 Método_Jesus_liderar</div><div class="v">R$ 62 <small style="font-weight:400;color:#6b7280">— 38 MQL</small></div></div>
+        <div class="mini"><div class="l">#2 Empresario_aumentar_receita</div><div class="v">R$ 71</div></div>
+        <div class="mini"><div class="l">#3 Quando_vendedor_gestor</div><div class="v">R$ 88</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="title">Top por vendas <small>geraram fechamento</small></div>
+      <div class="mini-grid" style="grid-template-columns:1fr">
+        <div class="mini"><div class="l">#1 Método_Jesus_liderar</div><div class="v">3 vendas <small style="font-weight:400;color:#6b7280">— R$ 124k</small></div></div>
+        <div class="mini"><div class="l">#2 Empresario_aumentar_receita</div><div class="v">2 vendas</div></div>
+        <div class="mini"><div class="l">#3 Quando_vendedor_gestor</div><div class="v">1 venda</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="title">Galeria de criativos <small>thumbnail real do anúncio + link pro Instagram</small></div>
+    <div class="gallery">
+      <div class="crt">
+        <div class="img">thumbnail</div>
+        <div class="info">
+          <div class="info-top">
+            <b title="Método_Jesus_liderar">Método_Jesus_liderar</b>
+            <a class="ig-btn" href="#" target="_blank" rel="noopener" title="Abrir no Instagram">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+          <small>CPL R$ 15,40 · CMQL R$ 62 · 3 vendas</small>
+        </div>
+      </div>
+      <div class="crt">
+        <div class="img">thumbnail</div>
+        <div class="info">
+          <div class="info-top">
+            <b title="Empresario_aumentar_receita">Empresario_aumentar_receita</b>
+            <a class="ig-btn" href="#" target="_blank" rel="noopener" title="Abrir no Instagram">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+          <small>CPL R$ 18,20 · CMQL R$ 71 · 2 vendas</small>
+        </div>
+      </div>
+      <div class="crt">
+        <div class="img">thumbnail</div>
+        <div class="info">
+          <div class="info-top">
+            <b title="Quando_vendedor_gestor">Quando_vendedor_gestor</b>
+            <a class="ig-btn" href="#" target="_blank" rel="noopener" title="Abrir no Instagram">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+          <small>CPL R$ 12,30 · CMQL R$ 88 · 1 venda</small>
+        </div>
+      </div>
+      <div class="crt">
+        <div class="img">thumbnail</div>
+        <div class="info">
+          <div class="info-top">
+            <b title="Novo_Ana_Laura">Novo_Ana_Laura</b>
+            <a class="ig-btn" href="#" target="_blank" rel="noopener" title="Abrir no Instagram">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+          <small>CPL R$ 14,80 · CMQL R$ 142 · 0 vendas</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card tall">
+    <div class="title">Ranking de anúncios <small>ordenado por CMQL · métricas de tráfego + funil cruzadas via utm_content</small></div>
+    <table>
+      <thead><tr>
+        <th>Anúncio</th>
+        <th class="num">Invest.</th>
+        <th class="num">Impr.</th>
+        <th class="num">CTR</th>
+        <th class="num">CPC</th>
+        <th class="num">CPM</th>
+        <th class="num">LP Views</th>
+        <th class="num">Leads</th>
+        <th class="num">CPL</th>
+        <th class="num">MQL</th>
+        <th class="num">CMQL</th>
+        <th class="num">Agend.</th>
+        <th class="num">Reun. ag.</th>
+        <th class="num">Reun. real.</th>
+        <th class="num">Vendas</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Método_Jesus_liderar</td><td class="num">R$ 4.200</td><td class="num">98k</td><td class="num">2,1%</td><td class="num">R$ 4,28</td><td class="num">R$ 43</td><td class="num">1.820</td><td class="num">273</td><td class="num">R$ 15,40</td><td class="num">68</td><td class="num">R$ 62</td><td class="num">22</td><td class="num">18</td><td class="num">10</td><td class="num">3</td></tr>
+        <tr><td>Empresario_aumentar_receita</td><td class="num">R$ 3.800</td><td class="num">82k</td><td class="num">1,9%</td><td class="num">R$ 4,55</td><td class="num">R$ 46</td><td class="num">1.420</td><td class="num">209</td><td class="num">R$ 18,20</td><td class="num">54</td><td class="num">R$ 71</td><td class="num">16</td><td class="num">14</td><td class="num">8</td><td class="num">2</td></tr>
+        <tr><td>Quando_vendedor_gestor</td><td class="num">R$ 2.200</td><td class="num">52k</td><td class="num">2,3%</td><td class="num">R$ 3,87</td><td class="num">R$ 42</td><td class="num">980</td><td class="num">180</td><td class="num">R$ 12,30</td><td class="num">24</td><td class="num">R$ 88</td><td class="num">8</td><td class="num">6</td><td class="num">3</td><td class="num">1</td></tr>
+        <tr><td>Novo_Ana_Laura</td><td class="num">R$ 2.100</td><td class="num">62k</td><td class="num">2,0%</td><td class="num">R$ 4,12</td><td class="num">R$ 34</td><td class="num">1.100</td><td class="num">142</td><td class="num">R$ 14,80</td><td class="num">15</td><td class="num">R$ 142</td><td class="num">4</td><td class="num">3</td><td class="num">1</td><td class="num">0</td></tr>
+        <tr><td>Metodo_Jesus_liderar_v2</td><td class="num">R$ 1.840</td><td class="num">46k</td><td class="num">1,87%</td><td class="num">R$ 4,40</td><td class="num">R$ 40</td><td class="num">760</td><td class="num">98</td><td class="num">R$ 18,80</td><td class="num">22</td><td class="num">R$ 84</td><td class="num">7</td><td class="num">5</td><td class="num">3</td><td class="num">1</td></tr>
+        <tr><td>SALA_CAPTACAO_15</td><td class="num">R$ 1.560</td><td class="num">38k</td><td class="num">2,5%</td><td class="num">R$ 3,90</td><td class="num">R$ 41</td><td class="num">670</td><td class="num">112</td><td class="num">R$ 13,90</td><td class="num">18</td><td class="num">R$ 87</td><td class="num">5</td><td class="num">4</td><td class="num">2</td><td class="num">0</td></tr>
+        <tr><td>Empresario_q_aumentar_receita</td><td class="num">R$ 1.380</td><td class="num">42k</td><td class="num">1,8%</td><td class="num">R$ 4,72</td><td class="num">R$ 33</td><td class="num">580</td><td class="num">88</td><td class="num">R$ 15,68</td><td class="num">14</td><td class="num">R$ 99</td><td class="num">4</td><td class="num">4</td><td class="num">2</td><td class="num">0</td></tr>
+        <tr><td>Audicao_protocolo</td><td class="num">R$ 980</td><td class="num">31k</td><td class="num">1,5%</td><td class="num">R$ 4,93</td><td class="num">R$ 32</td><td class="num">320</td><td class="num">42</td><td class="num">R$ 23,33</td><td class="num">7</td><td class="num">R$ 140</td><td class="num">2</td><td class="num">2</td><td class="num">1</td><td class="num">0</td></tr>
+        <tr><td>Ebook_lider</td><td class="num">R$ 840</td><td class="num">28k</td><td class="num">1,7%</td><td class="num">R$ 4,12</td><td class="num">R$ 30</td><td class="num">390</td><td class="num">62</td><td class="num">R$ 13,55</td><td class="num">10</td><td class="num">R$ 84</td><td class="num">3</td><td class="num">2</td><td class="num">1</td><td class="num">0</td></tr>
+        <tr><td>Teste_video_27_04</td><td class="num">R$ 720</td><td class="num">22k</td><td class="num">2,1%</td><td class="num">R$ 3,80</td><td class="num">R$ 33</td><td class="num">280</td><td class="num">45</td><td class="num">R$ 16,00</td><td class="num">8</td><td class="num">R$ 90</td><td class="num">2</td><td class="num">2</td><td class="num">1</td><td class="num">0</td></tr>
+        <tr><td>...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</section>
+
+<!-- ============== P8 ORIGEM ============== -->
+<section id="p8" class="page">
+  <div class="filters">
+    <div class="filter">Período
+      <div class="date-trigger" data-dp style="margin-top:5px"><svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>01/05/2026 — 31/05/2026 <span class="pill">31 dias</span><svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
+    </div>
+    <div class="filter" style="flex:1;min-width:280px">Funis
+      <div class="chips" style="margin-top:5px">
+        <span class="chip on" style="background:#1e293b;border-color:#1e293b;color:#fff">Todos</span>
+        <span class="chip on">Sala</span>
+        <span class="chip on">Aplicação</span>
+        <span class="chip on">Sessão</span>
+        <span class="chip">Isca</span>
+        <span class="chip">Reality</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+      <div class="title">Por UTM Source</div>
+      <table>
+        <thead><tr><th>Origem</th><th class="num">Leads qualif.</th><th class="num">MQL</th><th class="num">Agend.</th><th class="num">Reun. ag.</th><th class="num">Reun. real.</th><th class="num">Vendas</th><th class="num">Faturamento</th></tr></thead>
+        <tbody>
+          <tr><td>ig</td><td class="num">312</td><td class="num">298</td><td class="num">58</td><td class="num">48</td><td class="num">24</td><td class="num">5</td><td class="num">R$ 210.000</td></tr>
+          <tr><td>fb</td><td class="num">118</td><td class="num">112</td><td class="num">22</td><td class="num">18</td><td class="num">9</td><td class="num">1</td><td class="num">R$ 42.000</td></tr>
+          <tr><td>MetaAds_Adv</td><td class="num">42</td><td class="num">40</td><td class="num">7</td><td class="num">6</td><td class="num">3</td><td class="num">1</td><td class="num">R$ 38.000</td></tr>
+          <tr><td>google</td><td class="num">10</td><td class="num">10</td><td class="num">2</td><td class="num">2</td><td class="num">2</td><td class="num">0</td><td class="num">—</td></tr>
+          <tr><td>...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  <div class="card" style="margin-bottom:14px">
+      <div class="title">Por UTM Medium</div>
+      <table>
+        <thead><tr><th>Origem</th><th class="num">Leads qualif.</th><th class="num">MQL</th><th class="num">Agend.</th><th class="num">Reun. ag.</th><th class="num">Reun. real.</th><th class="num">Vendas</th><th class="num">Faturamento</th></tr></thead>
+        <tbody>
+          <tr><td>paid</td><td class="num">388</td><td class="num">370</td><td class="num">72</td><td class="num">60</td><td class="num">30</td><td class="num">6</td><td class="num">R$ 248.000</td></tr>
+          <tr><td>3% Alunos Mentoria</td><td class="num">62</td><td class="num">58</td><td class="num">12</td><td class="num">10</td><td class="num">5</td><td class="num">1</td><td class="num">R$ 42.000</td></tr>
+          <tr><td>organic</td><td class="num">22</td><td class="num">22</td><td class="num">3</td><td class="num">2</td><td class="num">1</td><td class="num">0</td><td class="num">—</td></tr>
+          <tr><td>referral</td><td class="num">10</td><td class="num">10</td><td class="num">2</td><td class="num">2</td><td class="num">2</td><td class="num">0</td><td class="num">—</td></tr>
+          <tr><td>...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="title">Por UTM Campaign</div>
+    <table>
+      <thead><tr><th>Campanha</th><th class="num">Leads qualif.</th><th class="num">MQL</th><th class="num">Agend.</th><th class="num">Reun. ag.</th><th class="num">Reun. real.</th><th class="num">Vendas</th><th class="num">Faturamento</th></tr></thead>
+      <tbody>
+        <tr><td>TIAGO01|PERPETUO|SESSAO|CAPTACAO|FRIO|FNC_Teste_criativos</td><td class="num">128</td><td class="num">120</td><td class="num">28</td><td class="num">24</td><td class="num">12</td><td class="num">3</td><td class="num">R$ 124.000</td></tr>
+        <tr><td>TIAGO01|PERPETUO|SESSAO|CAPTACAO|ADV|FNC_Teste_publico</td><td class="num">94</td><td class="num">88</td><td class="num">19</td><td class="num">16</td><td class="num">8</td><td class="num">2</td><td class="num">R$ 82.000</td></tr>
+        <tr><td>SALA_CAPTACAO_15/04_PERPETUO_COLD</td><td class="num">62</td><td class="num">58</td><td class="num">12</td><td class="num">10</td><td class="num">5</td><td class="num">1</td><td class="num">R$ 42.000</td></tr>
+        <tr><td>TIAGO01|PERPETUO|APLICA|CAPTACAO|FRIO|Conversao</td><td class="num">48</td><td class="num">44</td><td class="num">10</td><td class="num">8</td><td class="num">4</td><td class="num">1</td><td class="num">R$ 42.000</td></tr>
+        <tr><td>...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td><td class="num">...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+      <div class="title">Por Qualificação</div>
+      <table>
+        <thead><tr><th>Qualificação</th><th class="num">Leads qualif.</th><th class="num">MQL</th><th class="num">Agend.</th><th class="num">Reun. ag.</th><th class="num">Reun. real.</th><th class="num">Vendas</th><th class="num">Faturamento</th></tr></thead>
+        <tbody>
+          <tr><td>Enterprise</td><td class="num">38</td><td class="num">38</td><td class="num">18</td><td class="num">15</td><td class="num">10</td><td class="num">3</td><td class="num">R$ 132.000</td></tr>
+          <tr><td>MQL 1</td><td class="num">282</td><td class="num">282</td><td class="num">52</td><td class="num">42</td><td class="num">22</td><td class="num">3</td><td class="num">R$ 126.000</td></tr>
+          <tr><td>MQL 2</td><td class="num">162</td><td class="num">162</td><td class="num">19</td><td class="num">19</td><td class="num">6</td><td class="num">1</td><td class="num">R$ 32.000</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  <div class="card" style="margin-bottom:14px">
+      <div class="title">Por Cargo</div>
+      <table>
+        <thead><tr><th>Cargo</th><th class="num">Leads qualif.</th><th class="num">MQL</th><th class="num">Agend.</th><th class="num">Reun. ag.</th><th class="num">Reun. real.</th><th class="num">Vendas</th><th class="num">Faturamento</th></tr></thead>
+        <tbody>
+          <tr><td>Empresário</td><td class="num">298</td><td class="num">282</td><td class="num">58</td><td class="num">48</td><td class="num">25</td><td class="num">5</td><td class="num">R$ 208.000</td></tr>
+          <tr><td>Sócio</td><td class="num">82</td><td class="num">78</td><td class="num">14</td><td class="num">12</td><td class="num">6</td><td class="num">1</td><td class="num">R$ 38.000</td></tr>
+          <tr><td>CEO</td><td class="num">62</td><td class="num">58</td><td class="num">10</td><td class="num">9</td><td class="num">4</td><td class="num">1</td><td class="num">R$ 42.000</td></tr>
+          <tr><td>Diretor de vendas</td><td class="num">40</td><td class="num">38</td><td class="num">7</td><td class="num">7</td><td class="num">3</td><td class="num">0</td><td class="num">—</td></tr>
+          <tr><td>Gerente</td><td class="num">18</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td></tr>
+          <tr><td>Outros</td><td class="num">12</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  <div class="card" style="margin-bottom:14px">
+      <div class="title">Por Faixa de Faturamento <small>apenas leads qualificados</small></div>
+      <table>
+        <thead><tr><th>Faturamento</th><th class="num">Qualif.</th><th class="num">Leads qualif.</th><th class="num">MQL</th><th class="num">Agend.</th><th class="num">Reun. ag.</th><th class="num">Reun. real.</th><th class="num">Vendas</th><th class="num">Faturamento</th></tr></thead>
+        <tbody>
+          <tr><td>Acima de 4 milhões</td><td class="num">Enterprise</td><td class="num">38</td><td class="num">38</td><td class="num">18</td><td class="num">15</td><td class="num">10</td><td class="num">3</td><td class="num">R$ 132.000</td></tr>
+          <tr><td>De 1 milhão a 4 milhões</td><td class="num">MQL 1</td><td class="num">62</td><td class="num">62</td><td class="num">18</td><td class="num">15</td><td class="num">8</td><td class="num">2</td><td class="num">R$ 84.000</td></tr>
+          <tr><td>De 701 mil a 1 milhão</td><td class="num">MQL 1</td><td class="num">48</td><td class="num">48</td><td class="num">12</td><td class="num">10</td><td class="num">5</td><td class="num">1</td><td class="num">R$ 42.000</td></tr>
+          <tr><td>De 501 mil a 700 mil</td><td class="num">MQL 1</td><td class="num">68</td><td class="num">68</td><td class="num">12</td><td class="num">10</td><td class="num">5</td><td class="num">0</td><td class="num">—</td></tr>
+          <tr><td>De 301 mil a 500 mil</td><td class="num">MQL 1</td><td class="num">52</td><td class="num">52</td><td class="num">7</td><td class="num">5</td><td class="num">3</td><td class="num">0</td><td class="num">—</td></tr>
+          <tr><td>De 201 mil a 300 mil</td><td class="num">MQL 1</td><td class="num">52</td><td class="num">52</td><td class="num">3</td><td class="num">2</td><td class="num">1</td><td class="num">0</td><td class="num">—</td></tr>
+          <tr><td>De 101 mil a 200 mil</td><td class="num">MQL 2</td><td class="num">162</td><td class="num">162</td><td class="num">19</td><td class="num">19</td><td class="num">6</td><td class="num">1</td><td class="num">R$ 32.000</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  <div class="card">
+      <div class="title">Por Segmento de Mercado</div>
+      <table>
+        <thead><tr><th>Segmento</th><th class="num">Leads qualif.</th><th class="num">MQL</th><th class="num">Agend.</th><th class="num">Reun. ag.</th><th class="num">Reun. real.</th><th class="num">Vendas</th><th class="num">Faturamento</th></tr></thead>
+        <tbody>
+          <tr><td>Varejo</td><td class="num">142</td><td class="num">132</td><td class="num">28</td><td class="num">24</td><td class="num">12</td><td class="num">3</td><td class="num">R$ 132.000</td></tr>
+          <tr><td>Serviços</td><td class="num">108</td><td class="num">102</td><td class="num">20</td><td class="num">17</td><td class="num">9</td><td class="num">2</td><td class="num">R$ 84.000</td></tr>
+          <tr><td>Indústria</td><td class="num">62</td><td class="num">58</td><td class="num">14</td><td class="num">11</td><td class="num">6</td><td class="num">1</td><td class="num">R$ 42.000</td></tr>
+          <tr><td>Tecnologia</td><td class="num">48</td><td class="num">44</td><td class="num">8</td><td class="num">7</td><td class="num">3</td><td class="num">1</td><td class="num">R$ 32.000</td></tr>
+          <tr><td>Agronegócio</td><td class="num">38</td><td class="num">36</td><td class="num">6</td><td class="num">5</td><td class="num">3</td><td class="num">0</td><td class="num">—</td></tr>
+          <tr><td>Marketing</td><td class="num">28</td><td class="num">26</td><td class="num">4</td><td class="num">3</td><td class="num">2</td><td class="num">0</td><td class="num">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+</section>
+
+</main>
+</div>
+
+<!-- Date Picker (popover ancorado) -->
+<div class="dp" id="dpPopover" onclick="event.stopPropagation()">
+    <div class="dp-head">
+      <h3>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Período
+      </h3>
+      <button class="close" id="dpClose" aria-label="Fechar">×</button>
+    </div>
+    <div class="presets">
+      <button class="preset">7 dias</button>
+      <button class="preset">14 dias</button>
+      <button class="preset active">30 dias</button>
+      <button class="preset">90 dias</button>
+      <button class="preset">Este mês</button>
+      <button class="preset">Mês passado</button>
+    </div>
+    <div class="cals">
+      <div class="cal">
+        <h4><span class="arr">‹</span>Abril 2026</h4>
+        <div class="week">
+          <div class="dow">Dom</div><div class="dow">Seg</div><div class="dow">Ter</div><div class="dow">Qua</div><div class="dow">Qui</div><div class="dow">Sex</div><div class="dow">Sáb</div>
+          <div class="day muted">29</div><div class="day muted">30</div><div class="day muted">31</div><div class="day">1</div><div class="day">2</div><div class="day">3</div><div class="day">4</div>
+          <div class="day">5</div><div class="day">6</div><div class="day">7</div><div class="day">8</div><div class="day">9</div><div class="day">10</div><div class="day">11</div>
+          <div class="day">12</div><div class="day">13</div><div class="day">14</div><div class="day">15</div><div class="day">16</div><div class="day">17</div><div class="day">18</div>
+          <div class="day">19</div><div class="day">20</div><div class="day">21</div><div class="day">22</div><div class="day">23</div><div class="day">24</div><div class="day">25</div>
+          <div class="day">26</div><div class="day">27</div><div class="day">28</div><div class="day">29</div><div class="day">30</div><div class="day muted">1</div><div class="day muted">2</div>
+        </div>
+      </div>
+      <div class="cal">
+        <h4>Maio 2026<span class="arr">›</span></h4>
+        <div class="week">
+          <div class="dow">Dom</div><div class="dow">Seg</div><div class="dow">Ter</div><div class="dow">Qua</div><div class="dow">Qui</div><div class="dow">Sex</div><div class="dow">Sáb</div>
+          <div class="day muted">26</div><div class="day muted">27</div><div class="day muted">28</div><div class="day muted">29</div><div class="day muted">30</div><div class="day range-start">1</div><div class="day in-range">2</div>
+          <div class="day in-range">3</div><div class="day in-range">4</div><div class="day in-range">5</div><div class="day in-range">6</div><div class="day in-range">7</div><div class="day in-range">8</div><div class="day in-range">9</div>
+          <div class="day in-range">10</div><div class="day in-range">11</div><div class="day in-range">12</div><div class="day in-range">13</div><div class="day in-range">14</div><div class="day in-range">15</div><div class="day in-range">16</div>
+          <div class="day in-range">17</div><div class="day in-range">18</div><div class="day in-range">19</div><div class="day in-range">20</div><div class="day in-range">21</div><div class="day in-range">22</div><div class="day in-range">23</div>
+          <div class="day in-range">24</div><div class="day in-range">25</div><div class="day in-range">26</div><div class="day in-range">27</div><div class="day in-range">28</div><div class="day in-range">29</div><div class="day in-range">30</div>
+          <div class="day range-end">31</div><div class="day muted">1</div><div class="day muted">2</div><div class="day muted">3</div><div class="day muted">4</div><div class="day muted">5</div><div class="day muted">6</div>
+        </div>
+      </div>
+    </div>
+    <div class="dp-foot">
+      <div class="range-text">De <b>01/05/2026</b> até <b>31/05/2026</b></div>
+      <div class="right">
+        <span class="count">31 dias</span>
+        <button class="apply" id="dpApply">Aplicar</button>
+      </div>
+    </div>
+</div>
+
+<script>
+const app=document.getElementById('app');
+const sbToggle=document.getElementById('sbToggle');
+function toggleSidebar(){app.classList.toggle('collapsed')}
+sbToggle.addEventListener('click',toggleSidebar);
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='b'){e.preventDefault();toggleSidebar()}
+});
+
+const pageName=document.getElementById('pageName');
+document.querySelectorAll('.nav').forEach(a=>{
+  a.addEventListener('click',e=>{
+    e.preventDefault();
+    const id=a.dataset.p;
+    if(!id) return;
+    document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    a.classList.add('active');
+    document.getElementById(id).classList.add('active');
+    pageName.textContent=a.textContent.trim();
+    window.scrollTo(0,0);
+  });
+});
+
+const dpPop=document.getElementById('dpPopover');
+function openDp(e){
+  e.stopPropagation();
+  const trigger=e.currentTarget;
+  const r=trigger.getBoundingClientRect();
+  const popW=dpPop.offsetWidth||560;
+  let left=r.left+window.scrollX;
+  if(left+popW>window.innerWidth-12) left=window.innerWidth-popW-12;
+  dpPop.style.left=Math.max(12,left)+'px';
+  dpPop.style.top=(r.bottom+window.scrollY+6)+'px';
+  dpPop.classList.add('open');
+}
+function closeDp(){dpPop.classList.remove('open')}
+document.querySelectorAll('[data-dp]').forEach(el=>el.addEventListener('click',openDp));
+document.getElementById('dpClose').addEventListener('click',closeDp);
+document.getElementById('dpApply').addEventListener('click',closeDp);
+document.addEventListener('click',e=>{
+  if(!dpPop.contains(e.target) && !e.target.closest('[data-dp]')) closeDp();
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDp()});
+document.querySelectorAll('.preset').forEach(p=>{
+  p.addEventListener('click',()=>{
+    document.querySelectorAll('.preset').forEach(x=>x.classList.remove('active'));
+    p.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

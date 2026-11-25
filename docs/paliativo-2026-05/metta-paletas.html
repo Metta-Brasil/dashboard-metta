@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paletas — Metta</title>
+<style>
+  :root{
+    --metta-yellow:#FFBE18;
+    --metta-blue-night:#0C161B;
+    --metta-blue-gray:#435965;
+    --metta-blue-gray-subtle:#A8B3B9;
+    --ice:#FAFCFD;
+    --line:rgba(12,22,27,0.12);
+    --font-sans:-apple-system,'SF Pro Display','SF Pro Text','SF Pro',BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--font-sans);
+    background:#FFFFFF;
+    color:var(--metta-blue-night);
+    -webkit-font-smoothing:antialiased;
+    font-feature-settings:'cv11','ss01';
+  }
+  .wrap{max-width:1200px;margin:0 auto;padding:64px 32px 96px}
+
+  header{margin-bottom:56px}
+  .eyebrow{
+    font-size:11px;letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--metta-blue-gray);font-weight:600;margin:0 0 12px;
+  }
+  h1{
+    font-size:56px;line-height:0.9;letter-spacing:-0.03em;
+    font-weight:700;margin:0 0 16px;
+  }
+  .lead{
+    font-size:16px;line-height:1.5;color:var(--metta-blue-gray);
+    max-width:640px;margin:0;
+  }
+
+  section{margin-bottom:64px}
+  .section-head{
+    display:flex;align-items:baseline;justify-content:space-between;
+    border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:24px;
+  }
+  h2{
+    font-size:28px;line-height:1;letter-spacing:-0.02em;
+    font-weight:600;margin:0;
+  }
+  .section-meta{
+    font-size:11px;letter-spacing:0.1em;text-transform:uppercase;
+    color:var(--metta-blue-gray);font-weight:600;
+  }
+
+  h3{
+    font-size:14px;letter-spacing:0.08em;text-transform:uppercase;
+    color:var(--metta-blue-gray);font-weight:600;margin:24px 0 16px;
+  }
+  h3:first-child{margin-top:0}
+
+  .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+
+  .swatch{
+    border-radius:12px;overflow:hidden;
+    border:1px solid var(--line);
+    display:flex;flex-direction:column;
+    transition:transform .15s ease;
+  }
+  .swatch:hover{transform:translateY(-2px)}
+  .swatch .color{height:140px;display:flex;align-items:flex-end;padding:14px 16px}
+  .swatch .color .name{
+    font-size:13px;font-weight:600;letter-spacing:-0.01em;line-height:1.2;
+  }
+  .swatch .meta{
+    padding:14px 16px 16px;background:#FFFFFF;
+    border-top:1px solid var(--line);
+  }
+  .swatch .hex{
+    font-family:'SF Mono',Menlo,Consolas,monospace;
+    font-size:12px;font-weight:600;color:var(--metta-blue-night);
+    letter-spacing:-0.01em;margin:0 0 6px;
+    user-select:all;
+  }
+  .swatch .use{
+    font-size:11px;line-height:1.4;color:var(--metta-blue-gray);
+    margin:0;
+  }
+
+  .swatch.dark .color .name,
+  .swatch.dark .color .name *{color:#FFFFFF}
+  .swatch.light .color .name,
+  .swatch.light .color .name *{color:var(--metta-blue-night)}
+
+  .gradient-row{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+  .grad{
+    border-radius:12px;overflow:hidden;border:1px solid var(--line);
+  }
+  .grad .surface{height:160px}
+  .grad .meta{padding:16px;background:#FFFFFF;border-top:1px solid var(--line)}
+  .grad .name{font-size:13px;font-weight:600;margin:0 0 6px;letter-spacing:-0.01em}
+  .grad .css{
+    font-family:'SF Mono',Menlo,Consolas,monospace;
+    font-size:11px;color:var(--metta-blue-gray);line-height:1.4;
+    margin:0 0 8px;word-break:break-all;
+  }
+  .grad .use{font-size:11px;line-height:1.4;color:var(--metta-blue-gray);margin:0}
+
+  .opacity-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+  .op{
+    display:flex;align-items:center;gap:14px;
+    padding:12px;border:1px solid var(--line);border-radius:12px;
+    background:#FFFFFF;
+  }
+  .op .chip{
+    width:48px;height:48px;border-radius:8px;flex-shrink:0;
+    border:1px solid var(--line);
+    background-image:
+      linear-gradient(45deg,#f0f0f0 25%,transparent 25%),
+      linear-gradient(-45deg,#f0f0f0 25%,transparent 25%),
+      linear-gradient(45deg,transparent 75%,#f0f0f0 75%),
+      linear-gradient(-45deg,transparent 75%,#f0f0f0 75%);
+    background-size:12px 12px;
+    background-position:0 0,0 6px,6px -6px,-6px 0;
+    position:relative;
+  }
+  .op .chip::after{content:"";position:absolute;inset:0;border-radius:7px;background:var(--c)}
+  .op .text{min-width:0;flex:1}
+  .op .css{
+    font-family:'SF Mono',Menlo,Consolas,monospace;
+    font-size:11px;color:var(--metta-blue-night);font-weight:600;
+    margin:0 0 4px;word-break:break-all;
+  }
+  .op .use{font-size:11px;line-height:1.4;color:var(--metta-blue-gray);margin:0}
+
+  footer{
+    margin-top:64px;padding-top:24px;border-top:1px solid var(--line);
+    font-size:11px;color:var(--metta-blue-gray);letter-spacing:0.05em;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Identidade Visual</p>
+    <h1>Paleta de cores Metta</h1>
+    <p class="lead">Sistema cromático oficial — primárias, secundárias, gradientes e opacidades recorrentes. Extraído do PRD de identidade visual.</p>
+  </header>
+
+  <section>
+    <div class="section-head">
+      <h2>3.1 Cores primárias</h2>
+      <span class="section-meta">Marca principal</span>
+    </div>
+
+    <h3>Amarelo — cor principal</h3>
+    <div class="grid">
+      <div class="swatch light">
+        <div class="color" style="background:#FFBE18"><span class="name">Amarelo Principal</span></div>
+        <div class="meta">
+          <p class="hex">#FFBE18</p>
+          <p class="use">Cor primária, CTAs, símbolo, destaques</p>
+        </div>
+      </div>
+      <div class="swatch light">
+        <div class="color" style="background:#FFC531"><span class="name">Amarelo Claro</span></div>
+        <div class="meta">
+          <p class="hex">#FFC531</p>
+          <p class="use">Strokes, elementos secundários</p>
+        </div>
+      </div>
+      <div class="swatch light">
+        <div class="color" style="background:#FFCE50"><span class="name">Amarelo Médio</span></div>
+        <div class="meta">
+          <p class="hex">#FFCE50</p>
+          <p class="use">Backgrounds auxiliares, gradientes</p>
+        </div>
+      </div>
+      <div class="swatch light">
+        <div class="color" style="background:#FFE4A1"><span class="name">Amarelo Suave</span></div>
+        <div class="meta">
+          <p class="hex">#FFE4A1</p>
+          <p class="use">Backgrounds leves, hover states</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>Azul Noite — cor base</h3>
+    <div class="grid">
+      <div class="swatch dark">
+        <div class="color" style="background:#0C161B"><span class="name">Azul Noite</span></div>
+        <div class="meta">
+          <p class="hex">#0C161B</p>
+          <p class="use">Backgrounds escuros, textos sobre fundo claro</p>
+        </div>
+      </div>
+      <div class="swatch dark">
+        <div class="color" style="background:#0A1013"><span class="name">Azul Noite Profundo</span></div>
+        <div class="meta">
+          <p class="hex">#0A1013</p>
+          <p class="use">Backgrounds muito escuros</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>3.2 Cores secundárias</h2>
+      <span class="section-meta">Suporte e neutros</span>
+    </div>
+
+    <h3>Branco gelo</h3>
+    <div class="grid">
+      <div class="swatch light">
+        <div class="color" style="background:#FFFFFF;border-bottom:1px solid var(--line)"><span class="name">Branco Puro</span></div>
+        <div class="meta">
+          <p class="hex">#FFFFFF</p>
+          <p class="use">Backgrounds claros, textos sobre fundo escuro</p>
+        </div>
+      </div>
+      <div class="swatch light">
+        <div class="color" style="background:#FAFCFD"><span class="name">Branco Gelo</span></div>
+        <div class="meta">
+          <p class="hex">#FAFCFD</p>
+          <p class="use">Backgrounds neutros, cards</p>
+        </div>
+      </div>
+      <div class="swatch light">
+        <div class="color" style="background:#EBF3F7"><span class="name">Gelo Azulado</span></div>
+        <div class="meta">
+          <p class="hex">#EBF3F7</p>
+          <p class="use">Backgrounds secundários</p>
+        </div>
+      </div>
+      <div class="swatch light">
+        <div class="color" style="background:#EFF3F5"><span class="name">Cinza Muito Claro</span></div>
+        <div class="meta">
+          <p class="hex">#EFF3F5</p>
+          <p class="use">Backgrounds de seções</p>
+        </div>
+      </div>
+      <div class="swatch light">
+        <div class="color" style="background:#F0F0F0"><span class="name">Cinza Claro</span></div>
+        <div class="meta">
+          <p class="hex">#F0F0F0</p>
+          <p class="use">Backgrounds, divisores</p>
+        </div>
+      </div>
+      <div class="swatch light">
+        <div class="color" style="background:#EDEDED"><span class="name">Cinza</span></div>
+        <div class="meta">
+          <p class="hex">#EDEDED</p>
+          <p class="use">Backgrounds de contraste</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>Azul acinzentado</h3>
+    <div class="grid">
+      <div class="swatch dark">
+        <div class="color" style="background:#435965"><span class="name">Azul Acinzentado</span></div>
+        <div class="meta">
+          <p class="hex">#435965</p>
+          <p class="use">Textos secundários, labels, elementos de suporte</p>
+        </div>
+      </div>
+      <div class="swatch dark">
+        <div class="color" style="background:#688594"><span class="name">Azul Acinz. Claro</span></div>
+        <div class="meta">
+          <p class="hex">#688594</p>
+          <p class="use">Textos terciários, detalhes</p>
+        </div>
+      </div>
+      <div class="swatch dark">
+        <div class="color" style="background:#75919F"><span class="name">Azul Acinz. Suave</span></div>
+        <div class="meta">
+          <p class="hex">#75919F</p>
+          <p class="use">Tags, labels, metadata</p>
+        </div>
+      </div>
+      <div class="swatch light">
+        <div class="color" style="background:#A8B3B9"><span class="name">Azul Acinz. Muito Claro</span></div>
+        <div class="meta">
+          <p class="hex">#A8B3B9</p>
+          <p class="use">Linhas de grid, divisores sutis</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>3.3 Gradientes</h2>
+      <span class="section-meta">Backgrounds especiais</span>
+    </div>
+    <div class="gradient-row">
+      <div class="grad">
+        <div class="surface" style="background:radial-gradient(circle at 73% 2%, #FFFFFF 36%, #E0E6E9 100%)"></div>
+        <div class="meta">
+          <p class="name">Radial Claro</p>
+          <p class="css">radial-gradient(circle at 73% 2%, #FFFFFF 36%, #E0E6E9 100%)</p>
+          <p class="use">Backgrounds de destaque claro</p>
+        </div>
+      </div>
+      <div class="grad">
+        <div class="surface" style="background:radial-gradient(circle at 50% 41%, #0C161B 0%, #0C161B 100%)"></div>
+        <div class="meta">
+          <p class="name">Radial Escuro</p>
+          <p class="css">radial-gradient(circle at 50% 41%, #0C161B 0%, #0C161B 100%)</p>
+          <p class="use">Backgrounds escuros com profundidade</p>
+        </div>
+      </div>
+      <div class="grad">
+        <div class="surface" style="background:radial-gradient(circle at 82% 10%, #FFBE18 59%)"></div>
+        <div class="meta">
+          <p class="name">Amarelo Radial</p>
+          <p class="css">radial-gradient(circle at 82% 10%, #FFBE18 59%)</p>
+          <p class="use">Highlights, fundos especiais</p>
+        </div>
+      </div>
+      <div class="grad">
+        <div class="surface" style="background:conic-gradient(from 78deg at 33% 75%, #0C161B 5%, #435965 62%, #1E2D36 82%)"></div>
+        <div class="meta">
+          <p class="name">Angular Premium</p>
+          <p class="css">conic-gradient(from 78deg at 33% 75%, #0C161B 5%, #435965 62%, #1E2D36 82%)</p>
+          <p class="use">Backgrounds premium/sofisticados</p>
+        </div>
+      </div>
+      <div class="grad">
+        <div class="surface" style="background:linear-gradient(226deg, #FFC443 10%, #FFB618 97%)"></div>
+        <div class="meta">
+          <p class="name">Linear Amarelo</p>
+          <p class="css">linear-gradient(226deg, #FFC443 10%, #FFB618 97%)</p>
+          <p class="use">Elementos decorativos, formas</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>3.4 Cores com opacidade</h2>
+      <span class="section-meta">Uso recorrente</span>
+    </div>
+    <div class="opacity-grid">
+      <div class="op" style="--c:rgba(12,22,27,0.2)">
+        <div class="chip"></div>
+        <div class="text">
+          <p class="css">rgba(12, 22, 27, 0.2)</p>
+          <p class="use">Separadores sobre fundo claro</p>
+        </div>
+      </div>
+      <div class="op" style="--c:rgba(12,22,27,0.6)">
+        <div class="chip"></div>
+        <div class="text">
+          <p class="css">rgba(12, 22, 27, 0.6)</p>
+          <p class="use">Textos secundários sobre fundo claro</p>
+        </div>
+      </div>
+      <div class="op" style="--c:rgba(255,255,255,0.2)">
+        <div class="chip"></div>
+        <div class="text">
+          <p class="css">rgba(255, 255, 255, 0.2)</p>
+          <p class="use">Separadores sobre fundo escuro</p>
+        </div>
+      </div>
+      <div class="op" style="--c:rgba(255,190,24,0.1)">
+        <div class="chip"></div>
+        <div class="text">
+          <p class="css">rgba(255, 190, 24, 0.1)</p>
+          <p class="use">Background sutil amarelo</p>
+        </div>
+      </div>
+      <div class="op" style="--c:rgba(255,190,24,0.24)">
+        <div class="chip"></div>
+        <div class="text">
+          <p class="css">rgba(255, 190, 24, 0.24)</p>
+          <p class="use">Glow/sombra do logo</p>
+        </div>
+      </div>
+      <div class="op" style="--c:rgba(58,109,137,0.28)">
+        <div class="chip"></div>
+        <div class="text">
+          <p class="css">rgba(58, 109, 137, 0.28)</p>
+          <p class="use">Linhas de grid sobre fundo escuro</p>
+        </div>
+      </div>
+      <div class="op" style="--c:rgba(67,89,101,0.08)">
+        <div class="chip"></div>
+        <div class="text">
+          <p class="css">rgba(67, 89, 101, 0.08)</p>
+          <p class="use">Fills ghost/fantasma</p>
+        </div>
+      </div>
+      <div class="op" style="--c:rgba(202,217,224,0.87)">
+        <div class="chip"></div>
+        <div class="text">
+          <p class="css">rgba(202, 217, 224, 0.87)</p>
+          <p class="use">Strokes de outline</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>METTA — IDENTIDADE VISUAL · PALETA DE CORES · Clique no HEX/RGBA pra copiar</footer>
+</div>
+</body>
+</html>
